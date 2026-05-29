@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Clients — Diet2Fit Admin</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/portal/css/portal.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="portal-layout">
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Diet2Fit</div><div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
+      <div class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="clients.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">group</span>Clients</a>
+        <a href="appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="video-call.html" class="sidebar-link"><span class="material-symbols-outlined">videocam</span>Video Call</a>
+      </div>
+      <div class="sidebar-user"><div class="sidebar-user-avatar">DD</div><div class="sidebar-user-info"><div class="sidebar-user-name">Dt. Disha</div><div class="sidebar-user-role">Admin</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
+    </nav>
+
+    <main class="portal-main">
+      <div class="portal-header">
+        <div>
+          <h1 class="portal-title">Clients</h1>
+          <p class="text-caption" id="clientCount">Manage your client base</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+          <span class="material-symbols-outlined" style="font-size:18px;">person_add</span>
+          Add Client
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="search-bar mb-xl">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" id="searchInput" placeholder="Search clients by name, email, or phone..." oninput="handleSearch()" />
+      </div>
+
+      <!-- Client Grid -->
+      <div class="dashboard-grid" id="clientGrid">
+        <div class="empty-state" id="noClients">
+          <span class="material-symbols-outlined">group_off</span>
+          <p>No clients found</p>
+          <button class="btn btn-primary btn-sm" style="margin-top:var(--space-md);" onclick="openAddModal()">Add Your First Client</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Client Modal -->
+  <div class="admin-modal-overlay" id="addModal">
+    <div class="admin-modal">
+      <div class="flex justify-between items-center mb-lg">
+        <h3 style="margin:0;">Add New Client</h3>
+        <button onclick="closeAddModal()" style="color:var(--text-muted);padding:4px;"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <form id="addClientForm" class="flex flex-col gap-md">
+        <div class="grid grid-2">
+          <div class="form-group"><label class="form-label">Full Name *</label><input type="text" id="newName" class="form-input" required /></div>
+          <div class="form-group"><label class="form-label">Email *</label><input type="email" id="newEmail" class="form-input" required /></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="newPhone" class="form-input" /></div>
+          <div class="form-group"><label class="form-label">Password *</label><input type="text" id="newPassword" class="form-input" placeholder="Min 6 chars" required /></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group"><label class="form-label">Current Weight (kg)</label><input type="number" id="newCurrentWeight" class="form-input" step="0.1" /></div>
+          <div class="form-group"><label class="form-label">Goal Weight (kg)</label><input type="number" id="newGoalWeight" class="form-input" step="0.1" /></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group"><label class="form-label">Height (cm)</label><input type="number" id="newHeight" class="form-input" /></div>
+          <div class="form-group"><label class="form-label">Gender</label><select id="newGender" class="form-input"><option value="">Select</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select></div>
+        </div>
+        <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" id="newDob" class="form-input" /></div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea id="newNotes" class="form-input" rows="2" placeholder="Diet goals, medical conditions..."></textarea></div>
+        <button type="submit" class="btn btn-primary w-full" id="btnAddClient">
+          <span class="material-symbols-outlined" style="font-size:20px;">person_add</span>
+          Create Client
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/main.js"></script>
+  <script>
+    if (!Diet2Fit.isLoggedIn() || Diet2Fit.getUser()?.role !== 'admin') { window.location.href = '/login.html'; }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+
+    let allClients = [];
+
+    function openAddModal() { document.getElementById('addModal').classList.add('active'); }
+    function closeAddModal() { document.getElementById('addModal').classList.remove('active'); }
+
+    function renderClients(clients) {
+      const grid = document.getElementById('clientGrid');
+      const noEl = document.getElementById('noClients');
+      grid.querySelectorAll('.client-card').forEach(c => c.remove());
+      
+      if (clients.length === 0) { noEl.style.display = 'block'; return; }
+      noEl.style.display = 'none';
+      document.getElementById('clientCount').textContent = `${clients.length} client${clients.length !== 1 ? 's' : ''}`;
+
+      clients.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'client-card';
+        card.onclick = () => window.location.href = `client-detail.html?id=${c.id}`;
+        card.innerHTML = `
+          <div class="client-card-header">
+            <div class="client-avatar">${(c.name||'').substring(0,2).toUpperCase()}</div>
+            <div style="flex:1;overflow:hidden;">
+              <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+              <div class="text-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.email}</div>
+            </div>
+          </div>
+          <div class="client-card-stats">
+            <div class="client-stat">
+              <div class="client-stat-label">Weight</div>
+              <div class="client-stat-value">${c.latest_weight ? c.latest_weight + ' kg' : '—'}</div>
+            </div>
+            <div class="client-stat">
+              <div class="client-stat-label">Goal</div>
+              <div class="client-stat-value">${c.goal_weight ? c.goal_weight + ' kg' : '—'}</div>
+            </div>
+            <div class="client-stat">
+              <div class="client-stat-label">Appts</div>
+              <div class="client-stat-value">${c.appointment_count}</div>
+            </div>
+            <div class="client-stat">
+              <div class="client-stat-label">Joined</div>
+              <div class="client-stat-value" style="font-size:0.8rem;">${Diet2Fit.formatDate(c.created_at)}</div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function handleSearch() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allClients.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        (c.phone && c.phone.includes(q))
+      );
+      renderClients(filtered);
+    }
+
+    async function loadClients() {
+      try {
+        const data = await Diet2Fit.apiRequest('/api/clients');
+        allClients = data.clients;
+        renderClients(allClients);
+      } catch (err) {
+        Diet2Fit.showToast('Failed to load clients', 'error');
+      }
+    }
+
+    document.getElementById('addClientForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnAddClient');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Creating...';
+
+      try {
+        await Diet2Fit.apiRequest('/api/clients', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: document.getElementById('newName').value.trim(),
+            email: document.getElementById('newEmail').value.trim(),
+            phone: document.getElementById('newPhone').value.trim(),
+            password: document.getElementById('newPassword').value,
+            current_weight: parseFloat(document.getElementById('newCurrentWeight').value) || null,
+            goal_weight: parseFloat(document.getElementById('newGoalWeight').value) || null,
+            height_cm: parseFloat(document.getElementById('newHeight').value) || null,
+            gender: document.getElementById('newGender').value || null,
+            date_of_birth: document.getElementById('newDob').value || null,
+            notes: document.getElementById('newNotes').value.trim() || null,
+          }),
+        });
+        Diet2Fit.showToast('Client created successfully!', 'success');
+        closeAddModal();
+        document.getElementById('addClientForm').reset();
+        await loadClients();
+      } catch (err) {
+        Diet2Fit.showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">person_add</span> Create Client';
+      }
+    });
+
+    loadClients();
+  </script>
+</body>
+</html>

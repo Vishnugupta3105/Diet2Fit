@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weight Tracker — Diet2Fit</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="css/portal.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="portal-layout">
+    <div class="mobile-header">
+      <div class="mobile-header-inner">
+        <span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span>
+        <button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button>
+      </div>
+    </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Diet2Fit</div>
+      <div class="sidebar-subtitle">Client Portal</div>
+      <div class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="weight-tracker.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">monitor_weight</span>Weight Tracker</a>
+        <a href="appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="consult.html" class="sidebar-link"><span class="material-symbols-outlined">support_agent</span>Consult Dt. Disha</a>
+        <a href="video-call.html" class="sidebar-link"><span class="material-symbols-outlined">videocam</span>Video Call</a>
+      </div>
+      <div class="sidebar-user"><div class="sidebar-user-avatar" id="userAvatar">—</div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Loading...</div><div class="sidebar-user-role">Client</div></div><button onclick="logout()" title="Logout" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
+    </nav>
+
+    <main class="portal-main">
+      <div class="portal-header">
+        <div>
+          <h1 class="portal-title">Weight Tracker</h1>
+          <p class="text-caption">Log your daily weight and watch your progress over time</p>
+        </div>
+      </div>
+
+      <!-- Weight Input Form -->
+      <div class="card-flat mb-xl" style="padding: var(--space-xl);">
+        <h3 style="font-size:1rem;font-weight:600;margin-bottom:var(--space-lg);">
+          <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;color:var(--primary);margin-right:6px;">add_circle</span>
+          Log Your Weight
+        </h3>
+        <form id="weightForm" class="flex gap-md items-end" style="flex-wrap:wrap;">
+          <div class="form-group" style="flex:1;min-width:140px;">
+            <label class="form-label" for="weightDate">Date</label>
+            <input type="date" id="weightDate" class="form-input" required />
+          </div>
+          <div class="form-group" style="flex:1;min-width:140px;">
+            <label class="form-label" for="weightValue">Weight (kg)</label>
+            <input type="number" id="weightValue" class="form-input" step="0.1" min="20" max="300" placeholder="e.g. 72.5" required />
+          </div>
+          <div class="form-group" style="flex:2;min-width:200px;">
+            <label class="form-label" for="weightNotes">Notes (optional)</label>
+            <input type="text" id="weightNotes" class="form-input" placeholder="How you're feeling today..." />
+          </div>
+          <button type="submit" class="btn btn-primary" id="btnLogWeight" style="height:48px;">
+            <span class="material-symbols-outlined" style="font-size:20px;">save</span>
+            Save
+          </button>
+        </form>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="dashboard-grid mb-xl" id="statsCards">
+        <div class="metric-card">
+          <div class="metric-label mb-md">Starting Weight</div>
+          <div class="metric-value" id="startingWeight">—<span class="metric-unit"> kg</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label mb-md">Current Weight</div>
+          <div class="metric-value" id="currentWeight" style="color:var(--primary);">—<span class="metric-unit"> kg</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label mb-md">Total Lost</div>
+          <div class="metric-value" id="totalLost" style="color:var(--success);">—<span class="metric-unit"> kg</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label mb-md">Weekly Avg Change</div>
+          <div class="metric-value" id="weeklyChange">—<span class="metric-unit"> kg/wk</span></div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="chart-container mb-xl">
+        <div class="chart-header">
+          <h3 style="font-size:1.1rem;font-weight:600;">Weight Progress</h3>
+          <div class="chart-filters">
+            <button class="chart-filter-btn" data-range="7" onclick="setRange(7, this)">7D</button>
+            <button class="chart-filter-btn active" data-range="30" onclick="setRange(30, this)">30D</button>
+            <button class="chart-filter-btn" data-range="90" onclick="setRange(90, this)">90D</button>
+            <button class="chart-filter-btn" data-range="all" onclick="setRange('all', this)">All</button>
+          </div>
+        </div>
+        <div style="position:relative;height:350px;">
+          <canvas id="weightChart"></canvas>
+        </div>
+        <div id="chartEmpty" class="empty-state" style="display:none;">
+          <span class="material-symbols-outlined">show_chart</span>
+          <p>No weight data yet. Log your first entry above!</p>
+        </div>
+      </div>
+
+      <!-- Weight Log Table -->
+      <div class="card-flat" style="padding:0;overflow:hidden;">
+        <div style="padding: var(--space-lg) var(--space-xl); border-bottom: 1px solid var(--border);">
+          <h3 style="font-size:1.1rem;font-weight:600;">Weight Log</h3>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="weightTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Weight</th>
+                <th>Change</th>
+                <th>Notes</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="weightTableBody">
+              <tr><td colspan="5" class="text-center" style="padding:40px;color:var(--text-muted);">No entries yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/main.js"></script>
+  <script>
+    if (!Diet2Fit.isLoggedIn()) { window.location.href = '/login.html'; }
+    const user = Diet2Fit.getUser();
+    document.getElementById('userName').textContent = user?.name || 'Client';
+    document.getElementById('userAvatar').textContent = (user?.name || 'C').substring(0, 2).toUpperCase();
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+
+    // Set date default to today
+    document.getElementById('weightDate').value = Diet2Fit.getTodayDate();
+    document.getElementById('weightDate').max = Diet2Fit.getTodayDate();
+
+    let weightChart = null;
+    let allEntries = [];
+    let goalWeight = null;
+    let currentRange = 30;
+
+    // Initialize Chart
+    function initChart() {
+      const ctx = document.getElementById('weightChart').getContext('2d');
+      
+      const gradientFill = ctx.createLinearGradient(0, 0, 0, 350);
+      gradientFill.addColorStop(0, 'rgba(6, 78, 59, 0.15)');
+      gradientFill.addColorStop(0.5, 'rgba(16, 185, 129, 0.05)');
+      gradientFill.addColorStop(1, 'rgba(6, 78, 59, 0)');
+
+      weightChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Weight (kg)',
+              data: [],
+              borderColor: '#064e3b',
+              backgroundColor: gradientFill,
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 5,
+              pointHoverRadius: 8,
+              pointBackgroundColor: '#064e3b',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointHoverBackgroundColor: '#10b981',
+              pointHoverBorderColor: '#ffffff',
+              pointHoverBorderWidth: 3,
+            },
+            {
+              label: 'Goal Weight',
+              data: [],
+              borderColor: '#d4a853',
+              borderWidth: 2,
+              borderDash: [8, 4],
+              pointRadius: 0,
+              fill: false,
+              tension: 0,
+            }
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              align: 'end',
+              labels: {
+                font: { family: 'Inter', size: 12, weight: '500' },
+                usePointStyle: true,
+                pointStyleWidth: 16,
+                padding: 20,
+                color: '#4a5568',
+              },
+            },
+            tooltip: {
+              backgroundColor: 'rgba(26, 28, 28, 0.9)',
+              titleFont: { family: 'Inter', size: 13, weight: '600' },
+              bodyFont: { family: 'Inter', size: 12 },
+              padding: 14,
+              cornerRadius: 10,
+              displayColors: false,
+              callbacks: {
+                title: (items) => {
+                  if (items[0]) {
+                    const d = new Date(items[0].label);
+                    return d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                  }
+                  return '';
+                },
+                label: (item) => {
+                  if (item.datasetIndex === 0) {
+                    return `Weight: ${item.parsed.y} kg`;
+                  }
+                  return `Goal: ${item.parsed.y} kg`;
+                },
+                afterBody: (items) => {
+                  if (items[0] && items[0].datasetIndex === 0) {
+                    const idx = items[0].dataIndex;
+                    const entries = getFilteredEntries();
+                    if (entries[idx] && entries[idx].notes) {
+                      return `\n📝 ${entries[idx].notes}`;
+                    }
+                  }
+                  return '';
+                }
+              },
+            },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                font: { family: 'Inter', size: 11 },
+                color: '#718096',
+                maxRotation: 45,
+                callback: function(value, index) {
+                  const label = this.getLabelForValue(value);
+                  const d = new Date(label);
+                  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+                }
+              },
+              border: { display: false },
+            },
+            y: {
+              grid: {
+                color: 'rgba(0,0,0,0.04)',
+                drawBorder: false,
+              },
+              ticks: {
+                font: { family: 'Inter', size: 11 },
+                color: '#718096',
+                padding: 10,
+                callback: (val) => `${val} kg`,
+              },
+              border: { display: false },
+              beginAtZero: false,
+            },
+          },
+          animation: {
+            duration: 800,
+            easing: 'easeInOutQuart',
+          },
+        },
+      });
+    }
+
+    function getFilteredEntries() {
+      if (currentRange === 'all') return allEntries;
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - currentRange);
+      return allEntries.filter(e => new Date(e.date) >= cutoff);
+    }
+
+    function updateChart() {
+      const entries = getFilteredEntries();
+      
+      if (entries.length === 0) {
+        document.getElementById('weightChart').parentElement.style.display = 'none';
+        document.getElementById('chartEmpty').style.display = 'block';
+        return;
+      }
+      
+      document.getElementById('weightChart').parentElement.style.display = 'block';
+      document.getElementById('chartEmpty').style.display = 'none';
+
+      const labels = entries.map(e => e.date);
+      const weights = entries.map(e => e.weight_kg);
+      const goalLine = goalWeight ? entries.map(() => goalWeight) : [];
+
+      weightChart.data.labels = labels;
+      weightChart.data.datasets[0].data = weights;
+      weightChart.data.datasets[1].data = goalLine;
+      
+      // Dynamic color: green trending down, red trending up
+      if (weights.length >= 2) {
+        const trend = weights[weights.length - 1] - weights[0];
+        const ctx = document.getElementById('weightChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+        if (trend <= 0) {
+          weightChart.data.datasets[0].borderColor = '#064e3b';
+          weightChart.data.datasets[0].pointBackgroundColor = '#064e3b';
+          gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+          gradient.addColorStop(1, 'rgba(6, 78, 59, 0)');
+        } else {
+          weightChart.data.datasets[0].borderColor = '#ef4444';
+          weightChart.data.datasets[0].pointBackgroundColor = '#ef4444';
+          gradient.addColorStop(0, 'rgba(239, 68, 68, 0.15)');
+          gradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
+        }
+        weightChart.data.datasets[0].backgroundColor = gradient;
+      }
+      
+      weightChart.update();
+    }
+
+    function updateStats(stats) {
+      if (!stats) return;
+      document.getElementById('startingWeight').innerHTML = `${stats.first_weight}<span class="metric-unit"> kg</span>`;
+      document.getElementById('currentWeight').innerHTML = `${stats.current_weight}<span class="metric-unit"> kg</span>`;
+      
+      const lost = stats.total_change;
+      document.getElementById('totalLost').innerHTML = `${lost > 0 ? '+' : ''}${lost}<span class="metric-unit"> kg</span>`;
+      document.getElementById('totalLost').style.color = lost <= 0 ? 'var(--success)' : 'var(--error)';
+      
+      document.getElementById('weeklyChange').innerHTML = `${stats.weekly_change > 0 ? '+' : ''}${stats.weekly_change}<span class="metric-unit"> kg/wk</span>`;
+      document.getElementById('weeklyChange').style.color = stats.weekly_change <= 0 ? 'var(--success)' : 'var(--error)';
+    }
+
+    function updateTable() {
+      const tbody = document.getElementById('weightTableBody');
+      const entries = [...allEntries].reverse();
+      
+      if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:40px;color:var(--text-muted);">No entries yet</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = entries.map((entry, i) => {
+        const prev = entries[i + 1];
+        const change = prev ? (entry.weight_kg - prev.weight_kg).toFixed(1) : '—';
+        const changeClass = change === '—' ? '' : (parseFloat(change) <= 0 ? 'positive' : 'negative');
+        const changeSign = change !== '—' && parseFloat(change) > 0 ? '+' : '';
+        
+        return `
+          <tr>
+            <td>${Diet2Fit.formatDate(entry.date)}</td>
+            <td class="weight-val">${entry.weight_kg} kg</td>
+            <td>${change !== '—' ? `<span class="metric-change ${changeClass}" style="display:inline-flex;">${changeSign}${change} kg</span>` : '—'}</td>
+            <td class="text-caption">${entry.notes || '—'}</td>
+            <td>
+              <button onclick="deleteEntry(${entry.id})" class="btn btn-ghost btn-sm" style="padding:6px;color:var(--error);">
+                <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function setRange(range, btn) {
+      currentRange = range;
+      document.querySelectorAll('.chart-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateChart();
+    }
+
+    async function loadWeight() {
+      try {
+        const data = await Diet2Fit.apiRequest('/api/weight');
+        allEntries = data.entries || [];
+        updateStats(data.stats);
+        updateChart();
+        updateTable();
+
+        // Get goal weight
+        const profile = await Diet2Fit.apiRequest('/api/auth/me');
+        goalWeight = profile.user.goal_weight;
+        updateChart();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Form submit
+    document.getElementById('weightForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnLogWeight');
+      const weight = parseFloat(document.getElementById('weightValue').value);
+      const date = document.getElementById('weightDate').value;
+      const notes = document.getElementById('weightNotes').value.trim();
+
+      if (!weight || !date) return;
+      
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div>';
+
+      try {
+        const result = await Diet2Fit.apiRequest('/api/weight', {
+          method: 'POST',
+          body: JSON.stringify({ weight_kg: weight, date, notes }),
+        });
+        
+        Diet2Fit.showToast(result.updated ? 'Weight updated for this date!' : 'Weight logged successfully!', 'success');
+        document.getElementById('weightValue').value = '';
+        document.getElementById('weightNotes').value = '';
+        document.getElementById('weightDate').value = Diet2Fit.getTodayDate();
+        await loadWeight();
+      } catch (err) {
+        Diet2Fit.showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">save</span> Save';
+      }
+    });
+
+    async function deleteEntry(id) {
+      if (!confirm('Delete this weight entry?')) return;
+      try {
+        await Diet2Fit.apiRequest(`/api/weight/${id}`, { method: 'DELETE' });
+        Diet2Fit.showToast('Entry deleted', 'success');
+        await loadWeight();
+      } catch (err) {
+        Diet2Fit.showToast(err.message, 'error');
+      }
+    }
+
+    initChart();
+    loadWeight();
+  </script>
+</body>
+</html>

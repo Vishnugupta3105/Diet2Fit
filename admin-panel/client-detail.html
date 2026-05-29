@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Details — Diet2Fit Admin</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/portal/css/portal.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="portal-layout">
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Diet2Fit</div><div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
+      <div class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="clients.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">group</span>Clients</a>
+        <a href="appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="video-call.html" class="sidebar-link"><span class="material-symbols-outlined">videocam</span>Video Call</a>
+      </div>
+      <div class="sidebar-user"><div class="sidebar-user-avatar">DD</div><div class="sidebar-user-info"><div class="sidebar-user-name">Dt. Disha</div><div class="sidebar-user-role">Admin</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
+    </nav>
+
+    <main class="portal-main">
+      <!-- Back -->
+      <a href="clients.html" class="btn btn-ghost btn-sm mb-lg" style="display:inline-flex;">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> Back to Clients
+      </a>
+
+      <!-- Client Header -->
+      <div class="detail-header" id="clientHeader">
+        <div class="detail-avatar" id="detailAvatar">—</div>
+        <div style="flex:1;">
+          <h1 class="portal-title" id="clientName">Loading...</h1>
+          <div class="flex gap-md items-center" style="flex-wrap:wrap;margin-top:4px;">
+            <span class="text-caption" id="clientEmail">—</span>
+            <span class="text-caption" id="clientPhone">—</span>
+          </div>
+        </div>
+        <div class="flex gap-sm">
+          <button class="btn btn-outline btn-sm" onclick="startVideoCall()">
+            <span class="material-symbols-outlined" style="font-size:18px;">videocam</span> Call
+          </button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error);" onclick="deleteClient()">
+            <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Info Cards -->
+      <div class="dashboard-grid mb-xl" id="infoCards">
+        <div class="metric-card">
+          <div class="metric-label mb-md">Current Weight</div>
+          <div class="metric-value" id="cWeight">—<span class="metric-unit"> kg</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label mb-md">Goal Weight</div>
+          <div class="metric-value" id="cGoal">—<span class="metric-unit"> kg</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label mb-md">Total Change</div>
+          <div class="metric-value" id="cChange">—<span class="metric-unit"> kg</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label mb-md">Appointments</div>
+          <div class="metric-value" id="cAppts">0</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="detail-tabs">
+        <div class="detail-tab active" onclick="switchTab('progress', this)">Weight Progress</div>
+        <div class="detail-tab" onclick="switchTab('appointments', this)">Appointments</div>
+        <div class="detail-tab" onclick="switchTab('diets', this)">Diet Plans</div>
+        <div class="detail-tab" onclick="switchTab('profile', this)">Profile</div>
+      </div>
+
+      <!-- Tab: Weight Progress -->
+      <div class="tab-content active" id="tab-progress">
+        <div class="chart-container mb-xl">
+          <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-lg);">Weight Progress Chart</h3>
+          <div style="position:relative;height:300px;">
+            <canvas id="weightChart"></canvas>
+          </div>
+          <div id="chartEmpty" class="empty-state" style="display:none;"><span class="material-symbols-outlined">show_chart</span><p>No weight data for this client</p></div>
+        </div>
+        <div class="card-flat" style="padding:0;overflow:hidden;">
+          <div style="padding:var(--space-lg) var(--space-xl);border-bottom:1px solid var(--border);"><h3 style="font-size:1rem;font-weight:600;">Weight Log</h3></div>
+          <div style="overflow-x:auto;">
+            <table class="data-table"><thead><tr><th>Date</th><th>Weight</th><th>Change</th><th>Notes</th></tr></thead><tbody id="weightTableBody"><tr><td colspan="4" style="padding:30px;text-align:center;color:var(--text-muted);">No entries</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Appointments -->
+      <div class="tab-content" id="tab-appointments">
+        <div class="flex flex-col gap-md" id="apptList">
+          <div class="empty-state"><span class="material-symbols-outlined">event</span><p>No appointments</p></div>
+        </div>
+      </div>
+
+      <!-- Tab: Diet Plans -->
+      <div class="tab-content" id="tab-diets">
+        <div class="card-flat mb-xl" style="padding:var(--space-xl);">
+          <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md);">Upload Diet Plan</h3>
+          <form id="uploadDietForm" class="flex flex-col gap-md">
+            <div class="form-group">
+              <label class="form-label">Select File (PDF, Image, etc.)</label>
+              <input type="file" id="dietFile" name="diet_file" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes (Optional)</label>
+              <textarea id="dietNotes" name="notes" class="form-input" rows="2" placeholder="e.g. Week 1 High Protein Plan"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btnUploadDiet">
+              <span class="material-symbols-outlined" style="font-size:18px;">upload_file</span> Upload Diet Plan
+            </button>
+          </form>
+        </div>
+
+        <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md);">Uploaded Plans</h3>
+        <div class="flex flex-col gap-md" id="dietList">
+          <div class="empty-state"><span class="material-symbols-outlined">description</span><p>No diet plans uploaded yet</p></div>
+        </div>
+      </div>
+
+      <!-- Tab: Profile -->
+      <div class="tab-content" id="tab-profile">
+        <div class="card-flat" style="padding:var(--space-xl);">
+          <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-lg);">Edit Client Profile</h3>
+          <form id="editForm" class="flex flex-col gap-md">
+            <div class="grid grid-2">
+              <div class="form-group"><label class="form-label">Name</label><input type="text" id="editName" class="form-input" /></div>
+              <div class="form-group"><label class="form-label">Email</label><input type="email" id="editEmail" class="form-input" /></div>
+            </div>
+            <div class="grid grid-2">
+              <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="editPhone" class="form-input" /></div>
+              <div class="form-group"><label class="form-label">New Password</label><input type="text" id="editPassword" class="form-input" placeholder="Leave empty to keep current" /></div>
+            </div>
+            <div class="grid grid-2">
+              <div class="form-group"><label class="form-label">Goal Weight (kg)</label><input type="number" id="editGoalWeight" class="form-input" step="0.1" /></div>
+              <div class="form-group"><label class="form-label">Height (cm)</label><input type="number" id="editHeight" class="form-input" /></div>
+            </div>
+            <div class="form-group"><label class="form-label">Notes</label><textarea id="editNotes" class="form-input" rows="3"></textarea></div>
+            <button type="submit" class="btn btn-primary" id="btnSave">
+              <span class="material-symbols-outlined" style="font-size:18px;">save</span> Save Changes
+            </button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/main.js"></script>
+  <script>
+    if (!Diet2Fit.isLoggedIn() || Diet2Fit.getUser()?.role !== 'admin') { window.location.href = '/login.html'; }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+
+    const clientId = new URLSearchParams(window.location.search).get('id');
+    if (!clientId) { window.location.href = 'clients.html'; }
+
+    let weightChart = null;
+
+    function switchTab(tab, el) {
+      document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById(`tab-${tab}`).classList.add('active');
+    }
+
+    function initChart(entries, goalWeight) {
+      const ctx = document.getElementById('weightChart').getContext('2d');
+      if (entries.length === 0) {
+        document.getElementById('weightChart').parentElement.style.display = 'none';
+        document.getElementById('chartEmpty').style.display = 'block';
+        return;
+      }
+      const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+      gradient.addColorStop(0, 'rgba(6,78,59,0.15)');
+      gradient.addColorStop(1, 'rgba(6,78,59,0)');
+
+      weightChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: entries.map(e => e.date),
+          datasets: [{
+            label: 'Weight (kg)', data: entries.map(e => e.weight_kg),
+            borderColor: '#064e3b', backgroundColor: gradient, borderWidth: 3,
+            fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#064e3b',
+            pointBorderColor: '#fff', pointBorderWidth: 2,
+          }, {
+            label: 'Goal', data: goalWeight ? entries.map(() => goalWeight) : [],
+            borderColor: '#d4a853', borderWidth: 2, borderDash: [8,4], pointRadius: 0, fill: false,
+          }],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', align: 'end', labels: { font: { family: 'Inter', size: 12 }, usePointStyle: true } },
+            tooltip: { backgroundColor: 'rgba(26,28,28,0.9)', cornerRadius: 10, padding: 12,
+              callbacks: { title: (items) => { const d = new Date(items[0].label); return d.toLocaleDateString('en-IN', {day:'numeric',month:'long',year:'numeric'}); } }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 }, callback: function(v) { const d = new Date(this.getLabelForValue(v)); return d.toLocaleDateString('en-IN', {day:'numeric',month:'short'}); } } },
+            y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { family: 'Inter', size: 11 }, callback: v => v + ' kg' }, beginAtZero: false },
+          },
+        },
+      });
+    }
+
+    async function loadClient() {
+      try {
+        const data = await Diet2Fit.apiRequest(`/api/clients/${clientId}`);
+        const { client, weights, appointments } = data;
+
+        // Header
+        document.getElementById('clientName').textContent = client.name;
+        document.getElementById('clientEmail').textContent = `📧 ${client.email}`;
+        document.getElementById('clientPhone').textContent = client.phone ? `📱 ${client.phone}` : '';
+        document.getElementById('detailAvatar').textContent = (client.name||'').substring(0,2).toUpperCase();
+        document.title = `${client.name} — Diet2Fit Admin`;
+
+        // Info Cards
+        if (weights.length > 0) {
+          const sorted = [...weights].sort((a,b) => a.date.localeCompare(b.date));
+          const first = sorted[0].weight_kg;
+          const current = sorted[sorted.length-1].weight_kg;
+          document.getElementById('cWeight').innerHTML = `${current}<span class="metric-unit"> kg</span>`;
+          document.getElementById('cChange').innerHTML = `${(current-first) > 0 ? '+' : ''}${(current-first).toFixed(1)}<span class="metric-unit"> kg</span>`;
+          document.getElementById('cChange').style.color = (current-first) <= 0 ? 'var(--success)' : 'var(--error)';
+        }
+        document.getElementById('cGoal').innerHTML = client.goal_weight ? `${client.goal_weight}<span class="metric-unit"> kg</span>` : '—';
+        document.getElementById('cAppts').textContent = appointments.length;
+
+        // Chart
+        const sortedWeights = [...weights].sort((a,b) => a.date.localeCompare(b.date));
+        initChart(sortedWeights, client.goal_weight);
+
+        // Weight table
+        const tbody = document.getElementById('weightTableBody');
+        if (sortedWeights.length > 0) {
+          const reversed = [...sortedWeights].reverse();
+          tbody.innerHTML = reversed.map((e, i) => {
+            const prev = reversed[i+1];
+            const change = prev ? (e.weight_kg - prev.weight_kg).toFixed(1) : '—';
+            return `<tr><td>${Diet2Fit.formatDate(e.date)}</td><td class="weight-val">${e.weight_kg} kg</td><td>${change !== '—' ? `<span class="metric-change ${parseFloat(change) <= 0 ? 'positive' : 'negative'}" style="display:inline-flex;">${parseFloat(change) > 0 ? '+' : ''}${change} kg</span>` : '—'}</td><td class="text-caption">${e.notes||'—'}</td></tr>`;
+          }).join('');
+        }
+
+        // Appointments
+        const apptList = document.getElementById('apptList');
+        if (appointments.length > 0) {
+          apptList.innerHTML = appointments.map(a => {
+            const statusClass = { pending: 'badge-warning', confirmed: 'badge-success', completed: 'badge-primary', cancelled: 'badge-error' };
+            return `<div class="appointment-card"><div class="appointment-info"><div><div style="font-weight:600;">${a.goal||'Consultation'}</div><div class="text-caption">${a.type} • ${Diet2Fit.formatDate(a.preferred_date)} ${a.preferred_time||''}</div></div></div><div class="flex gap-sm items-center">${a.status==='pending' ? `<button onclick="updateAppt(${a.id},'confirmed')" class="btn btn-primary btn-sm" style="padding:6px 12px;">Confirm</button>` : ''}${a.status==='confirmed' ? `<button onclick="updateAppt(${a.id},'completed')" class="btn btn-ghost btn-sm">Complete</button>` : ''}<span class="badge ${statusClass[a.status]||''}">${a.status}</span></div></div>`;
+          }).join('');
+        }
+
+        // Edit form
+        document.getElementById('editName').value = client.name || '';
+        document.getElementById('editEmail').value = client.email || '';
+        document.getElementById('editPhone').value = client.phone || '';
+        document.getElementById('editGoalWeight').value = client.goal_weight || '';
+        document.getElementById('editHeight').value = client.height_cm || '';
+        document.getElementById('editNotes').value = client.notes || '';
+
+        // Load Diets
+        await loadDiets();
+      } catch (err) {
+        Diet2Fit.showToast('Failed to load client', 'error');
+      }
+    }
+
+    async function loadDiets() {
+      try {
+        const data = await Diet2Fit.apiRequest(`/api/diets/${clientId}`);
+        const dietList = document.getElementById('dietList');
+        if (data.plans && data.plans.length > 0) {
+          dietList.innerHTML = data.plans.map(p => `
+            <div class="appointment-card flex justify-between items-center">
+              <div class="flex gap-md items-center">
+                <div style="width:40px;height:40px;background:var(--primary-surface);color:var(--primary);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;">
+                  <span class="material-symbols-outlined">description</span>
+                </div>
+                <div>
+                  <div style="font-weight:600;">${p.original_name}</div>
+                  <div class="text-caption">${Diet2Fit.formatDate(p.created_at)} ${p.notes ? '• ' + p.notes : ''}</div>
+                </div>
+              </div>
+              <div class="flex gap-sm">
+                <a href="${p.filepath}" target="_blank" class="btn btn-outline btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">download</span> Download</a>
+                <button onclick="deleteDiet(${p.id})" class="btn btn-ghost btn-sm" style="color:var(--error);"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          dietList.innerHTML = '<div class="empty-state"><span class="material-symbols-outlined">description</span><p>No diet plans uploaded yet</p></div>';
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function deleteDiet(id) {
+      if (!confirm('Delete this diet plan?')) return;
+      try {
+        await Diet2Fit.apiRequest(`/api/diets/${id}`, { method: 'DELETE' });
+        Diet2Fit.showToast('Diet plan deleted', 'success');
+        loadDiets();
+      } catch (err) {
+        Diet2Fit.showToast(err.message, 'error');
+      }
+    }
+
+    document.getElementById('uploadDietForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnUploadDiet');
+      const fileInput = document.getElementById('dietFile');
+      if (!fileInput.files[0]) return;
+      
+      btn.disabled = true;
+      btn.innerHTML = 'Uploading...';
+      
+      const formData = new FormData();
+      formData.append('diet_file', fileInput.files[0]);
+      formData.append('client_id', clientId);
+      formData.append('notes', document.getElementById('dietNotes').value);
+
+      try {
+        const token = localStorage.getItem('diet2fit_token');
+        const res = await fetch('/api/diets', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+        
+        Diet2Fit.showToast('Diet plan uploaded!', 'success');
+        document.getElementById('uploadDietForm').reset();
+        loadDiets();
+      } catch (err) {
+        Diet2Fit.showToast(err.message, 'error');
+      }
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">upload_file</span> Upload Diet Plan';
+    });
+
+    async function updateAppt(id, status) {
+      try {
+        await Diet2Fit.apiRequest(`/api/appointments/${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
+        Diet2Fit.showToast(`Appointment ${status}`, 'success');
+        loadClient();
+      } catch (err) { Diet2Fit.showToast(err.message, 'error'); }
+    }
+
+    function startVideoCall() {
+      const roomId = Math.random().toString(36).substring(2, 10);
+      const inviteUrl = window.location.origin + '/portal/video-call.html?room=' + roomId;
+      navigator.clipboard.writeText(inviteUrl).then(() => {
+        Diet2Fit.showToast(`Room created! Invite link copied to clipboard.`, 'success', 5000);
+        window.open(`video-call.html?room=${roomId}`, '_blank');
+      }).catch(() => {
+        Diet2Fit.showToast(`Room created. Share link: ${inviteUrl}`, 'info', 6000);
+        window.open(`video-call.html?room=${roomId}`, '_blank');
+      });
+    }
+
+    async function deleteClient() {
+      if (!confirm('Are you sure you want to delete this client? This cannot be undone.')) return;
+      try {
+        await Diet2Fit.apiRequest(`/api/clients/${clientId}`, { method: 'DELETE' });
+        Diet2Fit.showToast('Client deleted', 'success');
+        setTimeout(() => window.location.href = 'clients.html', 500);
+      } catch (err) { Diet2Fit.showToast(err.message, 'error'); }
+    }
+
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSave');
+      btn.disabled = true;
+      try {
+        await Diet2Fit.apiRequest(`/api/clients/${clientId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            name: document.getElementById('editName').value.trim(),
+            email: document.getElementById('editEmail').value.trim(),
+            phone: document.getElementById('editPhone').value.trim(),
+            password: document.getElementById('editPassword').value || undefined,
+            goal_weight: parseFloat(document.getElementById('editGoalWeight').value) || null,
+            height_cm: parseFloat(document.getElementById('editHeight').value) || null,
+            notes: document.getElementById('editNotes').value.trim(),
+          }),
+        });
+        Diet2Fit.showToast('Client updated!', 'success');
+        loadClient();
+      } catch (err) { Diet2Fit.showToast(err.message, 'error'); }
+      btn.disabled = false;
+    });
+
+    loadClient();
+  </script>
+</body>
+</html>

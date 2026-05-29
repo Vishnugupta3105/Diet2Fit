@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Consultation — Diet2Fit | Dt. Disha</title>
+  <meta name="description" content="Book your personalized nutrition consultation with Dt. Disha. Specializing in Diabetes, Cardiac Care, PCOS, Fat Loss & Weight Management." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <style>
+    .step { display: none; }
+    .step.active { display: block; animation: fadeInUp 0.4s ease; }
+    .goal-option {
+      padding: 20px;
+      border: 2px solid var(--surface-dim);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.3s var(--ease);
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .goal-option:hover { border-color: var(--primary-dim); background: var(--primary-surface); }
+    .goal-option.selected { border-color: var(--primary); background: var(--primary-surface); box-shadow: 0 0 0 4px var(--primary-glow); }
+    .goal-option .goal-icon {
+      width: 48px; height: 48px; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; flex-shrink: 0;
+    }
+    .progress-steps {
+      display: flex; justify-content: center; gap: 8px;
+      margin-bottom: var(--space-2xl);
+    }
+    .progress-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--surface-dim); transition: all 0.3s;
+    }
+    .progress-dot.active { background: var(--primary); width: 32px; border-radius: 6px; }
+    .progress-dot.done { background: var(--primary-dim); }
+    .success-animation {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--primary-surface);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto var(--space-xl);
+      animation: successPop 0.5s ease;
+    }
+    @keyframes successPop {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body style="background: var(--bg-alt);">
+
+  <!-- ═══ Header ═══ -->
+  <header style="padding: 20px 0;">
+    <div class="container flex justify-between items-center">
+      <a href="/" class="navbar-brand" style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--primary);">Diet2Fit</a>
+      <a href="/" class="btn btn-ghost btn-sm">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+        Back to Home
+      </a>
+    </div>
+  </header>
+
+  <main class="container-narrow" style="padding-bottom: var(--space-4xl);">
+    <!-- Progress Indicator -->
+    <div class="progress-steps">
+      <div class="progress-dot active" id="dot1"></div>
+      <div class="progress-dot" id="dot2"></div>
+      <div class="progress-dot" id="dot3"></div>
+    </div>
+
+    <!-- Glass Card -->
+    <div class="glass" style="padding: var(--space-2xl); border-radius: var(--radius-2xl);">
+
+      <!-- Step 1: Choose Goal -->
+      <div class="step active" id="step1">
+        <div class="text-center mb-xl">
+          <h1 class="text-headline mb-sm">What's your health goal?</h1>
+          <p style="color: var(--text-secondary);">Select the area where you need expert guidance from Dt. Disha.</p>
+        </div>
+
+        <div class="flex flex-col gap-md">
+          <div class="goal-option" data-goal="Diabetes Management" onclick="selectGoal(this)">
+            <div class="goal-icon" style="background:#fef3c7;color:#d97706;">🩸</div>
+            <div>
+              <div class="text-title">Diabetes Management</div>
+              <div class="text-caption">Blood sugar control, HbA1c optimization, insulin management</div>
+            </div>
+          </div>
+          <div class="goal-option" data-goal="Cardiac Care" onclick="selectGoal(this)">
+            <div class="goal-icon" style="background:#fce7f3;color:#db2777;">❤️</div>
+            <div>
+              <div class="text-title">Cardiac Care</div>
+              <div class="text-caption">Heart health, cholesterol, blood pressure nutrition</div>
+            </div>
+          </div>
+          <div class="goal-option" data-goal="PCOS Management" onclick="selectGoal(this)">
+            <div class="goal-icon" style="background:#ede9fe;color:#7c3aed;">🦋</div>
+            <div>
+              <div class="text-title">PCOS Management</div>
+              <div class="text-caption">Hormonal balance, cycle regulation, weight management</div>
+            </div>
+          </div>
+          <div class="goal-option" data-goal="Fat Loss" onclick="selectGoal(this)">
+            <div class="goal-icon" style="background:#ecfdf5;color:#059669;">🔥</div>
+            <div>
+              <div class="text-title">Fat Loss</div>
+              <div class="text-caption">Sustainable body composition transformation</div>
+            </div>
+          </div>
+          <div class="goal-option" data-goal="Weight Management" onclick="selectGoal(this)">
+            <div class="goal-icon" style="background:#dbeafe;color:#2563eb;">⚖️</div>
+            <div>
+              <div class="text-title">Weight Management</div>
+              <div class="text-caption">Long-term weight maintenance strategies</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: var(--space-xl);">
+          <button class="btn btn-primary w-full btn-lg" onclick="nextStep(2)" id="btnNext1" disabled>
+            Continue
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Contact Details -->
+      <div class="step" id="step2">
+        <div class="text-center mb-xl">
+          <h1 class="text-headline mb-sm">Your Details</h1>
+          <p style="color: var(--text-secondary);">Tell us a bit about yourself so Dt. Disha can prepare for your consultation.</p>
+        </div>
+
+        <form id="bookingForm" class="flex flex-col gap-lg">
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label class="form-label" for="clientName">Full Name *</label>
+              <input type="text" id="clientName" class="form-input" placeholder="Your full name" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="clientPhone">Phone Number *</label>
+              <input type="tel" id="clientPhone" class="form-input" placeholder="+91 XXXXX XXXXX" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="clientEmail">Email (Optional)</label>
+            <input type="email" id="clientEmail" class="form-input" placeholder="your@email.com" />
+          </div>
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label class="form-label" for="prefDate">Preferred Date</label>
+              <input type="date" id="prefDate" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prefTime">Preferred Time</label>
+              <select id="prefTime" class="form-input">
+                <option value="">Select a time</option>
+                <option value="09:00">9:00 AM</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="15:00">3:00 PM</option>
+                <option value="16:00">4:00 PM</option>
+                <option value="17:00">5:00 PM</option>
+                <option value="18:00">6:00 PM</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="consultType">Consultation Type</label>
+            <select id="consultType" class="form-input">
+              <option value="video">Video Call</option>
+              <option value="whatsapp">WhatsApp Call</option>
+              <option value="in-person">In-Person</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="clientNotes">Additional Notes</label>
+            <textarea id="clientNotes" class="form-input" placeholder="Any specific health concerns, current medications, etc." rows="3"></textarea>
+          </div>
+        </form>
+
+        <div class="flex gap-md" style="margin-top: var(--space-xl);">
+          <button class="btn btn-ghost" onclick="nextStep(1)">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Back
+          </button>
+          <button class="btn btn-primary w-full btn-lg" onclick="submitBooking()" id="btnSubmit">
+            Book Consultation
+            <span class="material-symbols-outlined">check</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Success -->
+      <div class="step" id="step3">
+        <div class="text-center">
+          <div class="success-animation">
+            <span class="material-symbols-outlined" style="font-size:40px;color:var(--primary);">check_circle</span>
+          </div>
+          <h1 class="text-headline mb-sm">Consultation Booked!</h1>
+          <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto var(--space-xl);">
+            Thank you! Dt. Disha will contact you shortly to confirm your appointment. You can also reach out directly via WhatsApp.
+          </p>
+          <div class="flex flex-col gap-md items-center">
+            <a href="https://wa.me/918306404335?text=Hi%20Dt.%20Disha!%20I%20just%20booked%20a%20consultation%20on%20Diet2Fit.%20Looking%20forward%20to%20it!" target="_blank" class="btn btn-lg" style="background:#25d366;color:white;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Confirm via WhatsApp
+            </a>
+            <a href="/" class="btn btn-ghost">
+              <span class="material-symbols-outlined">home</span>
+              Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    let selectedGoal = null;
+
+    // Set min date for date picker to today
+    const prefDate = document.getElementById('prefDate');
+    if (prefDate) {
+      prefDate.min = new Date().toISOString().split('T')[0];
+    }
+
+    function selectGoal(el) {
+      document.querySelectorAll('.goal-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedGoal = el.dataset.goal;
+      document.getElementById('btnNext1').disabled = false;
+    }
+
+    function nextStep(step) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(`step${step}`).classList.add('active');
+
+      // Update progress dots
+      for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById(`dot${i}`);
+        dot.classList.remove('active', 'done');
+        if (i < step) dot.classList.add('done');
+        if (i === step) dot.classList.add('active');
+      }
+    }
+
+    async function submitBooking() {
+      const name = document.getElementById('clientName').value.trim();
+      const phone = document.getElementById('clientPhone').value.trim();
+      const email = document.getElementById('clientEmail').value.trim();
+      const date = document.getElementById('prefDate').value;
+      const time = document.getElementById('prefTime').value;
+      const type = document.getElementById('consultType').value;
+      const notes = document.getElementById('clientNotes').value.trim();
+
+      if (!name || !phone) {
+        Diet2Fit.showToast('Please fill in your name and phone number.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Booking...';
+
+      try {
+        await Diet2Fit.apiRequest('/api/appointments', {
+          method: 'POST',
+          body: JSON.stringify({
+            client_name: name,
+            client_phone: phone,
+            client_email: email,
+            preferred_date: date,
+            preferred_time: time,
+            type: type,
+            goal: selectedGoal,
+            notes: notes,
+          }),
+        });
+        nextStep(3);
+      } catch (err) {
+        Diet2Fit.showToast(err.message || 'Failed to book. Please try again.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = 'Book Consultation <span class="material-symbols-outlined">check</span>';
+      }
+    }
+  </script>
+
+  <div class="toast-container" id="toastContainer"></div>
+</body>
+</html>

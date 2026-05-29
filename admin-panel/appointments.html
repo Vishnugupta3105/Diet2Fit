@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Appointments — Diet2Fit Admin</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/portal/css/portal.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="portal-layout">
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Diet2Fit</div><div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
+      <div class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="clients.html" class="sidebar-link"><span class="material-symbols-outlined">group</span>Clients</a>
+        <a href="appointments.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">calendar_month</span>Appointments</a>
+        <a href="video-call.html" class="sidebar-link"><span class="material-symbols-outlined">videocam</span>Video Call</a>
+      </div>
+      <div class="sidebar-user"><div class="sidebar-user-avatar">DD</div><div class="sidebar-user-info"><div class="sidebar-user-name">Dt. Disha</div><div class="sidebar-user-role">Admin</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
+    </nav>
+
+    <main class="portal-main">
+      <div class="portal-header">
+        <div>
+          <h1 class="portal-title">All Appointments</h1>
+          <p class="text-caption" id="apptCount">Manage client consultations</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex justify-between items-center mb-xl" style="flex-wrap:wrap;gap:var(--space-md);">
+        <div class="chart-filters">
+          <button class="chart-filter-btn active" onclick="filterAppts('all', this)">All</button>
+          <button class="chart-filter-btn" onclick="filterAppts('pending', this)">Pending</button>
+          <button class="chart-filter-btn" onclick="filterAppts('confirmed', this)">Confirmed</button>
+          <button class="chart-filter-btn" onclick="filterAppts('completed', this)">Completed</button>
+          <button class="chart-filter-btn" onclick="filterAppts('cancelled', this)">Cancelled</button>
+        </div>
+        <div class="search-bar" style="max-width:300px;">
+          <span class="material-symbols-outlined">search</span>
+          <input type="text" id="searchInput" placeholder="Search..." oninput="handleSearch()" />
+        </div>
+      </div>
+
+      <!-- Appointments List -->
+      <div class="flex flex-col gap-md" id="apptList">
+        <div class="empty-state" id="noAppts">
+          <span class="material-symbols-outlined">event_busy</span>
+          <p>No appointments found</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/main.js"></script>
+  <script>
+    if (!Diet2Fit.isLoggedIn() || Diet2Fit.getUser()?.role !== 'admin') { window.location.href = '/login.html'; }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+
+    let allAppts = [];
+    let currentFilter = 'all';
+
+    function getStatusBadge(status) {
+      const map = { pending:'badge-warning', confirmed:'badge-success', completed:'badge-primary', cancelled:'badge-error' };
+      return `<span class="badge ${map[status]||''}">${status}</span>`;
+    }
+
+    function renderAppts(appts) {
+      const list = document.getElementById('apptList');
+      const noEl = document.getElementById('noAppts');
+      list.querySelectorAll('.appointment-card').forEach(c => c.remove());
+      
+      if (appts.length === 0) { noEl.style.display = 'block'; return; }
+      noEl.style.display = 'none';
+      document.getElementById('apptCount').textContent = `${appts.length} appointment${appts.length !== 1 ? 's' : ''}`;
+
+      appts.forEach(a => {
+        const date = a.preferred_date ? new Date(a.preferred_date) : null;
+        const card = document.createElement('div');
+        card.className = 'appointment-card';
+        card.innerHTML = `
+          <div class="appointment-info">
+            <div class="appointment-date-box">
+              <div class="appointment-date-day">${date ? date.getDate() : '—'}</div>
+              <div class="appointment-date-month">${date ? date.toLocaleString('en',{month:'short'}) : ''}</div>
+            </div>
+            <div>
+              <div style="font-weight:600;">${a.client_name || 'Unknown Client'}</div>
+              <div class="text-caption">${a.goal || 'Consultation'} • ${a.type === 'video' ? '📹 Video' : a.type === 'whatsapp' ? '📱 WhatsApp' : '🏥 In-Person'} • ${a.preferred_time || 'Time TBD'}</div>
+              <div class="text-caption" style="margin-top:2px;">${a.client_phone || ''} ${a.client_email ? '• ' + a.client_email : ''}</div>
+              ${a.notes ? `<div class="text-caption" style="margin-top:4px;font-style:italic;">📝 ${a.notes}</div>` : ''}
+            </div>
+          </div>
+          <div class="flex gap-sm items-center" style="flex-wrap:wrap;">
+            ${a.status === 'pending' ? `
+              <button onclick="updateStatus(${a.id}, 'confirmed')" class="btn btn-primary btn-sm" style="padding:6px 14px;">Confirm</button>
+              <button onclick="updateStatus(${a.id}, 'cancelled')" class="btn btn-ghost btn-sm" style="padding:6px 14px;color:var(--error);">Cancel</button>
+            ` : ''}
+            ${a.status === 'confirmed' ? `
+              <a href="video-call.html?room=${a.room_id}" class="btn btn-primary btn-sm" style="padding:6px 14px;"><span class="material-symbols-outlined" style="font-size:16px;">videocam</span>Call</a>
+              <button onclick="updateStatus(${a.id}, 'completed')" class="btn btn-ghost btn-sm" style="padding:6px 14px;">Complete</button>
+            ` : ''}
+            ${getStatusBadge(a.status)}
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function filterAppts(status, btn) {
+      currentFilter = status;
+      document.querySelectorAll('.chart-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilters();
+    }
+
+    function handleSearch() {
+      applyFilters();
+    }
+
+    function applyFilters() {
+      let filtered = allAppts;
+      if (currentFilter !== 'all') {
+        filtered = filtered.filter(a => a.status === currentFilter);
+      }
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      if (q) {
+        filtered = filtered.filter(a =>
+          (a.client_name || '').toLowerCase().includes(q) ||
+          (a.client_email || '').toLowerCase().includes(q) ||
+          (a.goal || '').toLowerCase().includes(q)
+        );
+      }
+      renderAppts(filtered);
+    }
+
+    async function updateStatus(id, status) {
+      try {
+        await Diet2Fit.apiRequest(`/api/appointments/${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
+        Diet2Fit.showToast(`Appointment ${status}`, 'success');
+        loadAppts();
+      } catch (err) { Diet2Fit.showToast(err.message, 'error'); }
+    }
+
+    async function loadAppts() {
+      try {
+        const data = await Diet2Fit.apiRequest('/api/appointments');
+        allAppts = data.appointments;
+        applyFilters();
+      } catch (err) { Diet2Fit.showToast('Failed to load appointments', 'error'); }
+    }
+
+    loadAppts();
+  </script>
+</body>
+</html>

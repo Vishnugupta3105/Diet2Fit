@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consult Dt. Disha — Diet2Fit</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="css/portal.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <style>
+    .consult-type-card {
+      border: 2px solid var(--surface-dim);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      cursor: pointer;
+      transition: all 0.3s var(--ease);
+      text-align: center;
+    }
+    .consult-type-card:hover { border-color: var(--primary-dim); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .consult-type-card.selected { border-color: var(--primary); background: var(--primary-surface); box-shadow: 0 0 0 4px var(--primary-glow); }
+    .consult-type-icon { width: 64px; height: 64px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); font-size: 28px; }
+    .expert-card { display: flex; align-items: center; gap: var(--space-xl); padding: var(--space-xl); background: var(--surface); border-radius: var(--radius-xl); border: 1px solid var(--border); margin-bottom: var(--space-xl); }
+    .expert-photo { width: 100px; height: 100px; border-radius: var(--radius-xl); overflow: hidden; flex-shrink: 0; }
+    .expert-photo img { width: 100%; height: 100%; object-fit: cover; }
+    @media (max-width: 640px) { .expert-card { flex-direction: column; text-align: center; } }
+  </style>
+</head>
+<body>
+  <div class="portal-layout">
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Diet2Fit</div><div class="sidebar-subtitle">Client Portal</div>
+      <div class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="weight-tracker.html" class="sidebar-link"><span class="material-symbols-outlined">monitor_weight</span>Weight Tracker</a>
+        <a href="appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="consult.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">support_agent</span>Consult Dt. Disha</a>
+        <a href="video-call.html" class="sidebar-link"><span class="material-symbols-outlined">videocam</span>Video Call</a>
+      </div>
+      <div class="sidebar-user"><div class="sidebar-user-avatar" id="userAvatar">—</div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Loading...</div><div class="sidebar-user-role">Client</div></div><button onclick="logout()" title="Logout" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
+    </nav>
+
+    <main class="portal-main">
+      <div class="portal-header">
+        <div>
+          <h1 class="portal-title">Consult with Dt. Disha</h1>
+          <p class="text-caption">Book a personalized nutrition consultation</p>
+        </div>
+      </div>
+
+      <!-- Expert Profile Card -->
+      <div class="expert-card">
+        <div class="expert-photo">
+          <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&h=200&fit=crop&crop=faces" alt="Dt. Disha" />
+        </div>
+        <div>
+          <h3 style="font-size:1.25rem;margin-bottom:4px;">Dietitian Disha (Dt. Disha)</h3>
+          <p class="text-caption" style="margin-bottom:var(--space-sm);">Founder, Diet2Fit — Certified Clinical Nutritionist</p>
+          <div class="flex gap-sm" style="flex-wrap:wrap;">
+            <span class="badge badge-primary">Diabetes</span>
+            <span class="badge badge-primary">Cardiac Care</span>
+            <span class="badge badge-primary">PCOS</span>
+            <span class="badge badge-primary">Fat Loss</span>
+            <span class="badge badge-primary">Weight Mgmt</span>
+          </div>
+          <div class="flex items-center gap-sm" style="margin-top:var(--space-sm);">
+            <span style="color:#f59e0b;">⭐⭐⭐⭐⭐</span>
+            <span class="text-caption">4.9/5 • 500+ consultations</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consultation Type Selection -->
+      <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md);">Choose Consultation Type</h3>
+      <div class="grid grid-3 mb-xl" id="consultTypes">
+        <div class="consult-type-card" data-type="video" onclick="selectType(this)">
+          <div class="consult-type-icon" style="background:#dbeafe;">
+            <span class="material-symbols-outlined" style="color:#2563eb;">videocam</span>
+          </div>
+          <div class="text-title mb-sm">Video Call</div>
+          <p class="text-caption">Face-to-face consultation from the comfort of your home</p>
+        </div>
+        <div class="consult-type-card" data-type="whatsapp" onclick="selectType(this)">
+          <div class="consult-type-icon" style="background:#ecfdf5;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#059669"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </div>
+          <div class="text-title mb-sm">WhatsApp</div>
+          <p class="text-caption">Quick consultation via WhatsApp call or chat</p>
+        </div>
+        <div class="consult-type-card" data-type="in-person" onclick="selectType(this)">
+          <div class="consult-type-icon" style="background:#fef3c7;">
+            <span class="material-symbols-outlined" style="color:#d97706;">location_on</span>
+          </div>
+          <div class="text-title mb-sm">In-Person</div>
+          <p class="text-caption">Visit the clinic for a detailed in-person consultation</p>
+        </div>
+      </div>
+
+      <!-- Booking Form -->
+      <div class="card-flat" id="bookingSection" style="padding:var(--space-xl);display:none;">
+        <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-lg);">Schedule Your Session</h3>
+        <form id="consultForm" class="flex flex-col gap-lg">
+          <div class="form-group">
+            <label class="form-label">What do you need help with?</label>
+            <select id="consultGoal" class="form-input">
+              <option value="Diabetes Management">Diabetes Management</option>
+              <option value="Cardiac Care">Cardiac Care</option>
+              <option value="PCOS Management">PCOS Management</option>
+              <option value="Fat Loss">Fat Loss</option>
+              <option value="Weight Management">Weight Management</option>
+              <option value="General Nutrition">General Nutrition Advice</option>
+            </select>
+          </div>
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label class="form-label" for="consultDate">Preferred Date</label>
+              <input type="date" id="consultDate" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="consultTime">Preferred Time</label>
+              <select id="consultTime" class="form-input">
+                <option value="">Select time</option>
+                <option value="09:00">9:00 AM</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="15:00">3:00 PM</option>
+                <option value="16:00">4:00 PM</option>
+                <option value="17:00">5:00 PM</option>
+                <option value="18:00">6:00 PM</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="consultNotes">Describe your concerns</label>
+            <textarea id="consultNotes" class="form-input" rows="3" placeholder="Current health issues, medications, what you'd like to discuss..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg" id="btnBook">
+            <span class="material-symbols-outlined" style="font-size:20px;">event_available</span>
+            Book Consultation
+          </button>
+        </form>
+      </div>
+
+      <!-- Success State -->
+      <div class="card-flat text-center" id="successSection" style="padding:var(--space-3xl);display:none;">
+        <div class="success-animation" style="width:80px;height:80px;border-radius:50%;background:var(--primary-surface);display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-lg);">
+          <span class="material-symbols-outlined" style="font-size:40px;color:var(--primary);">check_circle</span>
+        </div>
+        <h3 class="text-headline mb-sm">Consultation Booked!</h3>
+        <p style="color:var(--text-secondary);max-width:400px;margin:0 auto var(--space-xl);">Dt. Disha will confirm your appointment shortly. You'll see it in your Appointments page.</p>
+        <div class="flex justify-center gap-md">
+          <a href="appointments.html" class="btn btn-primary"><span class="material-symbols-outlined" style="font-size:18px;">calendar_month</span> View Appointments</a>
+          <a href="https://wa.me/918306404335" target="_blank" class="btn btn-outline" style="border-color:#25d366;color:#25d366;">Chat on WhatsApp</a>
+        </div>
+      </div>
+
+      <!-- Quick WhatsApp -->
+      <div class="consult-card" style="margin-top:var(--space-xl);">
+        <div style="position:relative;z-index:1;">
+          <h3 style="font-size:1.1rem;margin-bottom:var(--space-sm);">💬 Need Immediate Help?</h3>
+          <p style="opacity:0.85;margin-bottom:var(--space-md);">Chat directly with Dt. Disha on WhatsApp for quick queries.</p>
+          <a href="https://wa.me/918306404335?text=Hi%20Dt.%20Disha!%20I%20need%20quick%20nutrition%20advice." target="_blank" class="btn btn-sm" style="background:#25d366;color:white;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp Dt. Disha
+          </a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/main.js"></script>
+  <script>
+    if (!Diet2Fit.isLoggedIn()) { window.location.href = '/login.html'; }
+    const user = Diet2Fit.getUser();
+    document.getElementById('userName').textContent = user?.name || 'Client';
+    document.getElementById('userAvatar').textContent = (user?.name || 'C').substring(0, 2).toUpperCase();
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+
+    document.getElementById('consultDate').min = Diet2Fit.getTodayDate();
+    let selectedType = null;
+
+    function selectType(el) {
+      document.querySelectorAll('.consult-type-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedType = el.dataset.type;
+      
+      if (selectedType === 'whatsapp') {
+        window.open('https://wa.me/918306404335?text=Hi%20Dt.%20Disha!%20I%27d%20like%20to%20schedule%20a%20WhatsApp%20consultation.', '_blank');
+      }
+      document.getElementById('bookingSection').style.display = 'block';
+      document.getElementById('bookingSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.getElementById('consultForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnBook');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Booking...';
+
+      try {
+        await Diet2Fit.apiRequest('/api/appointments', {
+          method: 'POST',
+          body: JSON.stringify({
+            client_id: user.id,
+            client_name: user.name,
+            client_email: user.email,
+            client_phone: user.phone || '',
+            type: selectedType,
+            goal: document.getElementById('consultGoal').value,
+            preferred_date: document.getElementById('consultDate').value,
+            preferred_time: document.getElementById('consultTime').value,
+            notes: document.getElementById('consultNotes').value.trim(),
+          }),
+        });
+        document.getElementById('bookingSection').style.display = 'none';
+        document.getElementById('successSection').style.display = 'block';
+        document.getElementById('successSection').scrollIntoView({ behavior: 'smooth' });
+      } catch (err) {
+        Diet2Fit.showToast(err.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">event_available</span> Book Consultation';
+      }
+    });
+  </script>
+</body>
+</html>

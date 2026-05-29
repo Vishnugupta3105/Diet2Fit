@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Appointments — Diet2Fit</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="css/portal.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="portal-layout">
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Diet2Fit</div><div class="sidebar-subtitle">Client Portal</div>
+      <div class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="weight-tracker.html" class="sidebar-link"><span class="material-symbols-outlined">monitor_weight</span>Weight Tracker</a>
+        <a href="appointments.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">calendar_month</span>Appointments</a>
+        <a href="consult.html" class="sidebar-link"><span class="material-symbols-outlined">support_agent</span>Consult Dt. Disha</a>
+        <a href="video-call.html" class="sidebar-link"><span class="material-symbols-outlined">videocam</span>Video Call</a>
+      </div>
+      <div class="sidebar-user"><div class="sidebar-user-avatar" id="userAvatar">—</div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Loading...</div><div class="sidebar-user-role">Client</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
+    </nav>
+
+    <main class="portal-main">
+      <div class="portal-header">
+        <div>
+          <h1 class="portal-title">Appointments</h1>
+          <p class="text-caption">View your past and upcoming sessions</p>
+        </div>
+        <a href="consult.html" class="btn btn-primary btn-sm">
+          <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+          Book New
+        </a>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="chart-filters mb-xl">
+        <button class="chart-filter-btn active" onclick="filterAppts('all', this)">All</button>
+        <button class="chart-filter-btn" onclick="filterAppts('pending', this)">Pending</button>
+        <button class="chart-filter-btn" onclick="filterAppts('confirmed', this)">Confirmed</button>
+        <button class="chart-filter-btn" onclick="filterAppts('completed', this)">Completed</button>
+      </div>
+
+      <!-- Appointments List -->
+      <div class="flex flex-col gap-md" id="appointmentsList">
+        <div class="empty-state" id="noAppointments">
+          <span class="material-symbols-outlined">event_busy</span>
+          <p>No appointments found</p>
+          <a href="consult.html" class="btn btn-primary btn-sm" style="margin-top:var(--space-md);">Book Your First Session</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/main.js"></script>
+  <script>
+    if (!Diet2Fit.isLoggedIn()) { window.location.href = '/login.html'; }
+    const user = Diet2Fit.getUser();
+    document.getElementById('userName').textContent = user?.name || 'Client';
+    document.getElementById('userAvatar').textContent = (user?.name || 'C').substring(0, 2).toUpperCase();
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+
+    let allAppointments = [];
+
+    function getStatusBadge(status) {
+      const map = { pending: 'badge-warning', confirmed: 'badge-success', completed: 'badge-primary', cancelled: 'badge-error' };
+      return `<span class="badge ${map[status] || ''}">${status}</span>`;
+    }
+
+    function getTypeIcon(type) {
+      if (type === 'video') return '📹 Video Call';
+      if (type === 'whatsapp') return '📱 WhatsApp';
+      return '🏥 In-Person';
+    }
+
+    function renderAppointments(appointments) {
+      const container = document.getElementById('appointmentsList');
+      const noEl = document.getElementById('noAppointments');
+      
+      if (appointments.length === 0) {
+        noEl.style.display = 'block';
+        container.querySelectorAll('.appointment-card').forEach(c => c.remove());
+        return;
+      }
+      
+      noEl.style.display = 'none';
+      // Remove old cards
+      container.querySelectorAll('.appointment-card').forEach(c => c.remove());
+
+      appointments.forEach(appt => {
+        const date = appt.preferred_date ? new Date(appt.preferred_date) : null;
+        const card = document.createElement('div');
+        card.className = 'appointment-card';
+        card.innerHTML = `
+          <div class="appointment-info">
+            <div class="appointment-date-box">
+              <div class="appointment-date-day">${date ? date.getDate() : '—'}</div>
+              <div class="appointment-date-month">${date ? date.toLocaleString('en', {month:'short', year:'2-digit'}) : ''}</div>
+            </div>
+            <div>
+              <div style="font-weight:600;">${appt.goal || 'Consultation'}</div>
+              <div class="text-caption">${getTypeIcon(appt.type)} • ${appt.preferred_time || 'Time TBD'}</div>
+              ${appt.notes ? `<div class="text-caption" style="margin-top:4px;">📝 ${appt.notes}</div>` : ''}
+            </div>
+          </div>
+          <div class="flex items-center gap-md">
+            ${appt.status === 'confirmed' && appt.type === 'video' ? `<a href="video-call.html?room=${appt.room_id}" class="btn btn-primary btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">videocam</span>Join Call</a>` : ''}
+            ${getStatusBadge(appt.status)}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterAppts(status, btn) {
+      document.querySelectorAll('.chart-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (status === 'all') {
+        renderAppointments(allAppointments);
+      } else {
+        renderAppointments(allAppointments.filter(a => a.status === status));
+      }
+    }
+
+    async function loadAppointments() {
+      try {
+        const data = await Diet2Fit.apiRequest('/api/appointments');
+        allAppointments = data.appointments;
+        renderAppointments(allAppointments);
+      } catch (err) {
+        Diet2Fit.showToast(err.message, 'error');
+      }
+    }
+
+    loadAppointments();
+  </script>
+</body>
+</html>

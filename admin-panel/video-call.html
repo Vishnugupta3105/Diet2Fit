@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Call — Diet2Fit Admin</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/portal/css/portal.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body>
+  <div class="portal-layout">
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Diet2Fit</div><div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
+      <div class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="clients.html" class="sidebar-link"><span class="material-symbols-outlined">group</span>Clients</a>
+        <a href="appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="video-call.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">videocam</span>Video Call</a>
+      </div>
+      <div class="sidebar-user"><div class="sidebar-user-avatar">DD</div><div class="sidebar-user-info"><div class="sidebar-user-name">Dt. Disha</div><div class="sidebar-user-role">Admin</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
+    </nav>
+
+    <main class="portal-main">
+      <div class="portal-header">
+        <div>
+          <h1 class="portal-title">Video Consultation</h1>
+          <p class="text-caption">Start or join a video call with clients</p>
+        </div>
+      </div>
+
+      <!-- Create / Join -->
+      <div id="joinSection">
+        <div class="dashboard-grid-wide mb-xl">
+          <!-- Create New Room -->
+          <div class="card-flat" style="padding:var(--space-xl);text-align:center;">
+            <span class="material-symbols-outlined" style="font-size:48px;color:var(--primary);margin-bottom:var(--space-md);">add_call</span>
+            <h3 class="text-title mb-sm">Create New Room</h3>
+            <p class="text-caption mb-lg">Generate a room code and share it with your client</p>
+            <button class="btn btn-primary w-full" onclick="createRoom()">
+              <span class="material-symbols-outlined" style="font-size:20px;">videocam</span>
+              Create & Join
+            </button>
+            <div id="roomCodeDisplay" style="display:none;margin-top:var(--space-md);">
+              <div class="text-caption mb-sm">Share this invite link with your client:</div>
+              <div class="flex items-center justify-center gap-sm" style="flex-wrap:wrap;">
+                <input type="text" id="inviteLink" class="form-input" readonly style="font-size:0.9rem;flex:1;min-width:200px;" />
+                <button onclick="copyInviteLink()" class="btn btn-ghost btn-sm" style="padding:8px;" title="Copy Link"><span class="material-symbols-outlined" style="font-size:18px;">content_copy</span></button>
+                <a id="whatsappLink" href="#" target="_blank" class="btn btn-primary btn-sm" style="padding:8px;background:#25d366;border:none;" title="Send via WhatsApp">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Join Existing -->
+          <div class="card-flat" style="padding:var(--space-xl);text-align:center;">
+            <span class="material-symbols-outlined" style="font-size:48px;color:var(--accent);margin-bottom:var(--space-md);">login</span>
+            <h3 class="text-title mb-sm">Join Existing Room</h3>
+            <p class="text-caption mb-lg">Enter a room code to join an ongoing call</p>
+            <div class="flex gap-sm">
+              <input type="text" id="roomInput" class="form-input" placeholder="Room code..." style="flex:1;" />
+              <button class="btn btn-primary" onclick="joinRoom()">Join</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confirmed appointments with call buttons -->
+        <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md);">Confirmed Appointments</h3>
+        <div class="flex flex-col gap-md" id="confirmedList">
+          <div class="empty-state" style="padding:var(--space-xl);"><span class="material-symbols-outlined">event</span><p>No confirmed appointments</p></div>
+        </div>
+      </div>
+
+      <!-- Video Call UI -->
+      <div id="callSection" style="display:none;">
+        <div class="video-container" id="videoContainer">
+          <video id="remoteVideo" autoplay playsinline></video>
+          <div class="video-placeholder" id="remotePlaceholder">
+            <span class="material-symbols-outlined">person</span>
+            <p>Waiting for client to join...</p>
+          </div>
+          <div class="video-local">
+            <video id="localVideo" autoplay playsinline muted></video>
+          </div>
+          <div class="video-status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="callStatus">Connecting...</span>
+          </div>
+          <div class="video-controls">
+            <button class="video-btn active" id="btnMic" onclick="toggleMic()"><span class="material-symbols-outlined">mic</span></button>
+            <button class="video-btn active" id="btnCam" onclick="toggleCam()"><span class="material-symbols-outlined">videocam</span></button>
+            <button class="video-btn end-call" onclick="endCall()"><span class="material-symbols-outlined">call_end</span></button>
+          </div>
+        </div>
+        <div class="flex justify-between items-center" style="margin-top:var(--space-md);">
+          <div class="flex items-center gap-md">
+            <span class="text-caption" id="roomInfo">Room: —</span>
+            <button onclick="copyCurrentRoom()" class="btn btn-ghost btn-sm" style="padding:4px 8px;"><span class="material-symbols-outlined" style="font-size:16px;">content_copy</span> Copy Code</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error);" onclick="endCall()">
+            <span class="material-symbols-outlined" style="font-size:16px;">close</span> End Call
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/main.js"></script>
+  <script>
+    if (!Diet2Fit.isLoggedIn() || Diet2Fit.getUser()?.role !== 'admin') { window.location.href = '/login.html'; }
+    const user = Diet2Fit.getUser();
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+
+    // Check URL for room
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomFromUrl = urlParams.get('room');
+    if (roomFromUrl) { document.getElementById('roomInput').value = roomFromUrl; }
+
+    let socket, localStream, peerConnection;
+    let isMicOn = true, isCamOn = true;
+    let currentRoomId = null;
+    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+
+    function createRoom() {
+      const roomId = Math.random().toString(36).substring(2, 10);
+      const inviteUrl = window.location.origin + '/portal/video-call.html?room=' + roomId;
+      document.getElementById('inviteLink').value = inviteUrl;
+      document.getElementById('whatsappLink').href = `https://wa.me/?text=Hi!%20Please%20join%20our%20Diet2Fit%20video%20consultation%20here:%20${encodeURIComponent(inviteUrl)}`;
+      document.getElementById('roomCodeDisplay').style.display = 'block';
+      currentRoomId = roomId;
+      startCall(roomId);
+    }
+
+    function joinRoom() {
+      const roomId = document.getElementById('roomInput').value.trim();
+      if (!roomId) { Diet2Fit.showToast('Enter a room code', 'error'); return; }
+      currentRoomId = roomId;
+      startCall(roomId);
+    }
+
+    function copyInviteLink() {
+      navigator.clipboard.writeText(document.getElementById('inviteLink').value);
+      Diet2Fit.showToast('Invite link copied!', 'success');
+    }
+
+    function copyCurrentRoom() {
+      if (currentRoomId) {
+        navigator.clipboard.writeText(currentRoomId);
+        Diet2Fit.showToast('Room code copied!', 'success');
+      }
+    }
+
+    async function startCall(roomId) {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('localVideo').srcObject = localStream;
+      } catch (err) {
+        Diet2Fit.showToast('Camera/mic access required', 'error');
+        return;
+      }
+
+      document.getElementById('joinSection').style.display = 'none';
+      document.getElementById('callSection').style.display = 'block';
+      document.getElementById('roomInfo').textContent = `Room: ${roomId}`;
+
+      socket = io('/video');
+      socket.on('connect', () => {
+        socket.emit('join-room', { roomId, userId: user.id, userName: user.name });
+        document.getElementById('callStatus').textContent = 'Connected — waiting for client...';
+      });
+
+      socket.on('room-users', async (users) => {
+        if (users.length > 0) {
+          document.getElementById('callStatus').textContent = 'Found client, connecting...';
+        }
+      });
+      socket.on('user-joined', async ({ socketId, userName }) => {
+        document.getElementById('callStatus').textContent = `${userName} joined`;
+        Diet2Fit.showToast(`${userName} joined the call`, 'success');
+        await createOffer(socketId);
+      });
+      socket.on('offer', async ({ from, offer }) => {
+        peerConnection = createPeerConnection(from);
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.emit('answer', { to: from, answer });
+      });
+      socket.on('answer', async ({ answer }) => { if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer)); });
+      socket.on('ice-candidate', async ({ candidate }) => { if (peerConnection && candidate) await peerConnection.addIceCandidate(new RTCIceCandidate(candidate)); });
+      socket.on('user-left', ({ userName }) => {
+        document.getElementById('callStatus').textContent = `${userName} left`;
+        document.getElementById('remoteVideo').srcObject = null;
+        document.getElementById('remotePlaceholder').style.display = 'flex';
+        Diet2Fit.showToast(`${userName} left`, 'info');
+      });
+    }
+
+    function createPeerConnection(target) {
+      peerConnection = new RTCPeerConnection(rtcConfig);
+      localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+      peerConnection.ontrack = (e) => { 
+        const remoteVid = document.getElementById('remoteVideo');
+        remoteVid.srcObject = e.streams[0]; 
+        remoteVid.play().catch(err => console.error("Play error:", err));
+        document.getElementById('remotePlaceholder').style.display = 'none'; 
+        document.getElementById('callStatus').textContent = 'In Call'; 
+      };
+      peerConnection.onicecandidate = (e) => { if (e.candidate) socket.emit('ice-candidate', { to: target, candidate: e.candidate }); };
+      return peerConnection;
+    }
+
+    async function createOffer(target) {
+      peerConnection = createPeerConnection(target);
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      socket.emit('offer', { to: target, offer });
+    }
+
+    function toggleMic() { isMicOn = !isMicOn; localStream.getAudioTracks().forEach(t => t.enabled = isMicOn); const b = document.getElementById('btnMic'); b.querySelector('.material-symbols-outlined').textContent = isMicOn ? 'mic' : 'mic_off'; b.classList.toggle('active', isMicOn); }
+    function toggleCam() { isCamOn = !isCamOn; localStream.getVideoTracks().forEach(t => t.enabled = isCamOn); const b = document.getElementById('btnCam'); b.querySelector('.material-symbols-outlined').textContent = isCamOn ? 'videocam' : 'videocam_off'; b.classList.toggle('active', isCamOn); }
+    function endCall() { if (peerConnection) peerConnection.close(); if (localStream) localStream.getTracks().forEach(t => t.stop()); if (socket) socket.disconnect(); document.getElementById('joinSection').style.display = 'block'; document.getElementById('callSection').style.display = 'none'; }
+
+    // Load confirmed appointments
+    async function loadConfirmed() {
+      try {
+        const data = await Diet2Fit.apiRequest('/api/appointments?status=confirmed');
+        const list = document.getElementById('confirmedList');
+        if (data.appointments.length > 0) {
+          list.innerHTML = data.appointments.map(a => `
+            <div class="appointment-card">
+              <div class="appointment-info"><div><div style="font-weight:600;">${a.client_name || 'Client'}</div><div class="text-caption">${a.goal || 'Consultation'} • ${Diet2Fit.formatDate(a.preferred_date)} ${a.preferred_time||''}</div></div></div>
+              <button onclick="currentRoomId='${a.room_id}';startCall('${a.room_id}')" class="btn btn-primary btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">videocam</span>Start Call</button>
+            </div>
+          `).join('');
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    loadConfirmed();
+    if (roomFromUrl) { setTimeout(() => joinRoom(), 500); }
+  </script>
+</body>
+</html>

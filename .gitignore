@@ -1,0 +1,18 @@
+# Node modules
+node_modules/
+npm-debug.log
+
+# Mac OS
+.DS_Store
+
+# Environment variables
+.env
+
+# Database (Do not commit the live database!)
+backend/db/*.db
+backend/db/*.db-shm
+backend/db/*.db-wal
+
+# Uploaded Files (Do not commit client diet plans!)
+backend/uploads/*
+!backend/uploads/.gitkeep

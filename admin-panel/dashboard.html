@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Diet2Fit</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/portal/css/portal.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="portal-layout">
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Diet2Fit</div>
+      <div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
+      <div class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">dashboard</span>Dashboard</a>
+        <a href="clients.html" class="sidebar-link"><span class="material-symbols-outlined">group</span>Clients</a>
+        <a href="appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="video-call.html" class="sidebar-link"><span class="material-symbols-outlined">videocam</span>Video Call</a>
+      </div>
+      <div class="sidebar-user"><div class="sidebar-user-avatar" id="userAvatar">DD</div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Dt. Disha</div><div class="sidebar-user-role">Admin</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
+    </nav>
+
+    <main class="portal-main">
+      <div class="portal-header">
+        <div>
+          <h1 class="portal-title">Dashboard</h1>
+          <p class="text-caption">Welcome back, Dt. Disha — here's your practice overview</p>
+        </div>
+        <a href="clients.html" class="btn btn-primary btn-sm">
+          <span class="material-symbols-outlined" style="font-size:18px;">person_add</span>
+          Add Client
+        </a>
+      </div>
+
+      <!-- Overview Cards -->
+      <div class="dashboard-grid mb-xl" id="overviewCards">
+        <div class="overview-card">
+          <div class="overview-icon" style="background:var(--primary-surface);">
+            <span class="material-symbols-outlined" style="color:var(--primary);font-size:28px;">group</span>
+          </div>
+          <div>
+            <div class="overview-value" id="totalClients">0</div>
+            <div class="overview-label">Total Clients</div>
+          </div>
+        </div>
+        <div class="overview-card">
+          <div class="overview-icon" style="background:#fef3c7;">
+            <span class="material-symbols-outlined" style="color:#d97706;font-size:28px;">pending_actions</span>
+          </div>
+          <div>
+            <div class="overview-value" id="pendingAppts">0</div>
+            <div class="overview-label">Pending Appointments</div>
+          </div>
+        </div>
+        <div class="overview-card">
+          <div class="overview-icon" style="background:#ecfdf5;">
+            <span class="material-symbols-outlined" style="color:#059669;font-size:28px;">event_available</span>
+          </div>
+          <div>
+            <div class="overview-value" id="confirmedAppts">0</div>
+            <div class="overview-label">Confirmed Today</div>
+          </div>
+        </div>
+        <div class="overview-card">
+          <div class="overview-icon" style="background:#ede9fe;">
+            <span class="material-symbols-outlined" style="color:#7c3aed;font-size:28px;">check_circle</span>
+          </div>
+          <div>
+            <div class="overview-value" id="completedAppts">0</div>
+            <div class="overview-label">Completed Total</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Clients & Appointments -->
+      <div class="dashboard-grid-wide">
+        <!-- Recent Clients -->
+        <div class="card-flat" style="padding:0;overflow:hidden;">
+          <div style="padding:var(--space-lg) var(--space-xl);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:1.1rem;font-weight:600;">Recent Clients</h3>
+            <a href="clients.html" class="btn btn-ghost btn-sm">View All</a>
+          </div>
+          <div id="recentClients" style="padding:var(--space-sm);">
+            <div class="empty-state" style="padding:var(--space-xl);"><span class="material-symbols-outlined">group</span><p>No clients yet</p></div>
+          </div>
+        </div>
+
+        <!-- Pending Appointments -->
+        <div class="card-flat" style="padding:0;overflow:hidden;">
+          <div style="padding:var(--space-lg) var(--space-xl);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="font-size:1.1rem;font-weight:600;">Pending Appointments</h3>
+            <a href="appointments.html" class="btn btn-ghost btn-sm">View All</a>
+          </div>
+          <div id="pendingList" style="padding:var(--space-sm);">
+            <div class="empty-state" style="padding:var(--space-xl);"><span class="material-symbols-outlined">event</span><p>No pending appointments</p></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/main.js"></script>
+  <script>
+    if (!Diet2Fit.isLoggedIn()) { window.location.href = '/login.html'; }
+    const user = Diet2Fit.getUser();
+    if (user && user.role !== 'admin') { window.location.href = '/portal/'; }
+    document.getElementById('userName').textContent = user?.name || 'Admin';
+    document.getElementById('userAvatar').textContent = (user?.name || 'A').substring(0, 2).toUpperCase();
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+
+    async function loadDashboard() {
+      try {
+        const [clientsData, apptsData] = await Promise.all([
+          Diet2Fit.apiRequest('/api/clients'),
+          Diet2Fit.apiRequest('/api/appointments'),
+        ]);
+
+        // Stats
+        document.getElementById('totalClients').textContent = clientsData.clients.length;
+        const pending = apptsData.appointments.filter(a => a.status === 'pending');
+        const confirmed = apptsData.appointments.filter(a => a.status === 'confirmed');
+        const completed = apptsData.appointments.filter(a => a.status === 'completed');
+        document.getElementById('pendingAppts').textContent = pending.length;
+        document.getElementById('confirmedAppts').textContent = confirmed.length;
+        document.getElementById('completedAppts').textContent = completed.length;
+
+        // Recent clients
+        const rc = document.getElementById('recentClients');
+        if (clientsData.clients.length > 0) {
+          rc.innerHTML = clientsData.clients.slice(0, 5).map(c => `
+            <a href="client-detail.html?id=${c.id}" style="display:flex;align-items:center;gap:var(--space-md);padding:12px var(--space-lg);border-radius:var(--radius-md);transition:background 0.2s;cursor:pointer;" onmouseover="this.style.background='var(--bg-alt)'" onmouseout="this.style.background='transparent'">
+              <div class="client-avatar" style="width:36px;height:36px;font-size:0.75rem;">${(c.name||'').substring(0,2).toUpperCase()}</div>
+              <div style="flex:1;">
+                <div style="font-weight:600;font-size:0.9rem;">${c.name}</div>
+                <div class="text-caption">${c.email}</div>
+              </div>
+              <div class="text-caption">${c.latest_weight ? c.latest_weight + ' kg' : '—'}</div>
+            </a>
+          `).join('');
+        }
+
+        // Pending appointments
+        const pl = document.getElementById('pendingList');
+        if (pending.length > 0) {
+          pl.innerHTML = pending.slice(0, 5).map(a => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px var(--space-lg);border-radius:var(--radius-md);">
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;">${a.client_name || 'Unknown'}</div>
+                <div class="text-caption">${a.goal || 'Consultation'} • ${a.preferred_date ? Diet2Fit.formatDate(a.preferred_date) : 'No date'}</div>
+              </div>
+              <div class="flex gap-sm">
+                <button onclick="confirmAppt(${a.id})" class="btn btn-primary btn-sm" style="padding:6px 12px;font-size:0.75rem;">Confirm</button>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error(err);
+        Diet2Fit.showToast('Failed to load dashboard', 'error');
+      }
+    }
+
+    async function confirmAppt(id) {
+      try {
+        await Diet2Fit.apiRequest(`/api/appointments/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ status: 'confirmed' }),
+        });
+        Diet2Fit.showToast('Appointment confirmed!', 'success');
+        loadDashboard();
+      } catch (err) {
+        Diet2Fit.showToast(err.message, 'error');
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

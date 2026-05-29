@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Call — Diet2Fit</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="css/portal.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body>
+  <div class="portal-layout">
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Diet2Fit</div><div class="sidebar-subtitle">Client Portal</div>
+      <div class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="weight-tracker.html" class="sidebar-link"><span class="material-symbols-outlined">monitor_weight</span>Weight Tracker</a>
+        <a href="appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="consult.html" class="sidebar-link"><span class="material-symbols-outlined">support_agent</span>Consult Dt. Disha</a>
+        <a href="video-call.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">videocam</span>Video Call</a>
+      </div>
+      <div class="sidebar-user"><div class="sidebar-user-avatar" id="userAvatar">—</div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Loading...</div><div class="sidebar-user-role">Client</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
+    </nav>
+
+    <main class="portal-main">
+      <div class="portal-header">
+        <div>
+          <h1 class="portal-title">Video Call</h1>
+          <p class="text-caption">Connect face-to-face with Dt. Disha</p>
+        </div>
+      </div>
+
+      <!-- Join Room Section -->
+      <div id="joinSection" class="card-flat text-center" style="padding:var(--space-3xl);">
+        <span class="material-symbols-outlined" style="font-size:64px;color:var(--primary);margin-bottom:var(--space-md);">video_camera_front</span>
+        <h3 class="text-headline mb-md">Join a Video Call</h3>
+        <p style="color:var(--text-secondary);max-width:400px;margin:0 auto var(--space-xl);">
+          Enter the room code shared by Dt. Disha, or use the link from your confirmed appointment.
+        </p>
+        <div class="flex justify-center gap-md" style="flex-wrap:wrap;">
+          <input type="text" id="roomInput" class="form-input" placeholder="Enter room code" style="max-width:250px;" />
+          <button class="btn btn-primary" onclick="joinRoom()">
+            <span class="material-symbols-outlined" style="font-size:20px;">videocam</span>
+            Join Call
+          </button>
+        </div>
+      </div>
+
+      <!-- Video Call Section -->
+      <div id="callSection" style="display:none;">
+        <div class="video-container" id="videoContainer">
+          <!-- Remote Video -->
+          <video id="remoteVideo" autoplay playsinline></video>
+          <div class="video-placeholder" id="remotePlaceholder">
+            <span class="material-symbols-outlined">person</span>
+            <p>Waiting for Dt. Disha to join...</p>
+          </div>
+
+          <!-- Local Video -->
+          <div class="video-local">
+            <video id="localVideo" autoplay playsinline muted></video>
+          </div>
+
+          <!-- Status -->
+          <div class="video-status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="callStatus">Connecting...</span>
+          </div>
+
+          <!-- Controls -->
+          <div class="video-controls">
+            <button class="video-btn active" id="btnMic" onclick="toggleMic()">
+              <span class="material-symbols-outlined">mic</span>
+            </button>
+            <button class="video-btn active" id="btnCam" onclick="toggleCam()">
+              <span class="material-symbols-outlined">videocam</span>
+            </button>
+            <button class="video-btn end-call" onclick="endCall()">
+              <span class="material-symbols-outlined">call_end</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center" style="margin-top:var(--space-md);">
+          <div class="text-caption" id="roomInfo">Room: —</div>
+          <button class="btn btn-ghost btn-sm" onclick="endCall()">
+            <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+            Leave Call
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/main.js"></script>
+  <script>
+    if (!Diet2Fit.isLoggedIn()) { window.location.href = '/login.html'; }
+    const user = Diet2Fit.getUser();
+    document.getElementById('userName').textContent = user?.name || 'Client';
+    document.getElementById('userAvatar').textContent = (user?.name || 'C').substring(0, 2).toUpperCase();
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+
+    // Check URL for room param
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomFromUrl = urlParams.get('room');
+    if (roomFromUrl) {
+      document.getElementById('roomInput').value = roomFromUrl;
+    }
+
+    let socket, localStream, peerConnection;
+    let isMicOn = true, isCamOn = true;
+
+    const rtcConfig = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+      ],
+    };
+
+    async function joinRoom() {
+      const roomId = document.getElementById('roomInput').value.trim();
+      if (!roomId) { Diet2Fit.showToast('Enter a room code', 'error'); return; }
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('localVideo').srcObject = localStream;
+      } catch (err) {
+        Diet2Fit.showToast('Camera/mic access required for video calls', 'error');
+        return;
+      }
+
+      document.getElementById('joinSection').style.display = 'none';
+      document.getElementById('callSection').style.display = 'block';
+      document.getElementById('roomInfo').textContent = `Room: ${roomId}`;
+
+      socket = io('/video');
+
+      socket.on('connect', () => {
+        socket.emit('join-room', { roomId, userId: user.id, userName: user.name });
+        document.getElementById('callStatus').textContent = 'Connected — waiting for others...';
+      });
+
+      socket.on('room-users', async (users) => {
+        if (users.length > 0) {
+          document.getElementById('callStatus').textContent = 'Found Dt. Disha, connecting...';
+        }
+      });
+
+      socket.on('user-joined', async ({ socketId, userName }) => {
+        document.getElementById('callStatus').textContent = `${userName} joined`;
+        Diet2Fit.showToast(`${userName} joined the call`, 'success');
+        await createOffer(socketId);
+      });
+
+      socket.on('offer', async ({ from, offer, userName }) => {
+        peerConnection = createPeerConnection(from);
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.emit('answer', { to: from, answer });
+      });
+
+      socket.on('answer', async ({ from, answer }) => {
+        if (peerConnection) {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        }
+      });
+
+      socket.on('ice-candidate', async ({ from, candidate }) => {
+        if (peerConnection && candidate) {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+      });
+
+      socket.on('user-left', ({ userName }) => {
+        document.getElementById('callStatus').textContent = `${userName} left`;
+        document.getElementById('remoteVideo').srcObject = null;
+        document.getElementById('remotePlaceholder').style.display = 'flex';
+        Diet2Fit.showToast(`${userName} left the call`, 'info');
+      });
+    }
+
+    function createPeerConnection(targetSocketId) {
+      peerConnection = new RTCPeerConnection(rtcConfig);
+      
+      localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+      });
+
+      peerConnection.ontrack = (event) => {
+        const remoteVid = document.getElementById('remoteVideo');
+        remoteVid.srcObject = event.streams[0];
+        remoteVid.play().catch(e => console.error("Play error:", e));
+        document.getElementById('remotePlaceholder').style.display = 'none';
+        document.getElementById('callStatus').textContent = 'In Call';
+      };
+
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit('ice-candidate', { to: targetSocketId, candidate: event.candidate });
+        }
+      };
+
+      return peerConnection;
+    }
+
+    async function createOffer(targetSocketId) {
+      peerConnection = createPeerConnection(targetSocketId);
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      socket.emit('offer', { to: targetSocketId, offer });
+    }
+
+    function toggleMic() {
+      isMicOn = !isMicOn;
+      localStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
+      const btn = document.getElementById('btnMic');
+      btn.querySelector('.material-symbols-outlined').textContent = isMicOn ? 'mic' : 'mic_off';
+      btn.classList.toggle('active', isMicOn);
+    }
+
+    function toggleCam() {
+      isCamOn = !isCamOn;
+      localStream.getVideoTracks().forEach(t => t.enabled = isCamOn);
+      const btn = document.getElementById('btnCam');
+      btn.querySelector('.material-symbols-outlined').textContent = isCamOn ? 'videocam' : 'videocam_off';
+      btn.classList.toggle('active', isCamOn);
+    }
+
+    function endCall() {
+      if (peerConnection) peerConnection.close();
+      if (localStream) localStream.getTracks().forEach(t => t.stop());
+      if (socket) socket.disconnect();
+      document.getElementById('joinSection').style.display = 'block';
+      document.getElementById('callSection').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
