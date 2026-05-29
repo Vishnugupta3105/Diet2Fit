@@ -6,6 +6,11 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
+// Catch pool errors to prevent the entire Node.js server from crashing
+pool.on('error', (err, client) => {
+  console.error('Unexpected error on idle client', err);
+});
+
 const initializeDB = async () => {
   try {
     await pool.query(`
