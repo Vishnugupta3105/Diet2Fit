@@ -43,7 +43,8 @@ const loginLimiter = rateLimit({
 
 // ── Static File Serving ──────────────────────────────────────────
 // Serve uploads folder for diet plans
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, 'uploads');
+app.use('/uploads', express.static(uploadDir));
 
 app.use('/', express.static(path.join(__dirname, '..', 'frontend')));
 app.use('/portal', express.static(path.join(__dirname, '..', 'client-portal')));

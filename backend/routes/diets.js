@@ -6,11 +6,12 @@ const db = require('../db/database');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 
 // Configure multer for file storage
+const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../uploads');
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '..', 'uploads', 'diets'));
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
   },
-  filename: function (req, file, cb) {
+  filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
   }
