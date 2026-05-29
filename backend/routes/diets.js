@@ -1,20 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const db = require('../db/database');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 
-// Configure multer for file storage
-const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../uploads');
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'diet2fit_diets',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
 });
 
 const upload = multer({ 
@@ -24,16 +28,17 @@ const upload = multer({
 
 // GET /api/diets/:clientId - Get diets for a specific client
 // Admins can view any, clients can only view their own
-router.get('/:clientId', authenticate, (req, res) => {
+router.get('/:clientId', authenticate, async (req, res) => {
   const clientId = parseInt(req.params.clientId, 10);
   
-  if (req.user.role !== 'admin' && req.user.userId !== clientId) {
+  // NOTE: req.user.id is used because in our JWT we attach id, not userId
+  if (req.user.role !== 'admin' && req.user.id !== clientId) {
     return res.status(403).json({ error: 'Unauthorized to view these diet plans.' });
   }
 
   try {
-    const plans = db.prepare('SELECT * FROM diet_plans WHERE client_id = ? ORDER BY created_at DESC').all(clientId);
-    res.json({ plans });
+    const plansRes = await db.query('SELECT * FROM diet_plans WHERE client_id = $1 ORDER BY created_at DESC', [clientId]);
+    res.json({ plans: plansRes.rows });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Database error fetching diet plans.' });
@@ -41,7 +46,7 @@ router.get('/:clientId', authenticate, (req, res) => {
 });
 
 // POST /api/diets - Upload a new diet plan (Admin only)
-router.post('/', authenticate, requireAdmin, upload.single('diet_file'), (req, res) => {
+router.post('/', authenticate, requireAdmin, upload.single('diet_file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded.' });
   }
@@ -52,15 +57,19 @@ router.post('/', authenticate, requireAdmin, upload.single('diet_file'), (req, r
   }
 
   try {
-    const filepath = `/uploads/diets/${req.file.filename}`;
+    // req.file.path contains the secure URL from Cloudinary
+    const filepath = req.file.path;
+    const filename = req.file.filename;
+    const original_name = req.file.originalname || filename;
     
-    const result = db.prepare(`
+    const result = await db.query(`
       INSERT INTO diet_plans (client_id, filename, original_name, filepath, notes)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(client_id, req.file.filename, req.file.originalname, filepath, notes || '');
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id
+    `, [client_id, filename, original_name, filepath, notes || '']);
 
-    const newPlan = db.prepare('SELECT * FROM diet_plans WHERE id = ?').get(result.lastInsertRowid);
-    res.status(201).json({ message: 'Diet plan uploaded successfully.', plan: newPlan });
+    const newPlanRes = await db.query('SELECT * FROM diet_plans WHERE id = $1', [result.rows[0].id]);
+    res.status(201).json({ message: 'Diet plan uploaded successfully.', plan: newPlanRes.rows[0] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Database error saving diet plan.' });
@@ -68,10 +77,16 @@ router.post('/', authenticate, requireAdmin, upload.single('diet_file'), (req, r
 });
 
 // DELETE /api/diets/:id - Delete a diet plan (Admin only)
-router.delete('/:id', authenticate, requireAdmin, (req, res) => {
+router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   const id = req.params.id;
   try {
-    db.prepare('DELETE FROM diet_plans WHERE id = ?').run(id);
+    // Optionally: fetch the plan first and delete it from Cloudinary as well
+    // const planRes = await db.query('SELECT filename FROM diet_plans WHERE id = $1', [id]);
+    // if (planRes.rows.length > 0) {
+    //   await cloudinary.uploader.destroy(planRes.rows[0].filename);
+    // }
+
+    await db.query('DELETE FROM diet_plans WHERE id = $1', [id]);
     res.json({ message: 'Diet plan deleted successfully.' });
   } catch (err) {
     console.error(err);

@@ -1,88 +1,92 @@
-const Database = require('better-sqlite3');
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
-const path = require('path');
 
-const DB_PATH = path.join(__dirname, 'diet2fit.db');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
-const db = new Database(DB_PATH);
+const initializeDB = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        phone TEXT,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'client' CHECK(role IN ('admin', 'client')),
+        goal_weight REAL,
+        height_cm REAL,
+        date_of_birth TEXT,
+        gender TEXT,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
 
-// Enable WAL mode for better performance
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+      CREATE TABLE IF NOT EXISTS weight_logs (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        weight_kg REAL NOT NULL,
+        date TEXT NOT NULL,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
 
-// ── Schema Creation ──────────────────────────────────────────────
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    phone TEXT,
-    password_hash TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'client' CHECK(role IN ('admin', 'client')),
-    goal_weight REAL,
-    height_cm REAL,
-    date_of_birth TEXT,
-    gender TEXT,
-    notes TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT DEFAULT (datetime('now'))
-  );
+      CREATE TABLE IF NOT EXISTS appointments (
+        id SERIAL PRIMARY KEY,
+        client_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        client_name TEXT,
+        client_email TEXT,
+        client_phone TEXT,
+        type TEXT NOT NULL DEFAULT 'video' CHECK(type IN ('video', 'in-person', 'whatsapp')),
+        goal TEXT,
+        preferred_date TEXT,
+        preferred_time TEXT,
+        status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'confirmed', 'completed', 'cancelled')),
+        room_id TEXT,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
 
-  CREATE TABLE IF NOT EXISTS weight_logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    weight_kg REAL NOT NULL,
-    date TEXT NOT NULL,
-    notes TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  );
+      CREATE INDEX IF NOT EXISTS idx_weight_user_date ON weight_logs(user_id, date);
+      CREATE INDEX IF NOT EXISTS idx_appointments_client ON appointments(client_id);
+      CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
 
-  CREATE TABLE IF NOT EXISTS appointments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_id INTEGER,
-    client_name TEXT,
-    client_email TEXT,
-    client_phone TEXT,
-    type TEXT NOT NULL DEFAULT 'video' CHECK(type IN ('video', 'in-person', 'whatsapp')),
-    goal TEXT,
-    preferred_date TEXT,
-    preferred_time TEXT,
-    status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'confirmed', 'completed', 'cancelled')),
-    room_id TEXT,
-    notes TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE SET NULL
-  );
+      CREATE TABLE IF NOT EXISTS diet_plans (
+        id SERIAL PRIMARY KEY,
+        client_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        filename TEXT NOT NULL,
+        original_name TEXT NOT NULL,
+        filepath TEXT NOT NULL,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
 
-  CREATE INDEX IF NOT EXISTS idx_weight_user_date ON weight_logs(user_id, date);
-  CREATE INDEX IF NOT EXISTS idx_appointments_client ON appointments(client_id);
-  CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
+      CREATE INDEX IF NOT EXISTS idx_diet_plans_client ON diet_plans(client_id);
+    `);
 
-  CREATE TABLE IF NOT EXISTS diet_plans (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_id INTEGER NOT NULL,
-    filename TEXT NOT NULL,
-    original_name TEXT NOT NULL,
-    filepath TEXT NOT NULL,
-    notes TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
-  );
+    // Seed Admin Account
+    const adminRes = await pool.query('SELECT id FROM users WHERE role = $1', ['admin']);
+    if (adminRes.rows.length === 0) {
+      const hash = bcrypt.hashSync('admin123', 10);
+      await pool.query(`
+        INSERT INTO users (name, email, phone, password_hash, role)
+        VALUES ($1, $2, $3, $4, $5)
+      `, ['Dt. Disha', 'admin@diet2fit.com', '+918306404335', hash, 'admin']);
+      console.log('✅ Admin account seeded: admin@diet2fit.com / admin123');
+    }
+  } catch (err) {
+    console.error('Database initialization failed:', err);
+  }
+};
 
-  CREATE INDEX IF NOT EXISTS idx_diet_plans_client ON diet_plans(client_id);
-`);
-
-// ── Seed Admin Account ───────────────────────────────────────────
-const adminExists = db.prepare('SELECT id FROM users WHERE role = ?').get('admin');
-if (!adminExists) {
-  const hash = bcrypt.hashSync('admin123', 10);
-  db.prepare(`
-    INSERT INTO users (name, email, phone, password_hash, role)
-    VALUES (?, ?, ?, ?, ?)
-  `).run('Dt. Disha', 'admin@diet2fit.com', '+918306404335', hash, 'admin');
-  console.log('✅ Admin account seeded: admin@diet2fit.com / admin123');
+if (process.env.DATABASE_URL) {
+  initializeDB();
+} else {
+  console.log('⚠️ DATABASE_URL not set. Skipping DB initialization.');
 }
 
-module.exports = db;
+module.exports = pool;
