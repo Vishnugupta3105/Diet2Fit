@@ -15,9 +15,13 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: 'diet2fit_diets',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
+  params: async (req, file) => {
+    const isPdf = file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf');
+    return {
+      folder: 'diet2fit_diets',
+      resource_type: isPdf ? 'raw' : 'image', // PDFs must be 'raw' to download correctly
+      format: isPdf ? 'pdf' : undefined,      // Ensure PDF extension
+    };
   },
 });
 
@@ -38,7 +42,22 @@ router.get('/:clientId', authenticate, async (req, res) => {
 
   try {
     const plansRes = await db.query('SELECT * FROM diet_plans WHERE client_id = $1 ORDER BY created_at DESC', [clientId]);
-    res.json({ plans: plansRes.rows });
+    
+    // Build proper URLs for each plan
+    const plans = plansRes.rows.map(plan => {
+      // Inject fl_attachment to force download. This works for both raw and image resource types on Cloudinary.
+      const downloadUrl = plan.filepath.includes('/upload/') 
+        ? plan.filepath.replace('/upload/', '/upload/fl_attachment/') 
+        : plan.filepath;
+
+      return {
+        ...plan,
+        preview_url: plan.filepath, // Original URL for browser viewing
+        download_url: downloadUrl,
+      };
+    });
+    
+    res.json({ plans });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Database error fetching diet plans.' });
@@ -61,12 +80,13 @@ router.post('/', authenticate, requireAdmin, upload.single('diet_file'), async (
     const filepath = req.file.path;
     const filename = req.file.filename;
     const original_name = req.file.originalname || filename;
+    const public_id = req.file.filename || null; // Cloudinary public_id
     
     const result = await db.query(`
-      INSERT INTO diet_plans (client_id, filename, original_name, filepath, notes)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO diet_plans (client_id, filename, original_name, filepath, public_id, notes)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id
-    `, [client_id, filename, original_name, filepath, notes || '']);
+    `, [client_id, filename, original_name, filepath, public_id, notes || '']);
 
     const newPlanRes = await db.query('SELECT * FROM diet_plans WHERE id = $1', [result.rows[0].id]);
     res.status(201).json({ message: 'Diet plan uploaded successfully.', plan: newPlanRes.rows[0] });
@@ -80,11 +100,15 @@ router.post('/', authenticate, requireAdmin, upload.single('diet_file'), async (
 router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   const id = req.params.id;
   try {
-    // Optionally: fetch the plan first and delete it from Cloudinary as well
-    // const planRes = await db.query('SELECT filename FROM diet_plans WHERE id = $1', [id]);
-    // if (planRes.rows.length > 0) {
-    //   await cloudinary.uploader.destroy(planRes.rows[0].filename);
-    // }
+    // Delete from Cloudinary if we have the public_id
+    const planRes = await db.query('SELECT public_id FROM diet_plans WHERE id = $1', [id]);
+    if (planRes.rows.length > 0 && planRes.rows[0].public_id) {
+      try {
+        await cloudinary.uploader.destroy(planRes.rows[0].public_id, { resource_type: 'raw' });
+      } catch (e) {
+        console.error('Cloudinary delete error:', e.message);
+      }
+    }
 
     await db.query('DELETE FROM diet_plans WHERE id = $1', [id]);
     res.json({ message: 'Diet plan deleted successfully.' });

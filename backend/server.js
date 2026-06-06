@@ -18,6 +18,7 @@ const clientRoutes = require('./routes/clients');
 const weightRoutes = require('./routes/weight');
 const appointmentRoutes = require('./routes/appointments');
 const dietRoutes = require('./routes/diets');
+const slotRoutes = require('./routes/slots');
 
 const app = express();
 const server = http.createServer(app);
@@ -59,6 +60,7 @@ app.use('/api/clients', clientRoutes);
 app.use('/api/weight', weightRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diets', dietRoutes);
+app.use('/api/slots', slotRoutes);
 
 // ── Health Check ─────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

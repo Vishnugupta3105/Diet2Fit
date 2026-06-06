@@ -36,9 +36,18 @@ router.post('/', async (req, res) => {
       roomId
     ]);
 
+    // Mark the slot as booked if a matching slot exists
+    if (preferred_date && preferred_time) {
+      await db.query(
+        'UPDATE available_slots SET is_booked = true, booked_by = $1 WHERE slot_date = $2 AND slot_time = $3 AND is_booked = false',
+        [client_id || null, preferred_date, preferred_time]
+      );
+    }
+
     const appointmentRes = await db.query('SELECT * FROM appointments WHERE id = $1', [result.rows[0].id]);
     res.status(201).json({ appointment: appointmentRes.rows[0] });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -154,6 +163,44 @@ router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
     await db.query('DELETE FROM appointments WHERE id = $1', [req.params.id]);
     res.json({ message: 'Appointment deleted.' });
   } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * PUT /api/appointments/:id/link
+ * Link an appointment to a newly registered client
+ */
+router.put('/:id/link', async (req, res) => {
+  try {
+    const { client_id } = req.body;
+    if (!client_id) {
+      return res.status(400).json({ error: 'client_id is required.' });
+    }
+
+    const existingRes = await db.query('SELECT * FROM appointments WHERE id = $1', [req.params.id]);
+    if (existingRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Appointment not found.' });
+    }
+
+    await db.query(
+      'UPDATE appointments SET client_id = $1, updated_at = NOW() WHERE id = $2',
+      [client_id, req.params.id]
+    );
+
+    // Also update the slot's booked_by
+    const appt = existingRes.rows[0];
+    if (appt.preferred_date && appt.preferred_time) {
+      await db.query(
+        'UPDATE available_slots SET booked_by = $1 WHERE slot_date = $2 AND slot_time = $3',
+        [client_id, appt.preferred_date, appt.preferred_time]
+      );
+    }
+
+    const updatedRes = await db.query('SELECT * FROM appointments WHERE id = $1', [req.params.id]);
+    res.json({ appointment: updatedRes.rows[0] });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

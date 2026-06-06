@@ -32,6 +32,41 @@
         </div>
       </div>
 
+      <!-- ═══ Slot Management ═══ -->
+      <div class="card-flat mb-xl" style="padding:var(--space-xl);">
+        <div class="flex justify-between items-center mb-lg" style="flex-wrap:wrap;gap:var(--space-sm);">
+          <h3 style="font-size:1.1rem;font-weight:600;">
+            <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;margin-right:6px;color:var(--primary);">event_available</span>
+            Manage Available Slots
+          </h3>
+          <span class="text-caption" id="slotSummary"></span>
+        </div>
+        <div class="grid grid-2" style="gap:var(--space-xl);">
+          <!-- Add Slots -->
+          <div>
+            <label class="form-label">Select Date</label>
+            <input type="date" id="slotDate" class="form-input mb-md" />
+            <label class="form-label">Add Time Slot</label>
+            <div style="display:flex;gap:8px;margin-bottom:var(--space-md);">
+              <input type="time" id="slotTimeInput" class="form-input" style="max-width:140px;" />
+              <button type="button" class="btn btn-outline btn-sm" onclick="addCustomTime()">Add Time</button>
+            </div>
+            <!-- Container for selected arbitrary times -->
+            <div id="selectedTimesContainer" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--space-md);"></div>
+            <button class="btn btn-primary btn-sm" onclick="createSlots()" id="btnCreateSlots">
+              <span class="material-symbols-outlined" style="font-size:18px;">add</span> Save Selected Slots
+            </button>
+          </div>
+          <!-- Existing Slots for selected date -->
+          <div>
+            <label class="form-label">Existing Slots for Selected Date</label>
+            <div id="existingSlots" class="flex flex-col gap-sm" style="max-height:260px;overflow-y:auto;">
+              <div class="text-caption" style="padding:16px;text-align:center;color:var(--text-muted);">Select a date to view slots</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Filters -->
       <div class="flex justify-between items-center mb-xl" style="flex-wrap:wrap;gap:var(--space-md);">
         <div class="chart-filters">
@@ -93,7 +128,7 @@
             </div>
             <div>
               <div style="font-weight:600;">${a.client_name || 'Unknown Client'}</div>
-              <div class="text-caption">${a.goal || 'Consultation'} • ${a.type === 'video' ? '📹 Video' : a.type === 'whatsapp' ? '📱 WhatsApp' : '🏥 In-Person'} • ${a.preferred_time || 'Time TBD'}</div>
+              <div class="text-caption">${a.goal || 'Consultation'} • ${a.type === 'video' ? '📹 Video' : '📱 WhatsApp'} • ${a.preferred_time || 'Time TBD'}</div>
               <div class="text-caption" style="margin-top:2px;">${a.client_phone || ''} ${a.client_email ? '• ' + a.client_email : ''}</div>
               ${a.notes ? `<div class="text-caption" style="margin-top:4px;font-style:italic;">📝 ${a.notes}</div>` : ''}
             </div>
@@ -155,6 +190,124 @@
         allAppts = data.appointments;
         applyFilters();
       } catch (err) { Diet2Fit.showToast('Failed to load appointments', 'error'); }
+    }
+
+    // ═══ Slot Management ═══
+    const slotDateInput = document.getElementById('slotDate');
+    if (slotDateInput) {
+      slotDateInput.min = new Date().toISOString().split('T')[0];
+      slotDateInput.addEventListener('change', loadExistingSlots);
+    }
+
+    let selectedTimes = new Set();
+
+    function format12Hour(timeStr) {
+      const [h, m] = timeStr.split(':');
+      const hour = parseInt(h);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const h12 = hour % 12 || 12;
+      return `${h12}:${m} ${ampm}`;
+    }
+
+    function renderSelectedTimes() {
+      const container = document.getElementById('selectedTimesContainer');
+      container.innerHTML = Array.from(selectedTimes).sort().map(time => `
+        <div style="background:var(--primary);color:white;padding:4px 10px;border-radius:16px;font-size:0.85rem;display:flex;align-items:center;gap:4px;">
+          ${format12Hour(time)}
+          <span class="material-symbols-outlined" style="font-size:14px;cursor:pointer;" onclick="removeCustomTime('${time}')">close</span>
+        </div>
+      `).join('');
+    }
+
+    function addCustomTime() {
+      const input = document.getElementById('slotTimeInput');
+      if (!input.value) return;
+      selectedTimes.add(input.value);
+      input.value = '';
+      renderSelectedTimes();
+    }
+
+    function removeCustomTime(time) {
+      selectedTimes.delete(time);
+      renderSelectedTimes();
+    }
+
+    async function createSlots() {
+      const date = slotDateInput.value;
+      if (!date) { Diet2Fit.showToast('Please select a date first.', 'error'); return; }
+      if (selectedTimes.size === 0) { Diet2Fit.showToast('Please select at least one time slot.', 'error'); return; }
+
+      const btn = document.getElementById('btnCreateSlots');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Adding...';
+
+      try {
+        const slots = Array.from(selectedTimes).map(time => ({ date, time }));
+        const data = await Diet2Fit.apiRequest('/api/slots', {
+          method: 'POST',
+          body: JSON.stringify({ slots }),
+        });
+        Diet2Fit.showToast(data.message, 'success');
+        
+        // Reset selection
+        selectedTimes.clear();
+        renderSelectedTimes();
+        
+        loadExistingSlots();
+      } catch (err) {
+        Diet2Fit.showToast(err.message, 'error');
+      }
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">add</span> Add Selected Slots';
+    }
+
+    async function loadExistingSlots() {
+      const date = slotDateInput.value;
+      const container = document.getElementById('existingSlots');
+      if (!date) {
+        container.innerHTML = '<div class="text-caption" style="padding:16px;text-align:center;color:var(--text-muted);">Select a date to view slots</div>';
+        return;
+      }
+
+      try {
+        const data = await Diet2Fit.apiRequest(`/api/slots/all?from=${date}&to=${date}`);
+        if (data.slots && data.slots.length > 0) {
+          container.innerHTML = data.slots.map(s => {
+            const [h, m] = s.slot_time.split(':');
+            const hour = parseInt(h);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const h12 = hour % 12 || 12;
+            const timeStr = `${h12}:${m} ${ampm}`;
+            const statusBadge = s.is_booked 
+              ? `<span class="badge badge-warning">Booked${s.booked_by_name ? ' — ' + s.booked_by_name : ''}</span>` 
+              : `<span class="badge badge-success">Available</span>`;
+            return `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--surface);border-radius:var(--radius-md);border:1px solid var(--border);">
+                <div class="flex items-center gap-sm">
+                  <span style="font-weight:600;font-size:0.9rem;">${timeStr}</span>
+                  ${statusBadge}
+                </div>
+                ${!s.is_booked ? `<button onclick="deleteSlot(${s.id})" class="btn btn-ghost btn-sm" style="color:var(--error);padding:4px 8px;"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>` : ''}
+              </div>
+            `;
+          }).join('');
+          document.getElementById('slotSummary').textContent = `${data.slots.filter(s => !s.is_booked).length} available, ${data.slots.filter(s => s.is_booked).length} booked`;
+        } else {
+          container.innerHTML = '<div class="text-caption" style="padding:16px;text-align:center;color:var(--text-muted);">No slots for this date. Add some above!</div>';
+          document.getElementById('slotSummary').textContent = '';
+        }
+      } catch (err) {
+        container.innerHTML = '<div class="text-caption" style="padding:16px;text-align:center;color:var(--error);">Failed to load slots</div>';
+      }
+    }
+
+    async function deleteSlot(id) {
+      if (!confirm('Remove this slot?')) return;
+      try {
+        await Diet2Fit.apiRequest(`/api/slots/${id}`, { method: 'DELETE' });
+        Diet2Fit.showToast('Slot removed', 'success');
+        loadExistingSlots();
+      } catch (err) { Diet2Fit.showToast(err.message, 'error'); }
     }
 
     loadAppts();

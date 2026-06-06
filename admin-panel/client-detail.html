@@ -294,7 +294,8 @@
                 </div>
               </div>
               <div class="flex gap-sm">
-                <a href="${p.filepath}" target="_blank" class="btn btn-outline btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">download</span> Download</a>
+                <a href="${p.preview_url || p.filepath}" target="_blank" class="btn btn-ghost btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">visibility</span> Preview</a>
+                <a href="${p.download_url || p.filepath}" target="_blank" download class="btn btn-outline btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">download</span> Download</a>
                 <button onclick="deleteDiet(${p.id})" class="btn btn-ghost btn-sm" style="color:var(--error);"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
               </div>
             </div>

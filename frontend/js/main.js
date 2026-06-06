@@ -167,6 +167,26 @@ function getTodayDate() {
   return new Date().toISOString().split('T')[0];
 }
 
+// ── Session Validation (Persistent Login) ────────────────────
+async function validateSession() {
+  const token = getToken();
+  if (!token) return null;
+  
+  try {
+    const data = await apiRequest('/api/auth/me');
+    if (data.user) {
+      // Update stored user data in case it changed
+      localStorage.setItem('diet2fit_user', JSON.stringify(data.user));
+      return data.user;
+    }
+    return null;
+  } catch (err) {
+    // Token is invalid or expired — clear it silently
+    clearAuth();
+    return null;
+  }
+}
+
 // Make helpers available globally
 window.Diet2Fit = {
   showToast,
@@ -176,6 +196,7 @@ window.Diet2Fit = {
   clearAuth,
   isLoggedIn,
   apiRequest,
+  validateSession,
   formatDate,
   formatDateTime,
   getTodayDate,

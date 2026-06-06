@@ -45,7 +45,7 @@ const initializeDB = async () => {
         client_name TEXT,
         client_email TEXT,
         client_phone TEXT,
-        type TEXT NOT NULL DEFAULT 'video' CHECK(type IN ('video', 'in-person', 'whatsapp')),
+        type TEXT NOT NULL DEFAULT 'video',
         goal TEXT,
         preferred_date TEXT,
         preferred_time TEXT,
@@ -66,12 +66,26 @@ const initializeDB = async () => {
         filename TEXT NOT NULL,
         original_name TEXT NOT NULL,
         filepath TEXT NOT NULL,
+        public_id TEXT,
         notes TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
       CREATE INDEX IF NOT EXISTS idx_diet_plans_client ON diet_plans(client_id);
+
+      CREATE TABLE IF NOT EXISTS available_slots (
+        id SERIAL PRIMARY KEY,
+        slot_date TEXT NOT NULL,
+        slot_time TEXT NOT NULL,
+        is_booked BOOLEAN DEFAULT FALSE,
+        booked_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(slot_date, slot_time)
+      );
     `);
+
+    // Run migrations for existing databases
+    try { await pool.query('ALTER TABLE diet_plans ADD COLUMN IF NOT EXISTS public_id TEXT'); } catch(e) {}
 
     // Seed Admin Account
     const adminRes = await pool.query('SELECT id FROM users WHERE role = $1', ['admin']);

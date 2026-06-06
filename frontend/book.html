@@ -49,6 +49,31 @@
       50% { transform: scale(1.2); }
       100% { transform: scale(1); }
     }
+    /* Slot picker styles */
+    .slot-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px; margin-top: var(--space-md);
+    }
+    .slot-card {
+      padding: 12px 16px; border: 2px solid var(--surface-dim);
+      border-radius: var(--radius-md); cursor: pointer;
+      text-align: center; font-weight: 600; font-size: 0.9rem;
+      transition: all 0.2s var(--ease);
+    }
+    .slot-card:hover { border-color: var(--primary-dim); background: var(--primary-surface); }
+    .slot-card.selected { border-color: var(--primary); background: var(--primary-surface); box-shadow: 0 0 0 3px var(--primary-glow); color: var(--primary); }
+    .slot-card.unavailable { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .no-slots-msg {
+      padding: 20px; text-align: center; color: var(--text-muted);
+      background: var(--surface-dim); border-radius: var(--radius-md);
+      margin-top: var(--space-md);
+    }
+    .date-available { position: relative; }
+    .date-available::after {
+      content: ''; position: absolute; bottom: 2px; left: 50%;
+      transform: translateX(-50%); width: 6px; height: 6px;
+      border-radius: 50%; background: var(--primary);
+    }
   </style>
 </head>
 <body style="background: var(--bg-alt);">
@@ -70,6 +95,7 @@
       <div class="progress-dot active" id="dot1"></div>
       <div class="progress-dot" id="dot2"></div>
       <div class="progress-dot" id="dot3"></div>
+      <div class="progress-dot" id="dot4"></div>
     </div>
 
     <!-- Glass Card -->
@@ -128,11 +154,11 @@
         </div>
       </div>
 
-      <!-- Step 2: Contact Details -->
+      <!-- Step 2: Contact Details + Slot Picker -->
       <div class="step" id="step2">
         <div class="text-center mb-xl">
-          <h1 class="text-headline mb-sm">Your Details</h1>
-          <p style="color: var(--text-secondary);">Tell us a bit about yourself so Dt. Disha can prepare for your consultation.</p>
+          <h1 class="text-headline mb-sm">Your Details & Preferred Slot</h1>
+          <p style="color: var(--text-secondary);">Tell us about yourself and pick an available consultation slot.</p>
         </div>
 
         <form id="bookingForm" class="flex flex-col gap-lg">
@@ -147,38 +173,56 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="clientEmail">Email (Optional)</label>
-            <input type="email" id="clientEmail" class="form-input" placeholder="your@email.com" />
+            <label class="form-label" for="clientEmail">Email *</label>
+            <input type="email" id="clientEmail" class="form-input" placeholder="your@email.com" required />
           </div>
+
+          <!-- Weight & Height -->
           <div class="grid grid-2">
             <div class="form-group">
-              <label class="form-label" for="prefDate">Preferred Date</label>
-              <input type="date" id="prefDate" class="form-input" />
+              <label class="form-label">Current Weight</label>
+              <div style="display:flex; gap:8px;">
+                <input type="number" id="clientWeight" class="form-input" placeholder="e.g. 70" step="0.1" style="flex:1;" />
+                <select id="weightUnit" class="form-input" style="width:80px;">
+                  <option value="kg">kg</option>
+                  <option value="lbs">lbs</option>
+                </select>
+              </div>
             </div>
             <div class="form-group">
-              <label class="form-label" for="prefTime">Preferred Time</label>
-              <select id="prefTime" class="form-input">
-                <option value="">Select a time</option>
-                <option value="09:00">9:00 AM</option>
-                <option value="10:00">10:00 AM</option>
-                <option value="11:00">11:00 AM</option>
-                <option value="12:00">12:00 PM</option>
-                <option value="14:00">2:00 PM</option>
-                <option value="15:00">3:00 PM</option>
-                <option value="16:00">4:00 PM</option>
-                <option value="17:00">5:00 PM</option>
-                <option value="18:00">6:00 PM</option>
-              </select>
+              <label class="form-label">Height</label>
+              <div style="display:flex; gap:8px;">
+                <input type="number" id="clientHeight" class="form-input" placeholder="e.g. 170" step="0.1" style="flex:1;" />
+                <div id="heightFtContainer" style="display:none; gap:8px; flex:1;">
+                  <input type="number" id="heightFt" class="form-input" placeholder="ft" style="width:100%;" />
+                  <input type="number" id="heightIn" class="form-input" placeholder="in" style="width:100%;" />
+                </div>
+                <select id="heightUnit" class="form-input" style="width:80px;" onchange="toggleHeightInput()">
+                  <option value="cm">cm</option>
+                  <option value="ft">ft/in</option>
+                </select>
+              </div>
             </div>
           </div>
+          
+          <!-- Consultation Type -->
           <div class="form-group">
             <label class="form-label" for="consultType">Consultation Type</label>
             <select id="consultType" class="form-input">
-              <option value="video">Video Call</option>
-              <option value="whatsapp">WhatsApp Call</option>
-              <option value="in-person">In-Person</option>
+              <option value="video">📹 Video Call</option>
+              <option value="whatsapp">📱 WhatsApp Call</option>
             </select>
           </div>
+
+          <!-- Slot Picker -->
+          <div class="form-group">
+            <label class="form-label">Pick a Date</label>
+            <input type="date" id="prefDate" class="form-input" />
+            <div id="slotContainer">
+              <div class="no-slots-msg">Select a date to see available slots</div>
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="form-label" for="clientNotes">Additional Notes</label>
             <textarea id="clientNotes" class="form-input" placeholder="Any specific health concerns, current medications, etc." rows="3"></textarea>
@@ -197,15 +241,55 @@
         </div>
       </div>
 
-      <!-- Step 3: Success -->
+      <!-- Step 3: Register Account -->
       <div class="step" id="step3">
-        <div class="text-center">
+        <div class="text-center mb-xl">
           <div class="success-animation">
             <span class="material-symbols-outlined" style="font-size:40px;color:var(--primary);">check_circle</span>
           </div>
-          <h1 class="text-headline mb-sm">Consultation Booked!</h1>
+          <h1 class="text-headline mb-sm">Consultation Booked! 🎉</h1>
+          <p style="color: var(--text-secondary); max-width: 440px; margin: 0 auto;">
+            Create a free account to access your <strong>Client Portal</strong> — track your weight, view diet plans, and join video calls with Dt. Disha.
+          </p>
+        </div>
+
+        <form id="registerForm" class="flex flex-col gap-lg" onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label class="form-label">Your Email</label>
+            <input type="email" id="regEmail" class="form-input" readonly style="opacity:0.7;" />
+          </div>
+          <div class="form-group" style="position:relative;">
+            <label class="form-label" for="regPassword">Create Password *</label>
+            <input type="password" id="regPassword" class="form-input" placeholder="Min. 6 characters" required minlength="6" style="padding-right:40px;" />
+            <span class="material-symbols-outlined" style="position:absolute; right:12px; bottom:12px; cursor:pointer; color:var(--text-muted); font-size: 20px;" onclick="togglePasswordVisibility('regPassword', this)">visibility_off</span>
+          </div>
+          <div class="form-group" style="position:relative;">
+            <label class="form-label" for="regPasswordConfirm">Confirm Password *</label>
+            <input type="password" id="regPasswordConfirm" class="form-input" placeholder="Re-enter password" required minlength="6" style="padding-right:40px;" />
+            <span class="material-symbols-outlined" style="position:absolute; right:12px; bottom:12px; cursor:pointer; color:var(--text-muted); font-size: 20px;" onclick="togglePasswordVisibility('regPasswordConfirm', this)">visibility_off</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg w-full" id="btnRegister">
+            <span class="material-symbols-outlined">person_add</span>
+            Create Account & Go to Portal
+          </button>
+        </form>
+
+        <div id="skipRegistrationDiv" style="margin-top: var(--space-lg); text-align: center; display: none;">
+          <button class="btn btn-ghost btn-sm" onclick="skipRegistration()">
+            Skip for now
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Final Success -->
+      <div class="step" id="step4">
+        <div class="text-center">
+          <div class="success-animation">
+            <span class="material-symbols-outlined" style="font-size:40px;color:var(--primary);">celebration</span>
+          </div>
+          <h1 class="text-headline mb-sm">You're All Set!</h1>
           <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto var(--space-xl);">
-            Thank you! Dt. Disha will contact you shortly to confirm your appointment. You can also reach out directly via WhatsApp.
+            Dt. Disha will contact you shortly to confirm your appointment. You can also reach out directly via WhatsApp.
           </p>
           <div class="flex flex-col gap-md items-center">
             <a href="https://wa.me/918306404335?text=Hi%20Dt.%20Disha!%20I%20just%20booked%20a%20consultation%20on%20Diet2Fit.%20Looking%20forward%20to%20it!" target="_blank" class="btn btn-lg" style="background:#25d366;color:white;">
@@ -226,11 +310,26 @@
   <script src="js/main.js"></script>
   <script>
     let selectedGoal = null;
+    let selectedSlotTime = null;
+    let bookedAppointmentId = null;
+    let clientMetrics = { weight_kg: null, height_cm: null };
 
     // Set min date for date picker to today
     const prefDate = document.getElementById('prefDate');
     if (prefDate) {
       prefDate.min = new Date().toISOString().split('T')[0];
+      prefDate.addEventListener('change', loadSlotsForDate);
+    }
+
+    function toggleHeightInput() {
+      const unit = document.getElementById('heightUnit').value;
+      if (unit === 'ft') {
+        document.getElementById('clientHeight').style.display = 'none';
+        document.getElementById('heightFtContainer').style.display = 'flex';
+      } else {
+        document.getElementById('clientHeight').style.display = 'block';
+        document.getElementById('heightFtContainer').style.display = 'none';
+      }
     }
 
     function selectGoal(el) {
@@ -245,7 +344,7 @@
       document.getElementById(`step${step}`).classList.add('active');
 
       // Update progress dots
-      for (let i = 1; i <= 3; i++) {
+      for (let i = 1; i <= 4; i++) {
         const dot = document.getElementById(`dot${i}`);
         dot.classList.remove('active', 'done');
         if (i < step) dot.classList.add('done');
@@ -253,26 +352,95 @@
       }
     }
 
+    async function loadSlotsForDate() {
+      const date = document.getElementById('prefDate').value;
+      const container = document.getElementById('slotContainer');
+      selectedSlotTime = null;
+
+      if (!date) {
+        container.innerHTML = '<div class="no-slots-msg">Select a date to see available slots</div>';
+        return;
+      }
+
+      container.innerHTML = '<div class="no-slots-msg"><div class="spinner"></div> Loading slots...</div>';
+
+      try {
+        const data = await Diet2Fit.apiRequest(`/api/slots?date=${date}`);
+        if (data.slots && data.slots.length > 0) {
+          container.innerHTML = `
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-top:var(--space-sm);">Available time slots:</p>
+            <div class="slot-grid">
+              ${data.slots.map(s => `
+                <div class="slot-card" onclick="selectSlot(this, '${s.slot_time}')" data-time="${s.slot_time}">
+                  ${formatSlotTime(s.slot_time)}
+                </div>
+              `).join('')}
+            </div>
+          `;
+        } else {
+          container.innerHTML = '<div class="no-slots-msg">No available slots for this date. Try another date or contact Dt. Disha via WhatsApp.</div>';
+        }
+      } catch (err) {
+        container.innerHTML = '<div class="no-slots-msg">Could not load slots. You can still book and Dt. Disha will confirm the time.</div>';
+      }
+    }
+
+    function formatSlotTime(time) {
+      const [h, m] = time.split(':');
+      const hour = parseInt(h);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const h12 = hour % 12 || 12;
+      return `${h12}:${m} ${ampm}`;
+    }
+
+    function selectSlot(el, time) {
+      document.querySelectorAll('.slot-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedSlotTime = time;
+    }
+
     async function submitBooking() {
       const name = document.getElementById('clientName').value.trim();
       const phone = document.getElementById('clientPhone').value.trim();
       const email = document.getElementById('clientEmail').value.trim();
       const date = document.getElementById('prefDate').value;
-      const time = document.getElementById('prefTime').value;
+      const time = selectedSlotTime;
       const type = document.getElementById('consultType').value;
       const notes = document.getElementById('clientNotes').value.trim();
 
-      if (!name || !phone) {
-        Diet2Fit.showToast('Please fill in your name and phone number.', 'error');
+      if (!name || !phone || !email) {
+        Diet2Fit.showToast('Please fill in your name, phone, and email.', 'error');
         return;
       }
+
+      // Parse metrics
+      let weightKg = null;
+      const weightVal = parseFloat(document.getElementById('clientWeight').value);
+      if (!isNaN(weightVal)) {
+        weightKg = document.getElementById('weightUnit').value === 'lbs' ? weightVal * 0.453592 : weightVal;
+      }
+
+      let heightCm = null;
+      if (document.getElementById('heightUnit').value === 'cm') {
+        const hVal = parseFloat(document.getElementById('clientHeight').value);
+        if (!isNaN(hVal)) heightCm = hVal;
+      } else {
+        const ft = parseFloat(document.getElementById('heightFt').value) || 0;
+        const inc = parseFloat(document.getElementById('heightIn').value) || 0;
+        if (ft > 0 || inc > 0) {
+          heightCm = (ft * 30.48) + (inc * 2.54);
+        }
+      }
+      
+      clientMetrics.weight_kg = weightKg ? Math.round(weightKg * 10) / 10 : null;
+      clientMetrics.height_cm = heightCm ? Math.round(heightCm * 10) / 10 : null;
 
       const btn = document.getElementById('btnSubmit');
       btn.disabled = true;
       btn.innerHTML = '<div class="spinner"></div> Booking...';
 
       try {
-        await Diet2Fit.apiRequest('/api/appointments', {
+        const result = await Diet2Fit.apiRequest('/api/appointments', {
           method: 'POST',
           body: JSON.stringify({
             client_name: name,
@@ -285,11 +453,94 @@
             notes: notes,
           }),
         });
+        
+        bookedAppointmentId = result.appointment.id;
+
+        // Pre-fill the registration form
+        document.getElementById('regEmail').value = email;
+
+        // Only allow skipping if WhatsApp consultation
+        const skipDiv = document.getElementById('skipRegistrationDiv');
+        if (type === 'whatsapp') {
+          skipDiv.style.display = 'block';
+        } else {
+          skipDiv.style.display = 'none';
+        }
+
         nextStep(3);
       } catch (err) {
         Diet2Fit.showToast(err.message || 'Failed to book. Please try again.', 'error');
         btn.disabled = false;
         btn.innerHTML = 'Book Consultation <span class="material-symbols-outlined">check</span>';
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const password = document.getElementById('regPassword').value;
+      const confirm = document.getElementById('regPasswordConfirm').value;
+
+      if (password !== confirm) {
+        Diet2Fit.showToast('Passwords do not match.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btnRegister');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Creating account...';
+
+      try {
+        const name = document.getElementById('clientName').value.trim();
+        const email = document.getElementById('clientEmail').value.trim();
+        const phone = document.getElementById('clientPhone').value.trim();
+
+        const data = await Diet2Fit.apiRequest('/api/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({ 
+            name, email, phone, password, 
+            weight_kg: clientMetrics.weight_kg, 
+            height_cm: clientMetrics.height_cm 
+          }),
+        });
+
+        // Save auth
+        Diet2Fit.setAuth(data.token, data.user);
+
+        // Link the appointment to the new client
+        if (bookedAppointmentId) {
+          try {
+            await Diet2Fit.apiRequest(`/api/appointments/${bookedAppointmentId}/link`, {
+              method: 'PUT',
+              body: JSON.stringify({ client_id: data.user.id }),
+            });
+          } catch (linkErr) {
+            console.error('Failed to link appointment:', linkErr);
+          }
+        }
+
+        Diet2Fit.showToast('Account created! Redirecting to your portal...', 'success');
+        setTimeout(() => {
+          window.location.href = '/portal/';
+        }, 1000);
+      } catch (err) {
+        Diet2Fit.showToast(err.message || 'Registration failed.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined">person_add</span> Create Account & Go to Portal';
+      }
+    }
+
+    function skipRegistration() {
+      nextStep(4);
+    }
+
+    function togglePasswordVisibility(inputId, icon) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility';
+      } else {
+        input.type = 'password';
+        icon.textContent = 'visibility_off';
       }
     }
   </script>

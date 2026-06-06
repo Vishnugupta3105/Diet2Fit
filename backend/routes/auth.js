@@ -129,4 +129,59 @@ router.put('/password', authenticate, async (req, res) => {
   }
 });
 
+/**
+ * POST /api/auth/register
+ * Register a new client account (public endpoint, used after booking)
+ */
+router.post('/register', [
+  body('name').notEmpty().withMessage('Name is required').trim(),
+  body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters').trim(),
+  validate
+], async (req, res) => {
+  try {
+    const { name, email, phone, password, weight_kg, height_cm } = req.body;
+
+    // Check if email already exists
+    const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'An account with this email already exists. Please log in.' });
+    }
+
+    const hash = bcrypt.hashSync(password, 10);
+    const result = await db.query(`
+      INSERT INTO users (name, email, phone, password_hash, role, height_cm)
+      VALUES ($1, $2, $3, $4, 'client', $5)
+      RETURNING id, name, email, phone, role
+    `, [name, email, phone || null, hash, height_cm || null]);
+
+    const user = result.rows[0];
+    
+    if (weight_kg) {
+      // Log initial weight
+      const today = new Date().toISOString().split('T')[0];
+      await db.query(`
+        INSERT INTO weight_logs (user_id, weight_kg, date, notes)
+        VALUES ($1, $2, $3, 'Initial weight from booking')
+      `, [user.id, weight_kg, today]);
+    }
+
+    const token = generateToken(user);
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

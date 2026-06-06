@@ -287,7 +287,7 @@
                   </div>
                   <div>
                     <div style="font-weight:600;">${appt.goal || 'Consultation'}</div>
-                    <div class="text-caption">${appt.type === 'video' ? '📹 Video Call' : appt.type === 'whatsapp' ? '📱 WhatsApp' : '🏥 In-Person'} • ${appt.preferred_time || 'TBD'}</div>
+                    <div class="text-caption">${appt.type === 'video' ? '📹 Video Call' : '📱 WhatsApp'} • ${appt.preferred_time || 'TBD'}</div>
                   </div>
                 </div>
                 <span class="badge ${appt.status === 'confirmed' ? 'badge-success' : 'badge-warning'}">${appt.status}</span>
@@ -313,7 +313,10 @@
                     <div class="text-caption">${Diet2Fit.formatDate(plan.created_at)} ${plan.notes ? '• ' + plan.notes : ''}</div>
                   </div>
                 </div>
-                <a href="${plan.filepath}" target="_blank" class="btn btn-primary btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">download</span> Download</a>
+                <div class="flex gap-sm">
+                  <a href="${plan.preview_url || plan.filepath}" target="_blank" class="btn btn-ghost btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">visibility</span> Preview</a>
+                  <a href="${plan.download_url || plan.filepath}" target="_blank" download class="btn btn-primary btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">download</span> Download</a>
+                </div>
               </div>
             `;
           });

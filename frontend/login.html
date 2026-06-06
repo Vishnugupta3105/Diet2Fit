@@ -102,15 +102,19 @@
 
   <script src="js/main.js"></script>
   <script>
-    // Redirect if already logged in
-    if (Diet2Fit.isLoggedIn()) {
-      const user = Diet2Fit.getUser();
-      if (user && user.role === 'admin') {
-        window.location.href = '/admin/';
-      } else {
-        window.location.href = '/portal/';
+    // Redirect if already logged in (validate token with server)
+    (async () => {
+      if (Diet2Fit.isLoggedIn()) {
+        const user = await Diet2Fit.validateSession();
+        if (user) {
+          if (user.role === 'admin') {
+            window.location.href = '/admin/';
+          } else {
+            window.location.href = '/portal/';
+          }
+        }
       }
-    }
+    })();
 
     function togglePassword() {
       const pwd = document.getElementById('password');
