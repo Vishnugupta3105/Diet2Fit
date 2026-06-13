@@ -239,7 +239,14 @@
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         document.getElementById('localVideo').srcObject = localStream;
       } catch (err) {
-        Diet2Fit.showToast('Camera/mic access required for video calls', 'error');
+        console.error("Camera error:", err);
+        if (err.name === 'NotAllowedError') {
+          Diet2Fit.showToast('Please allow camera/mic access in your browser settings (tap the lock icon in the URL bar)', 'error', 6000);
+        } else if (err.name === 'NotReadableError') {
+          Diet2Fit.showToast('Camera is being used by another app. Please close other apps and try again.', 'error', 6000);
+        } else {
+          Diet2Fit.showToast(`Camera error: ${err.name} - ${err.message}`, 'error', 6000);
+        }
         return;
       }
 
