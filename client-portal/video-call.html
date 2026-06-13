@@ -188,10 +188,9 @@
           </div>
         </div>
         <div class="vc-footer">
-          <div class="text-caption" id="roomInfo">Personal Consultation Room</div>
-          <button class="btn btn-ghost btn-sm" onclick="endCall()">
-            <span class="material-symbols-outlined" style="font-size:16px;">close</span>
-            Leave Call
+          <span id="clientRoomInfo">Personal Consultation Room</span>
+          <button class="btn btn-outline btn-sm text-danger" onclick="endCall()" style="background:transparent;border:none;">
+            <span class="material-symbols-outlined">close</span> Leave Call
           </button>
         </div>
       </div>
@@ -252,6 +251,7 @@
 
       document.getElementById('joinSection').style.display = 'none';
       document.getElementById('callSection').style.display = 'block';
+      document.getElementById('clientRoomInfo').textContent = 'Room ID: ' + user.id;
 
       // Join the actual room
       socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'client' });
