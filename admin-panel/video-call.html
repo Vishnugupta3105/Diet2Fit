@@ -183,10 +183,10 @@
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
     function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
 
-    let socket = io('/video');
-    let localStream = null, peerConnection = null;
-    let isMicOn = true, isCamOn = true;
-    let activeRoomsGlobal = {};
+    var socket = io('/video');
+    var localStream = null, peerConnection = null;
+    var isMicOn = true, isCamOn = true;
+    var activeRoomsGlobal = {};
 
     const rtcConfig = {
       iceServers: [
