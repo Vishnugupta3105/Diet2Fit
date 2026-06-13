@@ -33,46 +33,16 @@
         </div>
       </div>
 
-      <!-- Create / Join -->
+      <!-- Client List for Video Call -->
       <div id="joinSection">
-        <div class="dashboard-grid-wide mb-xl">
-          <!-- Create New Room -->
-          <div class="card-flat" style="padding:var(--space-xl);text-align:center;">
-            <span class="material-symbols-outlined" style="font-size:48px;color:var(--primary);margin-bottom:var(--space-md);">add_call</span>
-            <h3 class="text-title mb-sm">Create New Room</h3>
-            <p class="text-caption mb-lg">Generate a room code and share it with your client</p>
-            <button class="btn btn-primary w-full" onclick="createRoom()">
-              <span class="material-symbols-outlined" style="font-size:20px;">videocam</span>
-              Create & Join
-            </button>
-            <div id="roomCodeDisplay" style="display:none;margin-top:var(--space-md);">
-              <div class="text-caption mb-sm">Share this invite link with your client:</div>
-              <div class="flex items-center justify-center gap-sm" style="flex-wrap:wrap;">
-                <input type="text" id="inviteLink" class="form-input" readonly style="font-size:0.9rem;flex:1;min-width:200px;" />
-                <button onclick="copyInviteLink()" class="btn btn-ghost btn-sm" style="padding:8px;" title="Copy Link"><span class="material-symbols-outlined" style="font-size:18px;">content_copy</span></button>
-                <a id="whatsappLink" href="#" target="_blank" class="btn btn-primary btn-sm" style="padding:8px;background:#25d366;border:none;" title="Send via WhatsApp">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                </a>
-              </div>
-            </div>
+        <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md);">Start a Consultation</h3>
+        <p class="text-caption mb-lg">Select a client below to enter their personal video room. Clients currently waiting in their room are highlighted.</p>
+        
+        <div class="flex flex-col gap-md" id="clientCallList">
+          <div class="empty-state" style="padding:var(--space-xl);">
+            <span class="material-symbols-outlined">group</span>
+            <p>Loading clients...</p>
           </div>
-
-          <!-- Join Existing -->
-          <div class="card-flat" style="padding:var(--space-xl);text-align:center;">
-            <span class="material-symbols-outlined" style="font-size:48px;color:var(--accent);margin-bottom:var(--space-md);">login</span>
-            <h3 class="text-title mb-sm">Join Existing Room</h3>
-            <p class="text-caption mb-lg">Enter a room code to join an ongoing call</p>
-            <div class="flex gap-sm">
-              <input type="text" id="roomInput" class="form-input" placeholder="Room code..." style="flex:1;" />
-              <button class="btn btn-primary" onclick="joinRoom()">Join</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Confirmed appointments with call buttons -->
-        <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md);">Confirmed Appointments</h3>
-        <div class="flex flex-col gap-md" id="confirmedList">
-          <div class="empty-state" style="padding:var(--space-xl);"><span class="material-symbols-outlined">event</span><p>No confirmed appointments</p></div>
         </div>
       </div>
 
@@ -126,36 +96,16 @@
     let socket, localStream, peerConnection;
     let isMicOn = true, isCamOn = true;
     let currentRoomId = null;
+    let activeRoomsGlobal = {};
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
 
-    function createRoom() {
-      const roomId = Math.random().toString(36).substring(2, 10);
-      const inviteUrl = window.location.origin + '/portal/video-call.html?room=' + roomId;
-      document.getElementById('inviteLink').value = inviteUrl;
-      document.getElementById('whatsappLink').href = `https://wa.me/?text=Hi!%20Please%20join%20our%20Diet2Fit%20video%20consultation%20here:%20${encodeURIComponent(inviteUrl)}`;
-      document.getElementById('roomCodeDisplay').style.display = 'block';
-      currentRoomId = roomId;
-      startCall(roomId);
-    }
-
-    function joinRoom() {
-      const roomId = document.getElementById('roomInput').value.trim();
-      if (!roomId) { Diet2Fit.showToast('Enter a room code', 'error'); return; }
-      currentRoomId = roomId;
-      startCall(roomId);
-    }
-
-    function copyInviteLink() {
-      navigator.clipboard.writeText(document.getElementById('inviteLink').value);
-      Diet2Fit.showToast('Invite link copied!', 'success');
-    }
-
-    function copyCurrentRoom() {
-      if (currentRoomId) {
-        navigator.clipboard.writeText(currentRoomId);
-        Diet2Fit.showToast('Room code copied!', 'success');
-      }
-    }
+    // Initialize global lobby connection for presence updates
+    const lobbySocket = io('/video');
+    lobbySocket.on('connect', () => { lobbySocket.emit('join-lobby'); });
+    lobbySocket.on('active-rooms-update', (rooms) => {
+      activeRoomsGlobal = rooms;
+      renderClientList(); // Re-render the list with active indicators
+    });
 
     async function startCall(roomId) {
       try {
@@ -172,7 +122,7 @@
 
       socket = io('/video');
       socket.on('connect', () => {
-        socket.emit('join-room', { roomId, userId: user.id, userName: user.name });
+        socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'admin' });
         document.getElementById('callStatus').textContent = 'Connected — waiting for client...';
       });
 
@@ -228,24 +178,49 @@
     function toggleCam() { isCamOn = !isCamOn; localStream.getVideoTracks().forEach(t => t.enabled = isCamOn); const b = document.getElementById('btnCam'); b.querySelector('.material-symbols-outlined').textContent = isCamOn ? 'videocam' : 'videocam_off'; b.classList.toggle('active', isCamOn); }
     function endCall() { if (peerConnection) peerConnection.close(); if (localStream) localStream.getTracks().forEach(t => t.stop()); if (socket) socket.disconnect(); document.getElementById('joinSection').style.display = 'block'; document.getElementById('callSection').style.display = 'none'; }
 
-    // Load confirmed appointments
-    async function loadConfirmed() {
+    // Load clients
+    async function loadClientsForCall() {
       try {
-        const data = await Diet2Fit.apiRequest('/api/appointments?status=confirmed');
-        const list = document.getElementById('confirmedList');
-        if (data.appointments.length > 0) {
-          list.innerHTML = data.appointments.map(a => `
-            <div class="appointment-card">
-              <div class="appointment-info"><div><div style="font-weight:600;">${a.client_name || 'Client'}</div><div class="text-caption">${a.goal || 'Consultation'} • ${Diet2Fit.formatDate(a.preferred_date)} ${a.preferred_time||''}</div></div></div>
-              <button onclick="currentRoomId='${a.room_id}';startCall('${a.room_id}')" class="btn btn-primary btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">videocam</span>Start Call</button>
-            </div>
-          `).join('');
+        const data = await Diet2Fit.apiRequest('/api/clients');
+        const list = document.getElementById('clientCallList');
+        if (data.clients && data.clients.length > 0) {
+          window.allClients = data.clients;
+          renderClientList();
+        } else {
+          list.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">group</span><p>No clients found.</p></div>`;
         }
       } catch (err) { console.error(err); }
     }
 
-    loadConfirmed();
-    if (roomFromUrl) { setTimeout(() => joinRoom(), 500); }
+    function renderClientList() {
+      if (!window.allClients) return;
+      const list = document.getElementById('clientCallList');
+      list.innerHTML = window.allClients.map(c => {
+        // Check if this client is currently active/waiting in their room
+        const roomStatus = activeRoomsGlobal[c._id];
+        const isClientWaiting = roomStatus && roomStatus.some(u => u.role === 'client');
+        
+        return `
+          <div class="appointment-card" style="${isClientWaiting ? 'border:2px solid #22c55e; background:#f0fdf4;' : ''}">
+            <div class="appointment-info">
+              <div>
+                <div style="font-weight:600; display:flex; align-items:center; gap:8px;">
+                  ${c.name}
+                  ${isClientWaiting ? '<span style="font-size:0.75rem; background:#22c55e; color:white; padding:2px 8px; border-radius:12px; font-weight:700;">🟢 Waiting in Room</span>' : ''}
+                </div>
+                <div class="text-caption">${c.email} • ${c.phone}</div>
+              </div>
+            </div>
+            <button onclick="currentRoomId='${c._id}';startCall('${c._id}')" class="btn btn-primary btn-sm">
+              <span class="material-symbols-outlined" style="font-size:16px;">videocam</span>
+              Call
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    loadClientsForCall();
   </script>
 </body>
 </html>

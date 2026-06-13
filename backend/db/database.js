@@ -25,6 +25,7 @@ const initializeDB = async () => {
         height_cm REAL,
         date_of_birth TEXT,
         gender TEXT,
+        age INTEGER,
         notes TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -45,7 +46,12 @@ const initializeDB = async () => {
         client_name TEXT,
         client_email TEXT,
         client_phone TEXT,
-        type TEXT NOT NULL DEFAULT 'video',
+        client_weight_kg REAL,
+        client_height_cm REAL,
+        client_age INTEGER,
+        client_gender TEXT,
+        client_bmi REAL,
+        type TEXT NOT NULL DEFAULT 'whatsapp',
         goal TEXT,
         preferred_date TEXT,
         preferred_time TEXT,
@@ -82,10 +88,24 @@ const initializeDB = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(slot_date, slot_time)
       );
+
+      CREATE TABLE IF NOT EXISTS device_tokens (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token TEXT NOT NULL UNIQUE,
+        platform TEXT DEFAULT 'android',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
     `);
 
     // Run migrations for existing databases
     try { await pool.query('ALTER TABLE diet_plans ADD COLUMN IF NOT EXISTS public_id TEXT'); } catch(e) {}
+    try { await pool.query('ALTER TABLE appointments ADD COLUMN IF NOT EXISTS client_weight_kg REAL'); } catch(e) {}
+    try { await pool.query('ALTER TABLE appointments ADD COLUMN IF NOT EXISTS client_height_cm REAL'); } catch(e) {}
+    try { await pool.query('ALTER TABLE appointments ADD COLUMN IF NOT EXISTS client_age INTEGER'); } catch(e) {}
+    try { await pool.query('ALTER TABLE appointments ADD COLUMN IF NOT EXISTS client_gender TEXT'); } catch(e) {}
+    try { await pool.query('ALTER TABLE appointments ADD COLUMN IF NOT EXISTS client_bmi REAL'); } catch(e) {}
+    try { await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS age INTEGER'); } catch(e) {}
 
     // Seed Admin Account
     const adminRes = await pool.query('SELECT id FROM users WHERE role = $1', ['admin']);

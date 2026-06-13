@@ -19,7 +19,7 @@
         <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
         <a href="weight-tracker.html" class="sidebar-link"><span class="material-symbols-outlined">monitor_weight</span>Weight Tracker</a>
         <a href="appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
-        <a href="consult.html" class="sidebar-link"><span class="material-symbols-outlined">support_agent</span>Consult Dt. Disha</a>
+
         <a href="video-call.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">videocam</span>Video Call</a>
       </div>
       <div class="sidebar-user"><div class="sidebar-user-avatar" id="userAvatar">—</div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Loading...</div><div class="sidebar-user-role">Client</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
@@ -36,17 +36,20 @@
       <!-- Join Room Section -->
       <div id="joinSection" class="card-flat text-center" style="padding:var(--space-3xl);">
         <span class="material-symbols-outlined" style="font-size:64px;color:var(--primary);margin-bottom:var(--space-md);">video_camera_front</span>
-        <h3 class="text-headline mb-md">Join a Video Call</h3>
+        <h3 class="text-headline mb-md">Your Consultation Room</h3>
         <p style="color:var(--text-secondary);max-width:400px;margin:0 auto var(--space-xl);">
-          Enter the room code shared by Dt. Disha, or use the link from your confirmed appointment.
+          This is your private video consultation room. Click the button below to join the call.
         </p>
-        <div class="flex justify-center gap-md" style="flex-wrap:wrap;">
-          <input type="text" id="roomInput" class="form-input" placeholder="Enter room code" style="max-width:250px;" />
-          <button class="btn btn-primary" onclick="joinRoom()">
-            <span class="material-symbols-outlined" style="font-size:20px;">videocam</span>
-            Join Call
-          </button>
+        
+        <div id="adminWaitingAlert" style="display:none; background:#f0fdf4; border:2px solid #22c55e; border-radius:var(--radius-md); padding:var(--space-md); margin-bottom:var(--space-xl); color:#166534; font-weight:600; align-items:center; justify-content:center; gap:8px;">
+          <span class="material-symbols-outlined">notifications_active</span>
+          Dt. Disha has joined the call! Please join now.
         </div>
+
+        <button class="btn btn-primary btn-lg" onclick="joinRoom()">
+          <span class="material-symbols-outlined" style="font-size:24px;">videocam</span>
+          Join Consultation
+        </button>
       </div>
 
       <!-- Video Call Section -->
@@ -105,15 +108,25 @@
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
     function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
 
-    // Check URL for room param
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomFromUrl = urlParams.get('room');
-    if (roomFromUrl) {
-      document.getElementById('roomInput').value = roomFromUrl;
-    }
+    // Removed URL param parsing since room is always user.id
 
     let socket, localStream, peerConnection;
     let isMicOn = true, isCamOn = true;
+
+    // Connect to lobby on page load to listen for admin presence
+    const lobbySocket = io('/video');
+    lobbySocket.on('connect', () => { lobbySocket.emit('join-lobby'); });
+    lobbySocket.on('active-rooms-update', (rooms) => {
+      const myRoomStatus = rooms[user.id];
+      const isAdminWaiting = myRoomStatus && myRoomStatus.some(u => u.role === 'admin');
+      
+      const alertDiv = document.getElementById('adminWaitingAlert');
+      if (isAdminWaiting) {
+        alertDiv.style.display = 'flex';
+      } else {
+        alertDiv.style.display = 'none';
+      }
+    });
 
     const rtcConfig = {
       iceServers: [
@@ -123,8 +136,8 @@
     };
 
     async function joinRoom() {
-      const roomId = document.getElementById('roomInput').value.trim();
-      if (!roomId) { Diet2Fit.showToast('Enter a room code', 'error'); return; }
+      // The room ID is always the user's ID
+      const roomId = user.id;
 
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -136,13 +149,13 @@
 
       document.getElementById('joinSection').style.display = 'none';
       document.getElementById('callSection').style.display = 'block';
-      document.getElementById('roomInfo').textContent = `Room: ${roomId}`;
+      document.getElementById('roomInfo').textContent = `Personal Consultation Room`;
 
       socket = io('/video');
 
       socket.on('connect', () => {
-        socket.emit('join-room', { roomId, userId: user.id, userName: user.name });
-        document.getElementById('callStatus').textContent = 'Connected — waiting for others...';
+        socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'client' });
+        document.getElementById('callStatus').textContent = 'Connected — waiting for Dt. Disha...';
       });
 
       socket.on('room-users', async (users) => {

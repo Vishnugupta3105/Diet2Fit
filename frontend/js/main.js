@@ -85,7 +85,7 @@ function showToast(message, type = 'info', duration = 3000) {
 }
 
 // ── Auth Helpers ──────────────────────────────────────────────
-const API_BASE = window.location.origin;
+const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin;
 
 function getToken() {
   return localStorage.getItem('diet2fit_token');

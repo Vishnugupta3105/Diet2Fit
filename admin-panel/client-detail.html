@@ -39,6 +39,7 @@
           <div class="flex gap-md items-center" style="flex-wrap:wrap;margin-top:4px;">
             <span class="text-caption" id="clientEmail">—</span>
             <span class="text-caption" id="clientPhone">—</span>
+            <span class="badge" id="clientAgeGender" style="display:none; font-size: 0.75rem;">—</span>
           </div>
         </div>
         <div class="flex gap-sm">
@@ -225,6 +226,15 @@
         document.getElementById('clientPhone').textContent = client.phone ? `📱 ${client.phone}` : '';
         document.getElementById('detailAvatar').textContent = (client.name||'').substring(0,2).toUpperCase();
         document.title = `${client.name} — Diet2Fit Admin`;
+
+        if (client.age || client.gender) {
+          const ageGenderEl = document.getElementById('clientAgeGender');
+          ageGenderEl.style.display = 'inline-block';
+          const parts = [];
+          if (client.age) parts.push(`${client.age} yrs`);
+          if (client.gender) parts.push(client.gender.charAt(0).toUpperCase() + client.gender.slice(1));
+          ageGenderEl.textContent = parts.join(' • ');
+        }
 
         // Info Cards
         if (weights.length > 0) {

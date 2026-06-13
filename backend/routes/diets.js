@@ -19,8 +19,8 @@ const storage = new CloudinaryStorage({
     const isPdf = file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf');
     return {
       folder: 'diet2fit_diets',
-      resource_type: isPdf ? 'raw' : 'image', // PDFs must be 'raw' to download correctly
-      format: isPdf ? 'pdf' : undefined,      // Ensure PDF extension
+      resource_type: 'image', // Upload PDFs as 'image' so Cloudinary allows inline preview and fl_attachment
+      format: isPdf ? 'pdf' : undefined, 
     };
   },
 });
@@ -45,7 +45,7 @@ router.get('/:clientId', authenticate, async (req, res) => {
     
     // Build proper URLs for each plan
     const plans = plansRes.rows.map(plan => {
-      // Inject fl_attachment to force download. This works for both raw and image resource types on Cloudinary.
+      // Inject fl_attachment to force download. This works cleanly because Cloudinary handles PDFs as 'image' resource type now.
       const downloadUrl = plan.filepath.includes('/upload/') 
         ? plan.filepath.replace('/upload/', '/upload/fl_attachment/') 
         : plan.filepath;

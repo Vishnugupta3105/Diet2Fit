@@ -115,7 +115,7 @@ router.post('/', authenticate, requireAdmin, [
 router.get('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const clientRes = await db.query(`
-      SELECT id, name, email, phone, role, goal_weight, height_cm, gender, date_of_birth, notes, created_at 
+      SELECT id, name, email, phone, role, goal_weight, height_cm, gender, age, date_of_birth, notes, created_at 
       FROM users WHERE id = $1 AND role = 'client'
     `, [req.params.id]);
 
@@ -171,7 +171,7 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
       await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, req.params.id]);
     }
 
-    const clientRes = await db.query('SELECT id, name, email, phone, role, goal_weight, height_cm, gender, date_of_birth, notes, created_at FROM users WHERE id = $1', [req.params.id]);
+    const clientRes = await db.query('SELECT id, name, email, phone, role, goal_weight, height_cm, gender, age, date_of_birth, notes, created_at FROM users WHERE id = $1', [req.params.id]);
     res.json({ client: clientRes.rows[0] });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });

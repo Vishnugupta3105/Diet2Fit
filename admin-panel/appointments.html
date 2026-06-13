@@ -128,14 +128,14 @@
             </div>
             <div>
               <div style="font-weight:600;">${a.client_name || 'Unknown Client'}</div>
-              <div class="text-caption">${a.goal || 'Consultation'} • ${a.type === 'video' ? '📹 Video' : '📱 WhatsApp'} • ${a.preferred_time || 'Time TBD'}</div>
+              <div class="text-caption">${a.goal || 'Consultation'} • ${a.type === 'video' ? '📹 Video' : '📱 WhatsApp'}${a.preferred_time ? ` • ${format12Hour(a.preferred_time)}` : ''}</div>
               <div class="text-caption" style="margin-top:2px;">${a.client_phone || ''} ${a.client_email ? '• ' + a.client_email : ''}</div>
               ${a.notes ? `<div class="text-caption" style="margin-top:4px;font-style:italic;">📝 ${a.notes}</div>` : ''}
             </div>
           </div>
           <div class="flex gap-sm items-center" style="flex-wrap:wrap;">
             ${a.status === 'pending' ? `
-              <button onclick="updateStatus(${a.id}, 'confirmed')" class="btn btn-primary btn-sm" style="padding:6px 14px;">Confirm</button>
+              <button onclick="confirmClient(${a.id})" class="btn btn-primary btn-sm" style="padding:6px 14px;">Confirm & Create Client</button>
               <button onclick="updateStatus(${a.id}, 'cancelled')" class="btn btn-ghost btn-sm" style="padding:6px 14px;color:var(--error);">Cancel</button>
             ` : ''}
             ${a.status === 'confirmed' ? `
@@ -182,6 +182,35 @@
         Diet2Fit.showToast(`Appointment ${status}`, 'success');
         loadAppts();
       } catch (err) { Diet2Fit.showToast(err.message, 'error'); }
+    }
+
+    async function confirmClient(id) {
+      if (!confirm('This will confirm the request and create a client account for them. Continue?')) return;
+      const customPassword = prompt('Enter a password for the new client account (minimum 6 characters):');
+      if (!customPassword) return;
+      if (customPassword.length < 6) {
+        alert('Password must be at least 6 characters long.');
+        return;
+      }
+
+      try {
+        const data = await Diet2Fit.apiRequest(`/api/appointments/${id}/confirm-client`, { 
+          method: 'POST',
+          body: JSON.stringify({ password: customPassword })
+        });
+        
+        let msg = data.message + '\n\n';
+        msg += `Email: ${data.email}\n`;
+        if (data.password) {
+          msg += `Generated Password: ${data.password}\n\n`;
+          msg += `Please copy this password and send it to the client via WhatsApp so they can log in to their portal!`;
+        } else {
+          msg += `This user already had an account, so they can log in with their existing password.`;
+        }
+        
+        alert(msg);
+        loadAppts();
+      } catch (err) { Diet2Fit.showToast(err.message || 'Failed to confirm client', 'error'); }
     }
 
     async function loadAppts() {

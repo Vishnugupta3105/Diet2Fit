@@ -19,6 +19,7 @@ const weightRoutes = require('./routes/weight');
 const appointmentRoutes = require('./routes/appointments');
 const dietRoutes = require('./routes/diets');
 const slotRoutes = require('./routes/slots');
+const deviceRoutes = require('./routes/devices');
 
 const app = express();
 const server = http.createServer(app);
@@ -61,6 +62,7 @@ app.use('/api/weight', weightRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diets', dietRoutes);
 app.use('/api/slots', slotRoutes);
+app.use('/api/devices', deviceRoutes);
 
 // ── Health Check ─────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
@@ -74,15 +76,19 @@ setupSignaling(io);
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log('');
-  console.log('  🥗 ─────────────────────────────────────────');
-  console.log(`  │  Diet2Fit Server Running`);
+  console.log('  📱 ─────────────────────────────────────────');
+  console.log(`  │  Diet2Fit Backend & API Server Running`);
   console.log(`  │  http://localhost:${PORT}`);
   console.log(`  │`);
-  console.log(`  │  Public Site:    http://localhost:${PORT}/`);
-  console.log(`  │  Client Portal:  http://localhost:${PORT}/portal/`);
-  console.log(`  │  Admin Panel:    http://localhost:${PORT}/admin/`);
+  console.log(`  │  React Native App (Expo):`);
+  console.log(`  │  Start app with \`npx expo start\` in /mobile`);
+  console.log(`  │`);
+  console.log(`  │  Legacy Web Portals still available at:`);
+  console.log(`  │  - /        (Public Site)`);
+  console.log(`  │  - /portal/ (Client Portal)`);
+  console.log(`  │  - /admin/  (Admin Panel)`);
   console.log('  │');
   console.log('  │  Admin Login: admin@diet2fit.com / admin123');
-  console.log('  🥗 ─────────────────────────────────────────');
+  console.log('  📱 ─────────────────────────────────────────');
   console.log('');
 });

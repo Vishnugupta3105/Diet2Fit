@@ -6,8 +6,10 @@
   <title>Book Consultation — Diet2Fit | Dt. Disha</title>
   <meta name="description" content="Book your personalized nutrition consultation with Dt. Disha. Specializing in Diabetes, Cardiac Care, PCOS, Fat Loss & Weight Management." />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <style>
+    .iti { width: 100%; }
     .step { display: none; }
     .step.active { display: block; animation: fadeInUp 0.4s ease; }
     .goal-option {
@@ -95,7 +97,6 @@
       <div class="progress-dot active" id="dot1"></div>
       <div class="progress-dot" id="dot2"></div>
       <div class="progress-dot" id="dot3"></div>
-      <div class="progress-dot" id="dot4"></div>
     </div>
 
     <!-- Glass Card -->
@@ -108,42 +109,56 @@
           <p style="color: var(--text-secondary);">Select the area where you need expert guidance from Dt. Disha.</p>
         </div>
 
-        <div class="flex flex-col gap-md">
-          <div class="goal-option" data-goal="Diabetes Management" onclick="selectGoal(this)">
-            <div class="goal-icon" style="background:#fef3c7;color:#d97706;">🩸</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:var(--space-md);">
+          
+          <div class="goal-option" data-goal="Weight Management" onclick="selectGoal(this)" style="flex-direction:column; align-items:flex-start; padding:var(--space-lg); text-align:left; justify-content:flex-start;">
+            <div class="goal-icon mb-sm" style="background:#dbeafe;color:#2563eb;">⚖️</div>
             <div>
-              <div class="text-title">Diabetes Management</div>
-              <div class="text-caption">Blood sugar control, HbA1c optimization, insulin management</div>
+              <div class="text-title mb-xs" style="font-size:1.1rem;">Weight Management</div>
+              <div class="text-caption" style="font-style:italic; line-height:1.5; color:var(--text-secondary);">"Whether you want to lose, gain, or just feel right in your body — let’s build a plan that actually works."</div>
             </div>
           </div>
-          <div class="goal-option" data-goal="Cardiac Care" onclick="selectGoal(this)">
-            <div class="goal-icon" style="background:#fce7f3;color:#db2777;">❤️</div>
+          
+          <div class="goal-option" data-goal="Diabetes & Blood Sugar" onclick="selectGoal(this)" style="flex-direction:column; align-items:flex-start; padding:var(--space-lg); text-align:left; justify-content:flex-start;">
+            <div class="goal-icon mb-sm" style="background:#fef3c7;color:#d97706;">🩸</div>
             <div>
-              <div class="text-title">Cardiac Care</div>
-              <div class="text-caption">Heart health, cholesterol, blood pressure nutrition</div>
+              <div class="text-title mb-xs" style="font-size:1.1rem;">Diabetes & Blood Sugar</div>
+              <div class="text-caption" style="font-style:italic; line-height:1.5; color:var(--text-secondary);">"Stop managing numbers, start managing your life — with food that works for your body."</div>
             </div>
           </div>
-          <div class="goal-option" data-goal="PCOS Management" onclick="selectGoal(this)">
-            <div class="goal-icon" style="background:#ede9fe;color:#7c3aed;">🦋</div>
+          
+          <div class="goal-option" data-goal="Hormonal Health" onclick="selectGoal(this)" style="flex-direction:column; align-items:flex-start; padding:var(--space-lg); text-align:left; justify-content:flex-start;">
+            <div class="goal-icon mb-sm" style="background:#ede9fe;color:#7c3aed;">🦋</div>
             <div>
-              <div class="text-title">PCOS Management</div>
-              <div class="text-caption">Hormonal balance, cycle regulation, weight management</div>
+              <div class="text-title mb-xs" style="font-size:1.1rem;">Hormonal Health</div>
+              <div class="text-caption" style="font-style:italic; line-height:1.5; color:var(--text-secondary);">"PCOS, thyroid, irregular cycles — your hormones are talking. Let’s help you listen."</div>
             </div>
           </div>
-          <div class="goal-option" data-goal="Fat Loss" onclick="selectGoal(this)">
-            <div class="goal-icon" style="background:#ecfdf5;color:#059669;">🔥</div>
+
+          <div class="goal-option" data-goal="Heart & Cholesterol" onclick="selectGoal(this)" style="flex-direction:column; align-items:flex-start; padding:var(--space-lg); text-align:left; justify-content:flex-start;">
+            <div class="goal-icon mb-sm" style="background:#fce7f3;color:#db2777;">❤️</div>
             <div>
-              <div class="text-title">Fat Loss</div>
-              <div class="text-caption">Sustainable body composition transformation</div>
+              <div class="text-title mb-xs" style="font-size:1.1rem;">Heart & Cholesterol</div>
+              <div class="text-caption" style="font-style:italic; line-height:1.5; color:var(--text-secondary);">"High cholesterol doesn’t mean giving up the food you love — it means eating smarter."</div>
             </div>
           </div>
-          <div class="goal-option" data-goal="Weight Management" onclick="selectGoal(this)">
-            <div class="goal-icon" style="background:#dbeafe;color:#2563eb;">⚖️</div>
+
+          <div class="goal-option" data-goal="Gut & Digestive Health" onclick="selectGoal(this)" style="flex-direction:column; align-items:flex-start; padding:var(--space-lg); text-align:left; justify-content:flex-start;">
+            <div class="goal-icon mb-sm" style="background:#ecfdf5;color:#059669;">🥑</div>
             <div>
-              <div class="text-title">Weight Management</div>
-              <div class="text-caption">Long-term weight maintenance strategies</div>
+              <div class="text-title mb-xs" style="font-size:1.1rem;">Gut & Digestive Health</div>
+              <div class="text-caption" style="font-style:italic; line-height:1.5; color:var(--text-secondary);">"Bloating, acidity, irregular digestion — your gut is the root of everything. Let’s fix it."</div>
             </div>
           </div>
+
+          <div class="goal-option" data-goal="Sports & Performance" onclick="selectGoal(this)" style="flex-direction:column; align-items:flex-start; padding:var(--space-lg); text-align:left; justify-content:flex-start;">
+            <div class="goal-icon mb-sm" style="background:#fff7ed;color:#ea580c;">⚡</div>
+            <div>
+              <div class="text-title mb-xs" style="font-size:1.1rem;">Sports & Performance</div>
+              <div class="text-caption" style="font-style:italic; line-height:1.5; color:var(--text-secondary);">"Train hard, eat right — fuel your body the way it deserves to perform."</div>
+            </div>
+          </div>
+
         </div>
 
         <div style="margin-top: var(--space-xl);">
@@ -157,8 +172,8 @@
       <!-- Step 2: Contact Details + Slot Picker -->
       <div class="step" id="step2">
         <div class="text-center mb-xl">
-          <h1 class="text-headline mb-sm">Your Details & Preferred Slot</h1>
-          <p style="color: var(--text-secondary);">Tell us about yourself and pick an available consultation slot.</p>
+          <h1 class="text-headline mb-sm">Your Details</h1>
+          <p style="color: var(--text-secondary);">Tell us about yourself so Dt. Disha can review your request.</p>
         </div>
 
         <form id="bookingForm" class="flex flex-col gap-lg">
@@ -168,8 +183,8 @@
               <input type="text" id="clientName" class="form-input" placeholder="Your full name" required />
             </div>
             <div class="form-group">
-              <label class="form-label" for="clientPhone">Phone Number *</label>
-              <input type="tel" id="clientPhone" class="form-input" placeholder="+91 XXXXX XXXXX" required />
+              <label class="form-label" for="clientPhone">WhatsApp Number *</label>
+              <input type="tel" id="clientPhone" class="form-input" placeholder="10 digit number" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
             </div>
           </div>
           <div class="form-group">
@@ -182,8 +197,8 @@
             <div class="form-group">
               <label class="form-label">Current Weight</label>
               <div style="display:flex; gap:8px;">
-                <input type="number" id="clientWeight" class="form-input" placeholder="e.g. 70" step="0.1" style="flex:1;" />
-                <select id="weightUnit" class="form-input" style="width:80px;">
+                <input type="number" id="clientWeight" class="form-input" placeholder="e.g. 70" step="0.1" style="flex:1;" oninput="calculateBMI()" />
+                <select id="weightUnit" class="form-input" style="width:80px;" onchange="calculateBMI()">
                   <option value="kg">kg</option>
                   <option value="lbs">lbs</option>
                 </select>
@@ -192,37 +207,61 @@
             <div class="form-group">
               <label class="form-label">Height</label>
               <div style="display:flex; gap:8px;">
-                <input type="number" id="clientHeight" class="form-input" placeholder="e.g. 170" step="0.1" style="flex:1;" />
+                <input type="number" id="clientHeight" class="form-input" placeholder="e.g. 170" step="0.1" style="flex:1;" oninput="calculateBMI()" />
                 <div id="heightFtContainer" style="display:none; gap:8px; flex:1;">
-                  <input type="number" id="heightFt" class="form-input" placeholder="ft" style="width:100%;" />
-                  <input type="number" id="heightIn" class="form-input" placeholder="in" style="width:100%;" />
+                  <input type="number" id="heightFt" class="form-input" placeholder="ft" style="width:100%;" oninput="calculateBMI()" />
+                  <input type="number" id="heightIn" class="form-input" placeholder="in" style="width:100%;" oninput="calculateBMI()" />
                 </div>
-                <select id="heightUnit" class="form-input" style="width:80px;" onchange="toggleHeightInput()">
+                <select id="heightUnit" class="form-input" style="width:80px;" onchange="toggleHeightInput(); calculateBMI();">
                   <option value="cm">cm</option>
                   <option value="ft">ft/in</option>
                 </select>
               </div>
             </div>
           </div>
-          
-          <!-- Consultation Type -->
-          <div class="form-group">
-            <label class="form-label" for="consultType">Consultation Type</label>
-            <select id="consultType" class="form-input">
-              <option value="video">📹 Video Call</option>
-              <option value="whatsapp">📱 WhatsApp Call</option>
-            </select>
-          </div>
 
-          <!-- Slot Picker -->
-          <div class="form-group">
-            <label class="form-label">Pick a Date</label>
-            <input type="date" id="prefDate" class="form-input" />
-            <div id="slotContainer">
-              <div class="no-slots-msg">Select a date to see available slots</div>
+          <!-- Age & Gender -->
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label class="form-label" for="clientAge">Age</label>
+              <input type="number" id="clientAge" class="form-input" placeholder="e.g. 25" min="1" max="120" oninput="calculateBMI()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="clientGender">Gender</label>
+              <select id="clientGender" class="form-input" onchange="calculateBMI()">
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="other">Other</option>
+              </select>
             </div>
           </div>
 
+          <!-- BMI Calculator Widget -->
+          <div id="bmiWidget" style="display:none; background: var(--surface); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); text-align: center; border: 2px solid var(--surface-dim); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">Your BMI Result</h3>
+            <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 4px;" id="bmiValueDisplay">--</div>
+            <div id="bmiCategoryDisplay" style="font-size: 0.9rem; font-weight: 600; padding: 4px 16px; border-radius: 16px; display: inline-block; margin-bottom: 16px;">--</div>
+            
+            <!-- Custom CSS Gauge -->
+            <div style="width: 100%; max-width: 300px; height: 12px; background: #e2e8f0; border-radius: 6px; margin: 0 auto; position: relative; overflow: hidden; display: flex;">
+              <div style="width: 18.5%; background: #3b82f6;"></div> <!-- Underweight <18.5 -->
+              <div style="width: 25%; background: #22c55e;"></div>  <!-- Normal 18.5-24.9 -->
+              <div style="width: 20%; background: #eab308;"></div>  <!-- Overweight 25-29.9 -->
+              <div style="width: 36.5%; background: #ef4444;"></div> <!-- Obese 30+ -->
+              <!-- The marker pointer -->
+              <div id="bmiMarker" style="position: absolute; top: 0; width: 4px; height: 12px; background: #0f172a; border-radius: 2px; transform: translateX(-50%); transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1); left: 0%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; max-width: 300px; margin: 4px auto 0; font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">
+              <span>15</span>
+              <span>18.5</span>
+              <span>25</span>
+              <span>30</span>
+              <span>40</span>
+            </div>
+
+            <p id="bmiHealthyRange" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: var(--space-md);"></p>
+          </div>
+          
           <div class="form-group">
             <label class="form-label" for="clientNotes">Additional Notes</label>
             <textarea id="clientNotes" class="form-input" placeholder="Any specific health concerns, current medications, etc." rows="3"></textarea>
@@ -235,61 +274,21 @@
             Back
           </button>
           <button class="btn btn-primary w-full btn-lg" onclick="submitBooking()" id="btnSubmit">
-            Book Consultation
-            <span class="material-symbols-outlined">check</span>
+            Request Free Consultation
+            <span class="material-symbols-outlined">send</span>
           </button>
         </div>
       </div>
 
-      <!-- Step 3: Register Account -->
+      <!-- Step 3: Final Success -->
       <div class="step" id="step3">
-        <div class="text-center mb-xl">
-          <div class="success-animation">
-            <span class="material-symbols-outlined" style="font-size:40px;color:var(--primary);">check_circle</span>
-          </div>
-          <h1 class="text-headline mb-sm">Consultation Booked! 🎉</h1>
-          <p style="color: var(--text-secondary); max-width: 440px; margin: 0 auto;">
-            Create a free account to access your <strong>Client Portal</strong> — track your weight, view diet plans, and join video calls with Dt. Disha.
-          </p>
-        </div>
-
-        <form id="registerForm" class="flex flex-col gap-lg" onsubmit="handleRegister(event)">
-          <div class="form-group">
-            <label class="form-label">Your Email</label>
-            <input type="email" id="regEmail" class="form-input" readonly style="opacity:0.7;" />
-          </div>
-          <div class="form-group" style="position:relative;">
-            <label class="form-label" for="regPassword">Create Password *</label>
-            <input type="password" id="regPassword" class="form-input" placeholder="Min. 6 characters" required minlength="6" style="padding-right:40px;" />
-            <span class="material-symbols-outlined" style="position:absolute; right:12px; bottom:12px; cursor:pointer; color:var(--text-muted); font-size: 20px;" onclick="togglePasswordVisibility('regPassword', this)">visibility_off</span>
-          </div>
-          <div class="form-group" style="position:relative;">
-            <label class="form-label" for="regPasswordConfirm">Confirm Password *</label>
-            <input type="password" id="regPasswordConfirm" class="form-input" placeholder="Re-enter password" required minlength="6" style="padding-right:40px;" />
-            <span class="material-symbols-outlined" style="position:absolute; right:12px; bottom:12px; cursor:pointer; color:var(--text-muted); font-size: 20px;" onclick="togglePasswordVisibility('regPasswordConfirm', this)">visibility_off</span>
-          </div>
-          <button type="submit" class="btn btn-primary btn-lg w-full" id="btnRegister">
-            <span class="material-symbols-outlined">person_add</span>
-            Create Account & Go to Portal
-          </button>
-        </form>
-
-        <div id="skipRegistrationDiv" style="margin-top: var(--space-lg); text-align: center; display: none;">
-          <button class="btn btn-ghost btn-sm" onclick="skipRegistration()">
-            Skip for now
-          </button>
-        </div>
-      </div>
-
-      <!-- Step 4: Final Success -->
-      <div class="step" id="step4">
         <div class="text-center">
           <div class="success-animation">
             <span class="material-symbols-outlined" style="font-size:40px;color:var(--primary);">celebration</span>
           </div>
-          <h1 class="text-headline mb-sm">You're All Set!</h1>
+          <h1 class="text-headline mb-sm">Request Sent!</h1>
           <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto var(--space-xl);">
-            Dt. Disha will contact you shortly to confirm your appointment. You can also reach out directly via WhatsApp.
+            We will connect on your WhatsApp soon! You can also message us directly using the button below.
           </p>
           <div class="flex flex-col gap-md items-center">
             <a href="https://wa.me/918306404335?text=Hi%20Dt.%20Disha!%20I%20just%20booked%20a%20consultation%20on%20Diet2Fit.%20Looking%20forward%20to%20it!" target="_blank" class="btn btn-lg" style="background:#25d366;color:white;">
@@ -307,19 +306,23 @@
     </div>
   </main>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
   <script src="js/main.js"></script>
   <script>
+    // Initialize Phone Input
+    const phoneInput = document.querySelector("#clientPhone");
+    const iti = window.intlTelInput(phoneInput, {
+      initialCountry: "in",
+      separateDialCode: true,
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+    });
+
     let selectedGoal = null;
     let selectedSlotTime = null;
     let bookedAppointmentId = null;
-    let clientMetrics = { weight_kg: null, height_cm: null };
+    let clientMetrics = { weight_kg: null, height_cm: null, bmi: null, age: null, gender: null };
 
-    // Set min date for date picker to today
-    const prefDate = document.getElementById('prefDate');
-    if (prefDate) {
-      prefDate.min = new Date().toISOString().split('T')[0];
-      prefDate.addEventListener('change', loadSlotsForDate);
-    }
+
 
     function toggleHeightInput() {
       const unit = document.getElementById('heightUnit').value;
@@ -344,74 +347,117 @@
       document.getElementById(`step${step}`).classList.add('active');
 
       // Update progress dots
-      for (let i = 1; i <= 4; i++) {
+      for (let i = 1; i <= 3; i++) {
         const dot = document.getElementById(`dot${i}`);
-        dot.classList.remove('active', 'done');
-        if (i < step) dot.classList.add('done');
-        if (i === step) dot.classList.add('active');
-      }
-    }
-
-    async function loadSlotsForDate() {
-      const date = document.getElementById('prefDate').value;
-      const container = document.getElementById('slotContainer');
-      selectedSlotTime = null;
-
-      if (!date) {
-        container.innerHTML = '<div class="no-slots-msg">Select a date to see available slots</div>';
-        return;
-      }
-
-      container.innerHTML = '<div class="no-slots-msg"><div class="spinner"></div> Loading slots...</div>';
-
-      try {
-        const data = await Diet2Fit.apiRequest(`/api/slots?date=${date}`);
-        if (data.slots && data.slots.length > 0) {
-          container.innerHTML = `
-            <p style="font-size:0.85rem;color:var(--text-muted);margin-top:var(--space-sm);">Available time slots:</p>
-            <div class="slot-grid">
-              ${data.slots.map(s => `
-                <div class="slot-card" onclick="selectSlot(this, '${s.slot_time}')" data-time="${s.slot_time}">
-                  ${formatSlotTime(s.slot_time)}
-                </div>
-              `).join('')}
-            </div>
-          `;
-        } else {
-          container.innerHTML = '<div class="no-slots-msg">No available slots for this date. Try another date or contact Dt. Disha via WhatsApp.</div>';
+        if (dot) {
+          dot.classList.remove('active', 'done');
+          if (i < step) dot.classList.add('done');
+          if (i === step) dot.classList.add('active');
         }
-      } catch (err) {
-        container.innerHTML = '<div class="no-slots-msg">Could not load slots. You can still book and Dt. Disha will confirm the time.</div>';
       }
     }
 
-    function formatSlotTime(time) {
-      const [h, m] = time.split(':');
-      const hour = parseInt(h);
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-      const h12 = hour % 12 || 12;
-      return `${h12}:${m} ${ampm}`;
-    }
+    function calculateBMI() {
+      let weightKg = null;
+      const weightVal = parseFloat(document.getElementById('clientWeight').value);
+      if (!isNaN(weightVal)) {
+        weightKg = document.getElementById('weightUnit').value === 'lbs' ? weightVal * 0.453592 : weightVal;
+      }
 
-    function selectSlot(el, time) {
-      document.querySelectorAll('.slot-card').forEach(c => c.classList.remove('selected'));
-      el.classList.add('selected');
-      selectedSlotTime = time;
+      let heightCm = null;
+      if (document.getElementById('heightUnit').value === 'cm') {
+        const hVal = parseFloat(document.getElementById('clientHeight').value);
+        if (!isNaN(hVal)) heightCm = hVal;
+      } else {
+        const ft = parseFloat(document.getElementById('heightFt').value) || 0;
+        const inc = parseFloat(document.getElementById('heightIn').value) || 0;
+        if (ft > 0 || inc > 0) {
+          heightCm = (ft * 30.48) + (inc * 2.54);
+        }
+      }
+
+      const ageVal = parseInt(document.getElementById('clientAge').value);
+      const genderVal = document.getElementById('clientGender').value;
+
+      // Only calculate if we have both weight and height
+      const bmiWidget = document.getElementById('bmiWidget');
+      
+      if (weightKg > 0 && heightCm > 0) {
+        const heightM = heightCm / 100;
+        const bmi = (weightKg / (heightM * heightM)).toFixed(1);
+        clientMetrics.bmi = parseFloat(bmi);
+        clientMetrics.weight_kg = Math.round(weightKg * 10) / 10;
+        clientMetrics.height_cm = Math.round(heightCm * 10) / 10;
+        clientMetrics.age = !isNaN(ageVal) ? ageVal : null;
+        clientMetrics.gender = genderVal;
+
+        // Display widget
+        bmiWidget.style.display = 'block';
+        document.getElementById('bmiValueDisplay').textContent = bmi;
+
+        // Determine category and UI colors
+        let category = '';
+        let color = '';
+        let posPercentage = 0;
+
+        if (bmi < 18.5) {
+          category = 'Underweight';
+          color = '#3b82f6'; // blue
+          // map 15-18.5 to 0-18.5%
+          posPercentage = Math.max(0, ((bmi - 15) / 3.5) * 18.5);
+        } else if (bmi < 25) {
+          category = 'Normal Weight';
+          color = '#22c55e'; // green
+          // map 18.5-25 to 18.5%-43.5%
+          posPercentage = 18.5 + ((bmi - 18.5) / 6.5) * 25;
+        } else if (bmi < 30) {
+          category = 'Overweight';
+          color = '#eab308'; // yellow
+          // map 25-30 to 43.5%-63.5%
+          posPercentage = 43.5 + ((bmi - 25) / 5) * 20;
+        } else {
+          category = 'Obese';
+          color = '#ef4444'; // red
+          // map 30-40 to 63.5%-100%
+          posPercentage = 63.5 + Math.min(1, (bmi - 30) / 10) * 36.5;
+        }
+
+        const catDisplay = document.getElementById('bmiCategoryDisplay');
+        catDisplay.textContent = category;
+        catDisplay.style.backgroundColor = color + '20'; // 12% opacity background
+        catDisplay.style.color = color;
+
+        // Move marker
+        document.getElementById('bmiMarker').style.left = `${posPercentage}%`;
+
+        // Calculate healthy weight range (BMI 18.5 - 24.9)
+        const minWeight = (18.5 * heightM * heightM).toFixed(1);
+        const maxWeight = (24.9 * heightM * heightM).toFixed(1);
+        document.getElementById('bmiHealthyRange').textContent = `Healthy weight range for your height: ${minWeight} kg - ${maxWeight} kg`;
+        
+      } else {
+        bmiWidget.style.display = 'none';
+        clientMetrics.bmi = null;
+      }
     }
 
     async function submitBooking() {
       const name = document.getElementById('clientName').value.trim();
-      const phone = document.getElementById('clientPhone').value.trim();
+      const phoneVal = phoneInput.value.trim();
       const email = document.getElementById('clientEmail').value.trim();
-      const date = document.getElementById('prefDate').value;
-      const time = selectedSlotTime;
-      const type = document.getElementById('consultType').value;
       const notes = document.getElementById('clientNotes').value.trim();
 
-      if (!name || !phone || !email) {
-        Diet2Fit.showToast('Please fill in your name, phone, and email.', 'error');
+      if (!name || !phoneVal || !email) {
+        Diet2Fit.showToast('Please fill in your name, WhatsApp number, and email.', 'error');
         return;
       }
+
+      if (phoneVal.length !== 10) {
+        Diet2Fit.showToast('Please enter exactly a 10 digit WhatsApp number.', 'error');
+        return;
+      }
+
+      const phone = iti.getNumber(); // Gets full number with country code
 
       // Parse metrics
       let weightKg = null;
@@ -446,101 +492,22 @@
             client_name: name,
             client_phone: phone,
             client_email: email,
-            preferred_date: date,
-            preferred_time: time,
-            type: type,
+            client_weight_kg: clientMetrics.weight_kg,
+            client_height_cm: clientMetrics.height_cm,
+            client_age: clientMetrics.age,
+            client_gender: clientMetrics.gender,
+            client_bmi: clientMetrics.bmi,
+            type: 'whatsapp',
             goal: selectedGoal,
             notes: notes,
           }),
         });
         
-        bookedAppointmentId = result.appointment.id;
-
-        // Pre-fill the registration form
-        document.getElementById('regEmail').value = email;
-
-        // Only allow skipping if WhatsApp consultation
-        const skipDiv = document.getElementById('skipRegistrationDiv');
-        if (type === 'whatsapp') {
-          skipDiv.style.display = 'block';
-        } else {
-          skipDiv.style.display = 'none';
-        }
-
         nextStep(3);
       } catch (err) {
-        Diet2Fit.showToast(err.message || 'Failed to book. Please try again.', 'error');
+        Diet2Fit.showToast(err.message || 'Failed to submit request. Please try again.', 'error');
         btn.disabled = false;
-        btn.innerHTML = 'Book Consultation <span class="material-symbols-outlined">check</span>';
-      }
-    }
-
-    async function handleRegister(e) {
-      e.preventDefault();
-      const password = document.getElementById('regPassword').value;
-      const confirm = document.getElementById('regPasswordConfirm').value;
-
-      if (password !== confirm) {
-        Diet2Fit.showToast('Passwords do not match.', 'error');
-        return;
-      }
-
-      const btn = document.getElementById('btnRegister');
-      btn.disabled = true;
-      btn.innerHTML = '<div class="spinner"></div> Creating account...';
-
-      try {
-        const name = document.getElementById('clientName').value.trim();
-        const email = document.getElementById('clientEmail').value.trim();
-        const phone = document.getElementById('clientPhone').value.trim();
-
-        const data = await Diet2Fit.apiRequest('/api/auth/register', {
-          method: 'POST',
-          body: JSON.stringify({ 
-            name, email, phone, password, 
-            weight_kg: clientMetrics.weight_kg, 
-            height_cm: clientMetrics.height_cm 
-          }),
-        });
-
-        // Save auth
-        Diet2Fit.setAuth(data.token, data.user);
-
-        // Link the appointment to the new client
-        if (bookedAppointmentId) {
-          try {
-            await Diet2Fit.apiRequest(`/api/appointments/${bookedAppointmentId}/link`, {
-              method: 'PUT',
-              body: JSON.stringify({ client_id: data.user.id }),
-            });
-          } catch (linkErr) {
-            console.error('Failed to link appointment:', linkErr);
-          }
-        }
-
-        Diet2Fit.showToast('Account created! Redirecting to your portal...', 'success');
-        setTimeout(() => {
-          window.location.href = '/portal/';
-        }, 1000);
-      } catch (err) {
-        Diet2Fit.showToast(err.message || 'Registration failed.', 'error');
-        btn.disabled = false;
-        btn.innerHTML = '<span class="material-symbols-outlined">person_add</span> Create Account & Go to Portal';
-      }
-    }
-
-    function skipRegistration() {
-      nextStep(4);
-    }
-
-    function togglePasswordVisibility(inputId, icon) {
-      const input = document.getElementById(inputId);
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.textContent = 'visibility';
-      } else {
-        input.type = 'password';
-        icon.textContent = 'visibility_off';
+        btn.innerHTML = 'Request Free Consultation <span class="material-symbols-outlined">send</span>';
       }
     }
   </script>
