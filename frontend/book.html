@@ -100,7 +100,7 @@
     </div>
 
     <!-- Glass Card -->
-    <div class="glass" style="padding: var(--space-2xl); border-radius: var(--radius-2xl);">
+    <div class="glass book-glass">
 
       <!-- Step 1: Choose Goal -->
       <div class="step active" id="step1">
@@ -109,7 +109,7 @@
           <p style="color: var(--text-secondary);">Select the area where you need expert guidance from Dt. Disha.</p>
         </div>
 
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:var(--space-md);">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap:var(--space-md);">
           
           <div class="goal-option" data-goal="Weight Management" onclick="selectGoal(this)" style="flex-direction:column; align-items:flex-start; padding:var(--space-lg); text-align:left; justify-content:flex-start;">
             <div class="goal-icon mb-sm" style="background:#dbeafe;color:#2563eb;">⚖️</div>

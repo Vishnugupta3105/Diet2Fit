@@ -89,6 +89,7 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 body {
@@ -364,6 +365,7 @@ h1, h2, h3, h4 { font-weight: 700; line-height: 1.2; }
 }
 
 .form-input {
+  width: 100%;
   padding: 12px 16px;
   border: 2px solid var(--surface-dim);
   border-radius: var(--radius-md);
@@ -1188,5 +1190,9 @@ select.form-input {
   .transform-img-wrapper {
     height: auto !important;
     aspect-ratio: 4/5;
+  }
+  .book-glass {
+    padding: var(--space-lg) !important;
+    border-radius: var(--radius-xl) !important;
   }
 }
