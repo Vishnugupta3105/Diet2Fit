@@ -259,6 +259,50 @@
       document.getElementById('clientRoomInfo').textContent = 'Room ID: ' + user.id;
 
       // Join the actual room
+      if (!videoSocket) {
+        videoSocket = io('/video');
+        videoSocket.on('connect', () => { 
+          videoSocket.emit('join-lobby'); 
+          if (hasJoinedRoom) {
+            videoSocket.emit('join-room', { roomId: String(user.id), userId: user.id, userName: user.name, role: 'client' });
+          }
+        });
+        
+        videoSocket.on('room-users', async (users) => {
+          if (users.length > 0) document.getElementById('callStatus').textContent = 'Dt. Disha found, connecting...';
+        });
+
+        videoSocket.on('user-joined', async ({ socketId, userName }) => {
+          document.getElementById('callStatus').textContent = `${userName} joined`;
+          Diet2Fit.showToast(`${userName} joined the call`, 'success');
+          await createOffer(socketId);
+        });
+
+        videoSocket.on('offer', async ({ from, offer }) => {
+          peerConnection = createPeerConnection(from);
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+          const answer = await peerConnection.createAnswer();
+          await peerConnection.setLocalDescription(answer);
+          videoSocket.emit('answer', { to: from, answer });
+        });
+
+        videoSocket.on('answer', async ({ answer }) => {
+          if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        });
+
+        videoSocket.on('ice-candidate', async ({ candidate }) => {
+          if (peerConnection && candidate) {
+            try { await peerConnection.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e) {}
+          }
+        });
+
+        videoSocket.on('user-left', ({ userName }) => {
+          document.getElementById('callStatus').textContent = `${userName} left`;
+          document.getElementById('remoteVideo').srcObject = null;
+          document.getElementById('remotePlaceholder').style.display = 'flex';
+        });
+      }
+
       try {
         hasJoinedRoom = true;
         videoSocket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'client' });
