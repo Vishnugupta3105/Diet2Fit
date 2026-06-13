@@ -183,7 +183,7 @@
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
     function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
 
-    var socket = io('/video');
+    var videoSocket = io('/video');
     var localStream = null, peerConnection = null;
     var isMicOn = true, isCamOn = true;
     var activeRoomsGlobal = {};
@@ -199,14 +199,14 @@
     };
 
     // Join lobby on initial connection to get presence
-    socket.on('connect', () => { 
-      socket.emit('join-lobby'); 
+    videoSocket.on('connect', () => { 
+      videoSocket.emit('join-lobby'); 
       if (hasJoinedRoom && currentCallRoomId) {
-        socket.emit('join-room', { roomId: currentCallRoomId, userId: user.id, userName: user.name, role: 'admin' });
+        videoSocket.emit('join-room', { roomId: currentCallRoomId, userId: user.id, userName: user.name, role: 'admin' });
       }
     });
 
-    socket.on('active-rooms-update', (rooms) => {
+    videoSocket.on('active-rooms-update', (rooms) => {
       activeRoomsGlobal = rooms;
       renderClientList();
     });
@@ -227,40 +227,40 @@
       // Join the actual room
       hasJoinedRoom = true;
       currentCallRoomId = roomId;
-      socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'admin' });
+      videoSocket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'admin' });
       document.getElementById('callStatus').textContent = 'Waiting for client...';
 
-      socket.on('room-users', async (users) => {
+      videoSocket.on('room-users', async (users) => {
         if (users.length > 0) {
           document.getElementById('callStatus').textContent = 'Client found, connecting...';
         }
       });
 
-      socket.on('user-joined', async ({ socketId, userName }) => {
+      videoSocket.on('user-joined', async ({ socketId, userName }) => {
         document.getElementById('callStatus').textContent = `${userName} joined`;
         Diet2Fit.showToast(`${userName} joined the call`, 'success');
         await createOffer(socketId);
       });
 
-      socket.on('offer', async ({ from, offer }) => {
+      videoSocket.on('offer', async ({ from, offer }) => {
         peerConnection = createPeerConnection(from);
         await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
-        socket.emit('answer', { to: from, answer });
+        videoSocket.emit('answer', { to: from, answer });
       });
 
-      socket.on('answer', async ({ answer }) => {
+      videoSocket.on('answer', async ({ answer }) => {
         if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
       });
 
-      socket.on('ice-candidate', async ({ candidate }) => {
+      videoSocket.on('ice-candidate', async ({ candidate }) => {
         if (peerConnection && candidate) {
           try { await peerConnection.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e) {}
         }
       });
 
-      socket.on('user-left', ({ userName }) => {
+      videoSocket.on('user-left', ({ userName }) => {
         document.getElementById('callStatus').textContent = `${userName} left`;
         document.getElementById('remoteVideo').srcObject = null;
         document.getElementById('remotePlaceholder').style.display = 'flex';
@@ -282,7 +282,7 @@
       };
 
       peerConnection.onicecandidate = (e) => {
-        if (e.candidate) socket.emit('ice-candidate', { to: target, candidate: e.candidate });
+        if (e.candidate) videoSocket.emit('ice-candidate', { to: target, candidate: e.candidate });
       };
 
       peerConnection.oniceconnectionstatechange = () => {
@@ -299,7 +299,7 @@
       peerConnection = createPeerConnection(target);
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
-      socket.emit('offer', { to: target, offer });
+      videoSocket.emit('offer', { to: target, offer });
     }
 
     function toggleMic() {
@@ -322,7 +322,7 @@
       if (peerConnection) { try { peerConnection.close(); } catch(e) {} peerConnection = null; }
       if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
       
-      // Instead of disconnecting the socket entirely, we can just leave the room 
+      // Instead of disconnecting the videoSocket entirely, we can just leave the room 
       // by refreshing the page to reset state safely
       window.location.reload();
     }
