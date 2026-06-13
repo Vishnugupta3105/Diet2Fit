@@ -208,7 +208,8 @@
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
     function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
 
-    let socket = null, localStream = null, peerConnection = null;
+    let socket = io('/video');
+    let localStream = null, peerConnection = null;
     let isMicOn = true, isCamOn = true;
 
     const rtcConfig = {
@@ -219,10 +220,12 @@
       iceCandidatePoolSize: 10,
     };
 
-    // Single lobby socket for presence detection
-    const lobbySocket = io('/video', { transports: ['websocket'] });
-    lobbySocket.on('connect', () => { lobbySocket.emit('join-lobby'); });
-    lobbySocket.on('active-rooms-update', (rooms) => {
+    // Join lobby on initial connection to get presence
+    socket.on('connect', () => { 
+      socket.emit('join-lobby'); 
+    });
+
+    socket.on('active-rooms-update', (rooms) => {
       const myRoomStatus = rooms[String(user.id)];
       const isAdminWaiting = myRoomStatus && myRoomStatus.some(u => u.role === 'admin');
       const alertDiv = document.getElementById('adminWaitingAlert');
@@ -246,12 +249,9 @@
       document.getElementById('joinSection').style.display = 'none';
       document.getElementById('callSection').style.display = 'block';
 
-      socket = io('/video', { transports: ['websocket'] });
-
-      socket.on('connect', () => {
-        socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'client' });
-        document.getElementById('callStatus').textContent = 'Waiting for Dt. Disha...';
-      });
+      // Join the actual room
+      socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'client' });
+      document.getElementById('callStatus').textContent = 'Waiting for Dt. Disha...';
 
       socket.on('room-users', async (users) => {
         if (users.length > 0) {
@@ -349,10 +349,10 @@
     function endCall() {
       if (peerConnection) { try { peerConnection.close(); } catch(e) {} peerConnection = null; }
       if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-      if (socket) { socket.disconnect(); socket = null; }
-      isMicOn = true; isCamOn = true;
-      document.getElementById('joinSection').style.display = 'block';
-      document.getElementById('callSection').style.display = 'none';
+      
+      // Instead of disconnecting the socket entirely, we can just leave the room 
+      // by refreshing the page to reset state safely
+      window.location.reload();
     }
   </script>
 </body>
