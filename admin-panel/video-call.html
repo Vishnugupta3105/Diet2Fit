@@ -9,6 +9,104 @@
   <link rel="stylesheet" href="css/admin.css" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <style>
+    /* ── Video Call Mobile Overrides ─────────────────────────────── */
+    .vc-container {
+      position: relative;
+      width: 100%;
+      background: #111;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+    /* Desktop: 16/9 landscape */
+    .vc-container { aspect-ratio: 16/9; }
+
+    .vc-remote {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .vc-placeholder {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.5); gap: 12px;
+      z-index: 2;
+    }
+    .vc-placeholder .material-symbols-outlined { font-size: 56px; }
+    .vc-placeholder p { font-size: 0.9rem; }
+
+    .vc-local {
+      position: absolute;
+      top: 16px; right: 16px;
+      width: 160px; aspect-ratio: 4/3;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.25);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      z-index: 5;
+    }
+    .vc-local video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .vc-status {
+      position: absolute; top: 16px; left: 16px;
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-full);
+      color: white; font-size: 0.8rem; font-weight: 500;
+      z-index: 10;
+    }
+    .vc-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #10b981;
+      animation: pulse-dot 2s infinite;
+    }
+
+    .vc-controls {
+      position: absolute; bottom: 20px;
+      left: 50%; transform: translateX(-50%);
+      display: flex; gap: 12px;
+      padding: 10px 20px;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-full);
+      z-index: 10;
+    }
+    .vc-btn {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.15);
+      color: white; border: none; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .vc-btn:hover { background: rgba(255,255,255,0.25); }
+    .vc-btn.on { background: rgba(255,255,255,0.3); }
+    .vc-btn.hang { background: #ef4444; }
+    .vc-btn.hang:hover { background: #dc2626; }
+
+    .vc-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: var(--space-sm); padding: 0 4px;
+    }
+
+    /* Mobile: make video taller so it's usable */
+    @media (max-width: 768px) {
+      .vc-container { aspect-ratio: 3/4; border-radius: var(--radius-lg); }
+      .vc-local { width: 100px; top: 12px; right: 12px; }
+      .vc-controls { bottom: 16px; padding: 8px 16px; gap: 10px; }
+      .vc-btn { width: 44px; height: 44px; }
+      .vc-btn .material-symbols-outlined { font-size: 20px; }
+      .vc-status { top: 12px; left: 12px; font-size: 0.75rem; padding: 5px 10px; }
+      .vc-footer { flex-direction: column; gap: 8px; align-items: stretch; text-align: center; }
+    }
+  </style>
 </head>
 <body>
   <div class="portal-layout">
@@ -36,7 +134,7 @@
       <!-- Client List for Video Call -->
       <div id="joinSection">
         <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md);">Start a Consultation</h3>
-        <p class="text-caption mb-lg">Select a client below to enter their personal video room. Clients currently waiting in their room are highlighted.</p>
+        <p class="text-caption mb-lg">Select a client below to enter their personal video room. Clients currently waiting are highlighted in green.</p>
         
         <div class="flex flex-col gap-md" id="clientCallList">
           <div class="empty-state" style="padding:var(--space-xl);">
@@ -48,30 +146,27 @@
 
       <!-- Video Call UI -->
       <div id="callSection" style="display:none;">
-        <div class="video-container" id="videoContainer">
-          <video id="remoteVideo" autoplay playsinline></video>
-          <div class="video-placeholder" id="remotePlaceholder">
+        <div class="vc-container" id="videoContainer">
+          <video class="vc-remote" id="remoteVideo" autoplay playsinline></video>
+          <div class="vc-placeholder" id="remotePlaceholder">
             <span class="material-symbols-outlined">person</span>
             <p>Waiting for client to join...</p>
           </div>
-          <div class="video-local">
+          <div class="vc-local">
             <video id="localVideo" autoplay playsinline muted></video>
           </div>
-          <div class="video-status">
-            <div class="status-dot" id="statusDot"></div>
+          <div class="vc-status">
+            <div class="vc-dot" id="statusDot"></div>
             <span id="callStatus">Connecting...</span>
           </div>
-          <div class="video-controls">
-            <button class="video-btn active" id="btnMic" onclick="toggleMic()"><span class="material-symbols-outlined">mic</span></button>
-            <button class="video-btn active" id="btnCam" onclick="toggleCam()"><span class="material-symbols-outlined">videocam</span></button>
-            <button class="video-btn end-call" onclick="endCall()"><span class="material-symbols-outlined">call_end</span></button>
+          <div class="vc-controls">
+            <button class="vc-btn on" id="btnMic" onclick="toggleMic()"><span class="material-symbols-outlined">mic</span></button>
+            <button class="vc-btn on" id="btnCam" onclick="toggleCam()"><span class="material-symbols-outlined">videocam</span></button>
+            <button class="vc-btn hang" onclick="endCall()"><span class="material-symbols-outlined">call_end</span></button>
           </div>
         </div>
-        <div class="flex justify-between items-center" style="margin-top:var(--space-md);">
-          <div class="flex items-center gap-md">
-            <span class="text-caption" id="roomInfo">Room: —</span>
-            <button onclick="copyCurrentRoom()" class="btn btn-ghost btn-sm" style="padding:4px 8px;"><span class="material-symbols-outlined" style="font-size:16px;">content_copy</span> Copy Code</button>
-          </div>
+        <div class="vc-footer">
+          <span class="text-caption" id="roomInfo">Room: —</span>
           <button class="btn btn-ghost btn-sm" style="color:var(--error);" onclick="endCall()">
             <span class="material-symbols-outlined" style="font-size:16px;">close</span> End Call
           </button>
@@ -88,28 +183,32 @@
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
     function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
 
-    // Check URL for room
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomFromUrl = urlParams.get('room');
-    if (roomFromUrl) { document.getElementById('roomInput').value = roomFromUrl; }
-
-    let socket, localStream, peerConnection;
+    let socket = null, localStream = null, peerConnection = null;
     let isMicOn = true, isCamOn = true;
-    let currentRoomId = null;
     let activeRoomsGlobal = {};
-    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
 
-    // Initialize global lobby connection for presence updates
-    const lobbySocket = io('/video');
+    const rtcConfig = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+      ],
+      iceCandidatePoolSize: 10,
+    };
+
+    // Single socket connection for lobby presence
+    const lobbySocket = io('/video', { transports: ['websocket'] });
     lobbySocket.on('connect', () => { lobbySocket.emit('join-lobby'); });
     lobbySocket.on('active-rooms-update', (rooms) => {
       activeRoomsGlobal = rooms;
-      renderClientList(); // Re-render the list with active indicators
+      renderClientList();
     });
 
     async function startCall(roomId) {
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+          audio: { echoCancellation: true, noiseSuppression: true }
+        });
         document.getElementById('localVideo').srcObject = localStream;
       } catch (err) {
         Diet2Fit.showToast('Camera/mic access required', 'error');
@@ -118,24 +217,28 @@
 
       document.getElementById('joinSection').style.display = 'none';
       document.getElementById('callSection').style.display = 'block';
-      document.getElementById('roomInfo').textContent = `Room: ${roomId}`;
+      document.getElementById('roomInfo').textContent = `Room: ${roomId.substring(0, 8)}...`;
 
-      socket = io('/video');
+      // Use a dedicated socket for the call room
+      socket = io('/video', { transports: ['websocket'] });
+
       socket.on('connect', () => {
         socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'admin' });
-        document.getElementById('callStatus').textContent = 'Connected — waiting for client...';
+        document.getElementById('callStatus').textContent = 'Waiting for client...';
       });
 
       socket.on('room-users', async (users) => {
         if (users.length > 0) {
-          document.getElementById('callStatus').textContent = 'Found client, connecting...';
+          document.getElementById('callStatus').textContent = 'Client found, connecting...';
         }
       });
+
       socket.on('user-joined', async ({ socketId, userName }) => {
         document.getElementById('callStatus').textContent = `${userName} joined`;
         Diet2Fit.showToast(`${userName} joined the call`, 'success');
         await createOffer(socketId);
       });
+
       socket.on('offer', async ({ from, offer }) => {
         peerConnection = createPeerConnection(from);
         await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
@@ -143,8 +246,17 @@
         await peerConnection.setLocalDescription(answer);
         socket.emit('answer', { to: from, answer });
       });
-      socket.on('answer', async ({ answer }) => { if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer)); });
-      socket.on('ice-candidate', async ({ candidate }) => { if (peerConnection && candidate) await peerConnection.addIceCandidate(new RTCIceCandidate(candidate)); });
+
+      socket.on('answer', async ({ answer }) => {
+        if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+      });
+
+      socket.on('ice-candidate', async ({ candidate }) => {
+        if (peerConnection && candidate) {
+          try { await peerConnection.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e) {}
+        }
+      });
+
       socket.on('user-left', ({ userName }) => {
         document.getElementById('callStatus').textContent = `${userName} left`;
         document.getElementById('remoteVideo').srcObject = null;
@@ -154,16 +266,29 @@
     }
 
     function createPeerConnection(target) {
+      if (peerConnection) { try { peerConnection.close(); } catch(e) {} }
       peerConnection = new RTCPeerConnection(rtcConfig);
       localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
-      peerConnection.ontrack = (e) => { 
+
+      peerConnection.ontrack = (e) => {
         const remoteVid = document.getElementById('remoteVideo');
-        remoteVid.srcObject = e.streams[0]; 
-        remoteVid.play().catch(err => console.error("Play error:", err));
-        document.getElementById('remotePlaceholder').style.display = 'none'; 
-        document.getElementById('callStatus').textContent = 'In Call'; 
+        remoteVid.srcObject = e.streams[0];
+        remoteVid.play().catch(() => {});
+        document.getElementById('remotePlaceholder').style.display = 'none';
+        document.getElementById('callStatus').textContent = 'In Call';
       };
-      peerConnection.onicecandidate = (e) => { if (e.candidate) socket.emit('ice-candidate', { to: target, candidate: e.candidate }); };
+
+      peerConnection.onicecandidate = (e) => {
+        if (e.candidate) socket.emit('ice-candidate', { to: target, candidate: e.candidate });
+      };
+
+      peerConnection.oniceconnectionstatechange = () => {
+        const state = peerConnection.iceConnectionState;
+        if (state === 'disconnected' || state === 'failed') {
+          document.getElementById('callStatus').textContent = 'Connection lost...';
+        }
+      };
+
       return peerConnection;
     }
 
@@ -174,9 +299,30 @@
       socket.emit('offer', { to: target, offer });
     }
 
-    function toggleMic() { isMicOn = !isMicOn; localStream.getAudioTracks().forEach(t => t.enabled = isMicOn); const b = document.getElementById('btnMic'); b.querySelector('.material-symbols-outlined').textContent = isMicOn ? 'mic' : 'mic_off'; b.classList.toggle('active', isMicOn); }
-    function toggleCam() { isCamOn = !isCamOn; localStream.getVideoTracks().forEach(t => t.enabled = isCamOn); const b = document.getElementById('btnCam'); b.querySelector('.material-symbols-outlined').textContent = isCamOn ? 'videocam' : 'videocam_off'; b.classList.toggle('active', isCamOn); }
-    function endCall() { if (peerConnection) peerConnection.close(); if (localStream) localStream.getTracks().forEach(t => t.stop()); if (socket) socket.disconnect(); document.getElementById('joinSection').style.display = 'block'; document.getElementById('callSection').style.display = 'none'; }
+    function toggleMic() {
+      isMicOn = !isMicOn;
+      localStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
+      const b = document.getElementById('btnMic');
+      b.querySelector('.material-symbols-outlined').textContent = isMicOn ? 'mic' : 'mic_off';
+      b.classList.toggle('on', isMicOn);
+    }
+
+    function toggleCam() {
+      isCamOn = !isCamOn;
+      localStream.getVideoTracks().forEach(t => t.enabled = isCamOn);
+      const b = document.getElementById('btnCam');
+      b.querySelector('.material-symbols-outlined').textContent = isCamOn ? 'videocam' : 'videocam_off';
+      b.classList.toggle('on', isCamOn);
+    }
+
+    function endCall() {
+      if (peerConnection) { try { peerConnection.close(); } catch(e) {} peerConnection = null; }
+      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+      if (socket) { socket.disconnect(); socket = null; }
+      isMicOn = true; isCamOn = true;
+      document.getElementById('joinSection').style.display = 'block';
+      document.getElementById('callSection').style.display = 'none';
+    }
 
     // Load clients
     async function loadClientsForCall() {
@@ -196,22 +342,20 @@
       if (!window.allClients) return;
       const list = document.getElementById('clientCallList');
       list.innerHTML = window.allClients.map(c => {
-        // Check if this client is currently active/waiting in their room
         const roomStatus = activeRoomsGlobal[c._id];
         const isClientWaiting = roomStatus && roomStatus.some(u => u.role === 'client');
-        
         return `
           <div class="appointment-card" style="${isClientWaiting ? 'border:2px solid #22c55e; background:#f0fdf4;' : ''}">
             <div class="appointment-info">
               <div>
-                <div style="font-weight:600; display:flex; align-items:center; gap:8px;">
+                <div style="font-weight:600; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                   ${c.name}
-                  ${isClientWaiting ? '<span style="font-size:0.75rem; background:#22c55e; color:white; padding:2px 8px; border-radius:12px; font-weight:700;">🟢 Waiting in Room</span>' : ''}
+                  ${isClientWaiting ? '<span style="font-size:0.7rem; background:#22c55e; color:white; padding:2px 8px; border-radius:12px; font-weight:700;">🟢 Waiting</span>' : ''}
                 </div>
                 <div class="text-caption">${c.email} • ${c.phone}</div>
               </div>
             </div>
-            <button onclick="currentRoomId='${c._id}';startCall('${c._id}')" class="btn btn-primary btn-sm">
+            <button onclick="startCall('${c._id}')" class="btn btn-primary btn-sm">
               <span class="material-symbols-outlined" style="font-size:16px;">videocam</span>
               Call
             </button>
