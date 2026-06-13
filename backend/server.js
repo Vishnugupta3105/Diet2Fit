@@ -32,6 +32,7 @@ const io = new Server(server, {
 });
 
 // ── Security & Middleware ─────────────────────────────────────────
+app.set('trust proxy', 1); // Trust Render's reverse proxy for correct rate limiting
 app.use(helmet({
   contentSecurityPolicy: false,
 }));
