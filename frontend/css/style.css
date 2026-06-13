@@ -1174,3 +1174,19 @@ select.form-input {
     display: none;
   }
 }
+
+/* ── Mobile Layout Fixes ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .transformation-showcase {
+    flex-direction: column;
+    gap: var(--space-md) !important;
+  }
+  .transform-arrow {
+    transform: rotate(90deg);
+    margin: -15px auto !important;
+  }
+  .transform-img-wrapper {
+    height: auto !important;
+    aspect-ratio: 4/5;
+  }
+}
