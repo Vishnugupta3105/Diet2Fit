@@ -18,21 +18,22 @@ function setupSignaling(io) {
 
     // Join a specific video room
     socket.on('join-room', ({ roomId, userId, userName, role }) => {
-      socket.join(roomId);
-      socket.roomId = roomId;
+      const room = String(roomId); // Normalize to string
+      socket.join(room);
+      socket.roomId = room;
       socket.userId = userId;
       socket.userName = userName;
       socket.role = role || 'client'; // default to client
 
       // Update global active rooms tracker
-      if (!activeRooms[roomId]) activeRooms[roomId] = [];
-      activeRooms[roomId].push({ userId, userName, role: socket.role, socketId: socket.id });
+      if (!activeRooms[room]) activeRooms[room] = [];
+      activeRooms[room].push({ userId, userName, role: socket.role, socketId: socket.id });
 
       // Broadcast to lobby that room state changed
       videoNamespace.to('lobby').emit('active-rooms-update', activeRooms);
 
       // Notify others in the room
-      socket.to(roomId).emit('user-joined', {
+      socket.to(room).emit('user-joined', {
         socketId: socket.id,
         userId,
         userName,
@@ -40,10 +41,10 @@ function setupSignaling(io) {
       });
 
       // Send list of existing users in room
-      const roomUsers = activeRooms[roomId].filter(u => u.socketId !== socket.id);
+      const roomUsers = activeRooms[room].filter(u => u.socketId !== socket.id);
       socket.emit('room-users', roomUsers);
 
-      console.log(`👤 ${userName} (${socket.role}) joined room ${roomId}`);
+      console.log(`👤 ${userName} (${socket.role}) joined room ${room}`);
     });
 
     // Relay WebRTC offer

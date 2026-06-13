@@ -223,14 +223,14 @@
     const lobbySocket = io('/video', { transports: ['websocket'] });
     lobbySocket.on('connect', () => { lobbySocket.emit('join-lobby'); });
     lobbySocket.on('active-rooms-update', (rooms) => {
-      const myRoomStatus = rooms[user.id];
+      const myRoomStatus = rooms[String(user.id)];
       const isAdminWaiting = myRoomStatus && myRoomStatus.some(u => u.role === 'admin');
       const alertDiv = document.getElementById('adminWaitingAlert');
       alertDiv.style.display = isAdminWaiting ? 'flex' : 'none';
     });
 
     async function joinRoom() {
-      const roomId = user.id;
+      const roomId = String(user.id);
 
       try {
         localStream = await navigator.mediaDevices.getUserMedia({
