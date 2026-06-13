@@ -324,25 +324,38 @@
       document.getElementById('callSection').style.display = 'none';
     }
 
-    // Load clients
-    async function loadClientsForCall() {
-      try {
-        const data = await Diet2Fit.apiRequest('/api/clients');
-        const list = document.getElementById('clientCallList');
-        if (data.clients && data.clients.length > 0) {
-          window.allClients = data.clients;
-          renderClientList();
-        } else {
-          list.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">group</span><p>No clients found.</p></div>`;
+    // Load clients with retry for Render cold starts
+    async function loadClientsForCall(retries = 3) {
+      const list = document.getElementById('clientCallList');
+      for (let i = 0; i < retries; i++) {
+        try {
+          const data = await Diet2Fit.apiRequest('/api/clients');
+          if (data.clients && data.clients.length > 0) {
+            window.allClients = data.clients;
+            renderClientList();
+            return;
+          } else {
+            list.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">group</span><p>No clients found.</p></div>`;
+            return;
+          }
+        } catch (err) {
+          console.error(`Attempt ${i+1} failed:`, err);
+          if (i < retries - 1) {
+            list.innerHTML = `<div class="empty-state" style="padding:var(--space-xl);"><span class="material-symbols-outlined">sync</span><p>Server waking up... retrying (${i+2}/${retries})</p></div>`;
+            await new Promise(r => setTimeout(r, 3000));
+          } else {
+            list.innerHTML = `<div class="empty-state"><span class="material-symbols-outlined">error</span><p>Could not load clients. <a href="javascript:loadClientsForCall()" style="color:var(--primary);font-weight:600;">Retry</a></p></div>`;
+          }
         }
-      } catch (err) { console.error(err); }
+      }
     }
 
     function renderClientList() {
       if (!window.allClients) return;
       const list = document.getElementById('clientCallList');
       list.innerHTML = window.allClients.map(c => {
-        const roomStatus = activeRoomsGlobal[c._id];
+        const clientId = c.id || c._id;
+        const roomStatus = activeRoomsGlobal[clientId];
         const isClientWaiting = roomStatus && roomStatus.some(u => u.role === 'client');
         return `
           <div class="appointment-card" style="${isClientWaiting ? 'border:2px solid #22c55e; background:#f0fdf4;' : ''}">
@@ -352,10 +365,10 @@
                   ${c.name}
                   ${isClientWaiting ? '<span style="font-size:0.7rem; background:#22c55e; color:white; padding:2px 8px; border-radius:12px; font-weight:700;">🟢 Waiting</span>' : ''}
                 </div>
-                <div class="text-caption">${c.email} • ${c.phone}</div>
+                <div class="text-caption">${c.email} • ${c.phone || '—'}</div>
               </div>
             </div>
-            <button onclick="startCall('${c._id}')" class="btn btn-primary btn-sm">
+            <button onclick="startCall('${clientId}')" class="btn btn-primary btn-sm">
               <span class="material-symbols-outlined" style="font-size:16px;">videocam</span>
               Call
             </button>
