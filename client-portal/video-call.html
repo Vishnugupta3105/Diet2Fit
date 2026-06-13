@@ -258,9 +258,13 @@
       document.getElementById('clientRoomInfo').textContent = 'Room ID: ' + user.id;
 
       // Join the actual room
-      hasJoinedRoom = true;
-      socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'client' });
-      document.getElementById('callStatus').textContent = 'Waiting for Dt. Disha...';
+      try {
+        hasJoinedRoom = true;
+        socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'client' });
+        document.getElementById('callStatus').textContent = 'Waiting for Dt. Disha...';
+      } catch (innerErr) {
+        document.getElementById('callStatus').textContent = 'Error: ' + innerErr.message;
+      }
 
       socket.on('room-users', async (users) => {
         if (users.length > 0) {
