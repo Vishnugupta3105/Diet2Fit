@@ -3,6 +3,7 @@
  * Handles room-based video calling between admin (Dt. Disha) and clients
  */
 const activeRooms = {};
+module.exports.activeRooms = activeRooms;
 
 function setupSignaling(io) {
   const videoNamespace = io.of('/video');

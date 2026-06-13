@@ -10,6 +10,7 @@ const path = require('path');
 // Initialize database (runs schema + seed)
 require('./db/database');
 
+const { activeRooms } = require('./socket/signaling');
 const setupSignaling = require('./socket/signaling');
 
 // Route imports
@@ -67,6 +68,10 @@ app.use('/api/devices', deviceRoutes);
 // ── Health Check ─────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', brand: 'Diet2Fit', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/debug-rooms', (req, res) => {
+  res.json({ activeRooms });
 });
 
 // ── WebRTC Signaling ─────────────────────────────────────────────
