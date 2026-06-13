@@ -236,10 +236,7 @@
       const roomId = String(user.id);
 
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
-          audio: { echoCancellation: true, noiseSuppression: true }
-        });
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         document.getElementById('localVideo').srcObject = localStream;
       } catch (err) {
         Diet2Fit.showToast('Camera/mic access required for video calls', 'error');
