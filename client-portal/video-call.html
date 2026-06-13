@@ -210,6 +210,7 @@
     var socket = io('/video');
     var localStream = null, peerConnection = null;
     var isMicOn = true, isCamOn = true;
+    var hasJoinedRoom = false;
 
     const rtcConfig = {
       iceServers: [
@@ -222,6 +223,9 @@
     // Join lobby on initial connection to get presence
     socket.on('connect', () => { 
       socket.emit('join-lobby'); 
+      if (hasJoinedRoom) {
+        socket.emit('join-room', { roomId: String(user.id), userId: user.id, userName: user.name, role: 'client' });
+      }
     });
 
     socket.on('active-rooms-update', (rooms) => {
@@ -254,6 +258,7 @@
       document.getElementById('clientRoomInfo').textContent = 'Room ID: ' + user.id;
 
       // Join the actual room
+      hasJoinedRoom = true;
       socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'client' });
       document.getElementById('callStatus').textContent = 'Waiting for Dt. Disha...';
 

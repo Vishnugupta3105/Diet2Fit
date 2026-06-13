@@ -187,6 +187,8 @@
     var localStream = null, peerConnection = null;
     var isMicOn = true, isCamOn = true;
     var activeRoomsGlobal = {};
+    var hasJoinedRoom = false;
+    var currentCallRoomId = null;
 
     const rtcConfig = {
       iceServers: [
@@ -199,6 +201,9 @@
     // Join lobby on initial connection to get presence
     socket.on('connect', () => { 
       socket.emit('join-lobby'); 
+      if (hasJoinedRoom && currentCallRoomId) {
+        socket.emit('join-room', { roomId: currentCallRoomId, userId: user.id, userName: user.name, role: 'admin' });
+      }
     });
 
     socket.on('active-rooms-update', (rooms) => {
@@ -220,6 +225,8 @@
       document.getElementById('roomInfo').textContent = `Room: ${roomId.substring(0, 8)}...`;
 
       // Join the actual room
+      hasJoinedRoom = true;
+      currentCallRoomId = roomId;
       socket.emit('join-room', { roomId, userId: user.id, userName: user.name, role: 'admin' });
       document.getElementById('callStatus').textContent = 'Waiting for client...';
 
