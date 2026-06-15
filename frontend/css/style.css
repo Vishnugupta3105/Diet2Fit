@@ -1196,3 +1196,10 @@ select.form-input {
     border-radius: var(--radius-xl) !important;
   }
 }
+
+/* Mobile Hero Spacing Fix */
+@media (max-width: 768px) {
+  .hero {
+    padding: 100px 0 40px 0 !important;
+  }
+}
