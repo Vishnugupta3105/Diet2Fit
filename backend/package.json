@@ -1,7 +1,7 @@
 {
   "name": "diet2fit-backend",
   "version": "1.0.0",
-  "description": "Diet2Fit - Nutritionist Platform Backend",
+  "description": "Beyond Kilo's - Nutritionist Platform Backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

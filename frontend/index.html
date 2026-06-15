@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Diet2Fit — Transform Your Health with Dt. Disha | Expert Nutritionist</title>
+  <title>Beyond Kilo's — Transform Your Health with Dt. Disha | Expert Nutritionist</title>
   <meta name="description"
-    content="Diet2Fit by Dt. Disha — Specialist in Diabetes, Cardiac Care, PCOS, Fat Loss & Weight Management. Book your personalized consultation today." />
+    content="Beyond Kilo's by Dt. Disha — Specialist in Diabetes, Cardiac Care, PCOS, Fat Loss & Weight Management. Book your personalized consultation today." />
   <link rel="stylesheet" href="css/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
@@ -113,7 +113,13 @@
   <!-- ═══ Navbar ═══ -->
   <nav class="navbar" id="navbar">
     <div class="navbar-inner">
-      <a href="/" class="navbar-brand">Diet2Fit</a>
+      <a href="/" class="navbar-brand" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+        <img src="img/logo.png" alt="Beyond Kilo's Logo" style="height:36px; border-radius:50%;">
+        <div style="display:flex; flex-direction:column; line-height:1.1;">
+          <span style="font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--primary);">Beyond Kilo's</span>
+          <span style="font-size:0.55rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Because real health was never about a number.</span>
+        </div>
+      </a>
       <div class="navbar-links" id="navLinks">
         <a href="#results" class="navbar-link">Results</a>
         <a href="#testimonials" class="navbar-link">Testimonials</a>
@@ -183,7 +189,7 @@
         <div class="hero-visual animate-fade-up" style="transition-delay: 0.2s;">
           <div class="relative" style="max-width: 450px; margin-left: auto;">
             <div class="hero-image-wrapper" style="aspect-ratio: 4/5; border-radius: var(--radius-2xl);">
-              <img src="/assets/p2.jpeg" alt="Dt. Disha at Diet2Fit clinic" style="object-fit: cover;" />
+              <img src="/assets/p2.jpeg" alt="Dt. Disha at Beyond Kilo's clinic" style="object-fit: cover;" />
             </div>
             <div class="about-decoration"></div>
             <!-- Experience badge -->
@@ -489,7 +495,7 @@
     <div class="container">
       <div class="footer-grid">
         <div>
-          <div class="footer-brand">Diet2Fit</div>
+          <div class="footer-brand">Beyond Kilo's</div>
           <p style="color:var(--primary-dim);max-width:300px;line-height:1.7;margin-bottom:var(--space-lg);">
             Personalized nutrition by Dt. Disha. Helping you achieve your health goals with science-backed diet plans.
           </p>
@@ -548,8 +554,8 @@
       </div>
       <hr class="footer-divider" />
       <div class="footer-bottom">
-        <span>© 2024 Diet2Fit. All rights reserved.</span>
-        <span>Made with 💚 by Diet2Fit Team</span>
+        <span>© 2024 BeyondKilos. All rights reserved.</span>
+        <span>Made with 💚 by Beyond Kilo's Team</span>
       </div>
     </div>
   </footer>
@@ -571,8 +577,8 @@
   <script>
     // Show welcome back banner for logged-in users
     (async () => {
-      if (Diet2Fit.isLoggedIn()) {
-        const user = await Diet2Fit.validateSession();
+      if (BeyondKilos.isLoggedIn()) {
+        const user = await BeyondKilos.validateSession();
         if (user) {
           const banner = document.getElementById('welcomeBackBanner');
           const text = document.getElementById('welcomeBackText');

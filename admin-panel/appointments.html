@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Appointments — Diet2Fit Admin</title>
+  <title>Appointments — Beyond Kilo's Admin</title>
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/portal/css/portal.css" />
   <link rel="stylesheet" href="css/admin.css" />
@@ -11,10 +11,22 @@
 </head>
 <body>
   <div class="portal-layout">
-    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+          <img src="/img/logo.png" alt="Logo" style="height:32px; border-radius:50%;">
+          <div style="display:flex; flex-direction:column; line-height:1.1;">
+            <span style="font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--primary);">Beyond Kilo's</span>
+            <span style="font-size:0.5rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Because real health was never about a number.</span>
+          </div>
+        </span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <nav class="sidebar" id="sidebar">
-      <div class="sidebar-brand">Diet2Fit</div><div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
+      <div class="sidebar-brand" style="display:flex; align-items:center; gap:8px; padding-bottom: 20px;">
+        <img src="/img/logo.png" alt="Logo" style="height:40px; border-radius:50%;">
+        <div style="display:flex; flex-direction:column; line-height:1.1; text-align:left;">
+          <span style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--primary);">Beyond Kilo's</span>
+          <span style="font-size:0.55rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Because real health was never about a number.</span>
+        </div>
+      </div><div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
       <div class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
         <a href="clients.html" class="sidebar-link"><span class="material-symbols-outlined">group</span>Clients</a>
@@ -95,9 +107,9 @@
   <div class="toast-container" id="toastContainer"></div>
   <script src="/js/main.js"></script>
   <script>
-    if (!Diet2Fit.isLoggedIn() || Diet2Fit.getUser()?.role !== 'admin') { window.location.href = '/login.html'; }
+    if (!BeyondKilos.isLoggedIn() || BeyondKilos.getUser()?.role !== 'admin') { window.location.href = '/login.html'; }
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
-    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+    function logout() { BeyondKilos.clearAuth(); window.location.href = '/login.html'; }
 
     let allAppts = [];
     let currentFilter = 'all';
@@ -178,10 +190,10 @@
 
     async function updateStatus(id, status) {
       try {
-        await Diet2Fit.apiRequest(`/api/appointments/${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
-        Diet2Fit.showToast(`Appointment ${status}`, 'success');
+        await BeyondKilos.apiRequest(`/api/appointments/${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
+        BeyondKilos.showToast(`Appointment ${status}`, 'success');
         loadAppts();
-      } catch (err) { Diet2Fit.showToast(err.message, 'error'); }
+      } catch (err) { BeyondKilos.showToast(err.message, 'error'); }
     }
 
     async function confirmClient(id) {
@@ -194,7 +206,7 @@
       }
 
       try {
-        const data = await Diet2Fit.apiRequest(`/api/appointments/${id}/confirm-client`, { 
+        const data = await BeyondKilos.apiRequest(`/api/appointments/${id}/confirm-client`, { 
           method: 'POST',
           body: JSON.stringify({ password: customPassword })
         });
@@ -210,15 +222,15 @@
         
         alert(msg);
         loadAppts();
-      } catch (err) { Diet2Fit.showToast(err.message || 'Failed to confirm client', 'error'); }
+      } catch (err) { BeyondKilos.showToast(err.message || 'Failed to confirm client', 'error'); }
     }
 
     async function loadAppts() {
       try {
-        const data = await Diet2Fit.apiRequest('/api/appointments');
+        const data = await BeyondKilos.apiRequest('/api/appointments');
         allAppts = data.appointments;
         applyFilters();
-      } catch (err) { Diet2Fit.showToast('Failed to load appointments', 'error'); }
+      } catch (err) { BeyondKilos.showToast('Failed to load appointments', 'error'); }
     }
 
     // ═══ Slot Management ═══
@@ -263,8 +275,8 @@
 
     async function createSlots() {
       const date = slotDateInput.value;
-      if (!date) { Diet2Fit.showToast('Please select a date first.', 'error'); return; }
-      if (selectedTimes.size === 0) { Diet2Fit.showToast('Please select at least one time slot.', 'error'); return; }
+      if (!date) { BeyondKilos.showToast('Please select a date first.', 'error'); return; }
+      if (selectedTimes.size === 0) { BeyondKilos.showToast('Please select at least one time slot.', 'error'); return; }
 
       const btn = document.getElementById('btnCreateSlots');
       btn.disabled = true;
@@ -272,11 +284,11 @@
 
       try {
         const slots = Array.from(selectedTimes).map(time => ({ date, time }));
-        const data = await Diet2Fit.apiRequest('/api/slots', {
+        const data = await BeyondKilos.apiRequest('/api/slots', {
           method: 'POST',
           body: JSON.stringify({ slots }),
         });
-        Diet2Fit.showToast(data.message, 'success');
+        BeyondKilos.showToast(data.message, 'success');
         
         // Reset selection
         selectedTimes.clear();
@@ -284,7 +296,7 @@
         
         loadExistingSlots();
       } catch (err) {
-        Diet2Fit.showToast(err.message, 'error');
+        BeyondKilos.showToast(err.message, 'error');
       }
       btn.disabled = false;
       btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">add</span> Add Selected Slots';
@@ -299,7 +311,7 @@
       }
 
       try {
-        const data = await Diet2Fit.apiRequest(`/api/slots/all?from=${date}&to=${date}`);
+        const data = await BeyondKilos.apiRequest(`/api/slots/all?from=${date}&to=${date}`);
         if (data.slots && data.slots.length > 0) {
           container.innerHTML = data.slots.map(s => {
             const [h, m] = s.slot_time.split(':');
@@ -333,10 +345,10 @@
     async function deleteSlot(id) {
       if (!confirm('Remove this slot?')) return;
       try {
-        await Diet2Fit.apiRequest(`/api/slots/${id}`, { method: 'DELETE' });
-        Diet2Fit.showToast('Slot removed', 'success');
+        await BeyondKilos.apiRequest(`/api/slots/${id}`, { method: 'DELETE' });
+        BeyondKilos.showToast('Slot removed', 'success');
         loadExistingSlots();
-      } catch (err) { Diet2Fit.showToast(err.message, 'error'); }
+      } catch (err) { BeyondKilos.showToast(err.message, 'error'); }
     }
 
     loadAppts();

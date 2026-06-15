@@ -3,17 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Appointments — Diet2Fit</title>
+  <title>Appointments — Beyond Kilo's</title>
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="css/portal.css" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 </head>
 <body>
   <div class="portal-layout">
-    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+          <img src="/img/logo.png" alt="Logo" style="height:32px; border-radius:50%;">
+          <div style="display:flex; flex-direction:column; line-height:1.1;">
+            <span style="font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--primary);">Beyond Kilo's</span>
+            <span style="font-size:0.5rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Because real health was never about a number.</span>
+          </div>
+        </span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <nav class="sidebar" id="sidebar">
-      <div class="sidebar-brand">Diet2Fit</div><div class="sidebar-subtitle">Client Portal</div>
+      <div class="sidebar-brand" style="display:flex; align-items:center; gap:8px; padding-bottom: 20px;">
+        <img src="/img/logo.png" alt="Logo" style="height:40px; border-radius:50%;">
+        <div style="display:flex; flex-direction:column; line-height:1.1; text-align:left;">
+          <span style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--primary);">Beyond Kilo's</span>
+          <span style="font-size:0.55rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Because real health was never about a number.</span>
+        </div>
+      </div><div class="sidebar-subtitle">Client Portal</div>
       <div class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
         <a href="weight-tracker.html" class="sidebar-link"><span class="material-symbols-outlined">monitor_weight</span>Weight Tracker</a>
@@ -55,12 +67,12 @@
   <div class="toast-container" id="toastContainer"></div>
   <script src="/js/main.js"></script>
   <script>
-    if (!Diet2Fit.isLoggedIn()) { window.location.href = '/login.html'; }
-    const user = Diet2Fit.getUser();
+    if (!BeyondKilos.isLoggedIn()) { window.location.href = '/login.html'; }
+    const user = BeyondKilos.getUser();
     document.getElementById('userName').textContent = user?.name || 'Client';
     document.getElementById('userAvatar').textContent = (user?.name || 'C').substring(0, 2).toUpperCase();
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
-    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+    function logout() { BeyondKilos.clearAuth(); window.location.href = '/login.html'; }
 
     let allAppointments = [];
 
@@ -126,11 +138,11 @@
 
     async function loadAppointments() {
       try {
-        const data = await Diet2Fit.apiRequest('/api/appointments');
+        const data = await BeyondKilos.apiRequest('/api/appointments');
         allAppointments = data.appointments;
         renderAppointments(allAppointments);
       } catch (err) {
-        Diet2Fit.showToast(err.message, 'error');
+        BeyondKilos.showToast(err.message, 'error');
       }
     }
 

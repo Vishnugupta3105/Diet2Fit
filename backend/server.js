@@ -68,7 +68,7 @@ app.use('/api/devices', deviceRoutes);
 
 // ── Health Check ─────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', brand: 'Diet2Fit', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', brand: 'Beyond Kilo's', timestamp: new Date().toISOString() });
 });
 
 app.get('/api/debug-rooms', (req, res) => {
@@ -83,7 +83,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log('');
   console.log('  📱 ─────────────────────────────────────────');
-  console.log(`  │  Diet2Fit Backend & API Server Running`);
+  console.log(`  │  Beyond Kilo's Backend & API Server Running`);
   console.log(`  │  http://localhost:${PORT}`);
   console.log(`  │`);
   console.log(`  │  React Native App (Expo):`);

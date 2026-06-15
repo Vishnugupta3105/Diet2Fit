@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Video Call — Diet2Fit</title>
+  <title>Video Call — Beyond Kilo's</title>
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="css/portal.css" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -124,10 +124,22 @@
 </head>
 <body>
   <div class="portal-layout">
-    <div class="mobile-header"><div class="mobile-header-inner"><span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
+    <div class="mobile-header"><div class="mobile-header-inner"><span style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+          <img src="/img/logo.png" alt="Logo" style="height:32px; border-radius:50%;">
+          <div style="display:flex; flex-direction:column; line-height:1.1;">
+            <span style="font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--primary);">Beyond Kilo's</span>
+            <span style="font-size:0.5rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Because real health was never about a number.</span>
+          </div>
+        </span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <nav class="sidebar" id="sidebar">
-      <div class="sidebar-brand">Diet2Fit</div><div class="sidebar-subtitle">Client Portal</div>
+      <div class="sidebar-brand" style="display:flex; align-items:center; gap:8px; padding-bottom: 20px;">
+        <img src="/img/logo.png" alt="Logo" style="height:40px; border-radius:50%;">
+        <div style="display:flex; flex-direction:column; line-height:1.1; text-align:left;">
+          <span style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--primary);">Beyond Kilo's</span>
+          <span style="font-size:0.55rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Because real health was never about a number.</span>
+        </div>
+      </div><div class="sidebar-subtitle">Client Portal</div>
       <div class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
         <a href="weight-tracker.html" class="sidebar-link"><span class="material-symbols-outlined">monitor_weight</span>Weight Tracker</a>
@@ -200,12 +212,12 @@
   <div class="toast-container" id="toastContainer"></div>
   <script src="/js/main.js"></script>
   <script>
-    if (!Diet2Fit.isLoggedIn()) { window.location.href = '/login.html'; }
-    const user = Diet2Fit.getUser();
+    if (!BeyondKilos.isLoggedIn()) { window.location.href = '/login.html'; }
+    const user = BeyondKilos.getUser();
     document.getElementById('userName').textContent = user?.name || 'Client';
     document.getElementById('userAvatar').textContent = (user?.name || 'C').substring(0, 2).toUpperCase();
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
-    function logout() { Diet2Fit.clearAuth(); window.location.href = '/login.html'; }
+    function logout() { BeyondKilos.clearAuth(); window.location.href = '/login.html'; }
 
     var videoSocket = io('/video');
     var localStream = null, peerConnection = null;
@@ -255,11 +267,11 @@
       } catch (err) {
         console.error("Camera error:", err);
         if (err.name === 'NotAllowedError') {
-          Diet2Fit.showToast('Please allow camera/mic access in your browser settings (tap the lock icon in the URL bar)', 'error', 6000);
+          BeyondKilos.showToast('Please allow camera/mic access in your browser settings (tap the lock icon in the URL bar)', 'error', 6000);
         } else if (err.name === 'NotReadableError') {
-          Diet2Fit.showToast('Camera is being used by another app. Please close other apps and try again.', 'error', 6000);
+          BeyondKilos.showToast('Camera is being used by another app. Please close other apps and try again.', 'error', 6000);
         } else {
-          Diet2Fit.showToast(`Camera error: ${err.name} - ${err.message}`, 'error', 6000);
+          BeyondKilos.showToast(`Camera error: ${err.name} - ${err.message}`, 'error', 6000);
         }
         return;
       }
@@ -284,7 +296,7 @@
 
         videoSocket.on('user-joined', async ({ socketId, userName }) => {
           document.getElementById('callStatus').textContent = `${userName} joined`;
-          Diet2Fit.showToast(`${userName} joined the call`, 'success');
+          BeyondKilos.showToast(`${userName} joined the call`, 'success');
           await createOffer(socketId);
         });
 
@@ -329,7 +341,7 @@
 
       videoSocket.on('user-joined', async ({ socketId, userName }) => {
         document.getElementById('callStatus').textContent = `${userName} joined`;
-        Diet2Fit.showToast(`${userName} joined the call`, 'success');
+        BeyondKilos.showToast(`${userName} joined the call`, 'success');
         await createOffer(socketId);
       });
 
@@ -355,7 +367,7 @@
         document.getElementById('callStatus').textContent = `${userName} left`;
         document.getElementById('remoteVideo').srcObject = null;
         document.getElementById('remotePlaceholder').style.display = 'flex';
-        Diet2Fit.showToast(`${userName} left the call`, 'info');
+        BeyondKilos.showToast(`${userName} left the call`, 'info');
       });
     }
 

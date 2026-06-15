@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — Diet2Fit Client Portal</title>
+  <title>Dashboard — Beyond Kilo's Client Portal</title>
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="css/portal.css" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -13,7 +13,13 @@
     <!-- Mobile Header -->
     <div class="mobile-header">
       <div class="mobile-header-inner">
-        <span style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--primary);">Diet2Fit</span>
+        <span style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+          <img src="/img/logo.png" alt="Logo" style="height:32px; border-radius:50%;">
+          <div style="display:flex; flex-direction:column; line-height:1.1;">
+            <span style="font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--primary);">Beyond Kilo's</span>
+            <span style="font-size:0.5rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Because real health was never about a number.</span>
+          </div>
+        </span>
         <button onclick="toggleSidebar()" style="padding:8px;">
           <span class="material-symbols-outlined">menu</span>
         </button>
@@ -23,7 +29,13 @@
 
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
-      <div class="sidebar-brand">Diet2Fit</div>
+      <div class="sidebar-brand" style="display:flex; align-items:center; gap:8px; padding-bottom: 20px;">
+        <img src="/img/logo.png" alt="Logo" style="height:40px; border-radius:50%;">
+        <div style="display:flex; flex-direction:column; line-height:1.1; text-align:left;">
+          <span style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--primary);">Beyond Kilo's</span>
+          <span style="font-size:0.55rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary);">Because real health was never about a number.</span>
+        </div>
+      </div>
       <div class="sidebar-subtitle">Client Portal</div>
       <div class="sidebar-nav">
         <a href="dashboard.html" class="sidebar-link active">
@@ -177,8 +189,8 @@
   <script src="/js/main.js"></script>
   <script>
     // Auth guard
-    if (!Diet2Fit.isLoggedIn()) { window.location.href = '/login.html'; }
-    const user = Diet2Fit.getUser();
+    if (!BeyondKilos.isLoggedIn()) { window.location.href = '/login.html'; }
+    const user = BeyondKilos.getUser();
     if (user && user.role === 'admin') { window.location.href = '/admin/'; }
 
     // Populate UI
@@ -193,7 +205,7 @@
     }
 
     function logout() {
-      Diet2Fit.clearAuth();
+      BeyondKilos.clearAuth();
       window.location.href = '/login.html';
     }
 
@@ -201,7 +213,7 @@
     async function loadDashboard() {
       try {
         // Load weight data
-        const weightData = await Diet2Fit.apiRequest('/api/weight');
+        const weightData = await BeyondKilos.apiRequest('/api/weight');
         if (weightData.stats) {
           document.getElementById('currentWeight').innerHTML = `${weightData.stats.current_weight}<span class="metric-unit"> kg</span>`;
           document.getElementById('totalChange').innerHTML = `${weightData.stats.total_change > 0 ? '+' : ''}${weightData.stats.total_change}<span class="metric-unit"> kg</span>`;
@@ -217,7 +229,7 @@
         }
 
         // Load user profile for goal weight
-        const profileData = await Diet2Fit.apiRequest('/api/auth/me');
+        const profileData = await BeyondKilos.apiRequest('/api/auth/me');
         if (profileData.user.goal_weight) {
           document.getElementById('goalWeight').innerHTML = `${profileData.user.goal_weight}<span class="metric-unit"> kg</span>`;
           
@@ -234,7 +246,7 @@
         }
 
         // Load appointments
-        const apptData = await Diet2Fit.apiRequest('/api/appointments');
+        const apptData = await BeyondKilos.apiRequest('/api/appointments');
         document.getElementById('appointmentCount').textContent = apptData.appointments.length;
 
         const upcoming = apptData.appointments.filter(a => a.status !== 'completed' && a.status !== 'cancelled');
@@ -262,7 +274,7 @@
         }
 
         // Load diet plans
-        const dietData = await Diet2Fit.apiRequest(`/api/diets/${user.id}`);
+        const dietData = await BeyondKilos.apiRequest(`/api/diets/${user.id}`);
         if (dietData.plans && dietData.plans.length > 0) {
           document.getElementById('noDietPlans').style.display = 'none';
           const dietContainer = document.getElementById('myDietPlans');
@@ -275,7 +287,7 @@
                   </div>
                   <div>
                     <div style="font-weight:600;">${plan.original_name}</div>
-                    <div class="text-caption">${Diet2Fit.formatDate(plan.created_at)} ${plan.notes ? '• ' + plan.notes : ''}</div>
+                    <div class="text-caption">${BeyondKilos.formatDate(plan.created_at)} ${plan.notes ? '• ' + plan.notes : ''}</div>
                   </div>
                 </div>
                 <div class="flex gap-sm">

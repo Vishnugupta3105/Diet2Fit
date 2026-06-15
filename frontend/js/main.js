@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   Diet2Fit — Main Frontend JavaScript
+   Beyond Kilo's — Main Frontend JavaScript
    Handles animations, navbar, and common interactions
    ═══════════════════════════════════════════════════════════════ */
 
@@ -188,7 +188,7 @@ async function validateSession() {
 }
 
 // Make helpers available globally
-window.Diet2Fit = {
+window.BeyondKilos = {
   showToast,
   getToken,
   getUser,
