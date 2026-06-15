@@ -68,7 +68,7 @@ app.use('/api/devices', deviceRoutes);
 
 // ── Health Check ─────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', brand: 'Beyond Kilo's', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', brand: "Beyond Kilo's", timestamp: new Date().toISOString() });
 });
 
 app.get('/api/debug-rooms', (req, res) => {
