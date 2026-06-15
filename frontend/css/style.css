@@ -767,7 +767,16 @@ select.form-input {
 }
 
 @media (max-width: 768px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid { 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: var(--space-sm);
+  }
+  .stat-card {
+    padding: var(--space-md);
+  }
+  .stat-number {
+    font-size: 1.8rem;
+  }
 }
 
 .stat-card {

@@ -105,25 +105,35 @@
       background: radial-gradient(circle, rgba(212, 168, 83, 0.15) 0%, transparent 70%);
       pointer-events: none;
     }
-  
+
     /* Mobile/Desktop Visibility Utility Classes */
-    .desktop-only { display: block !important; }
-    .mobile-only { display: none !important; }
-    
+    .desktop-only {
+      display: block !important;
+    }
+
+    .mobile-only {
+      display: none !important;
+    }
+
     @media (max-width: 968px) {
-      .desktop-only { display: none !important; }
-      .mobile-only { display: block !important; }
-      
+      .desktop-only {
+        display: none !important;
+      }
+
+      .mobile-only {
+        display: block !important;
+      }
+
       /* Also, make sure mobile title is centered if needed */
       .hero-content .mobile-only.hero-title {
         margin-top: 20px;
         margin-bottom: 24px;
       }
+
       .hero-content .mobile-only .hero-image-wrapper {
         margin-bottom: 24px;
       }
     }
-
   </style>
 </head>
 
@@ -133,12 +143,17 @@
   <nav class="navbar" id="navbar">
     <div class="navbar-inner">
       <a href="/" class="navbar-brand" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
-        <div style="width:48px; height:48px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow:hidden; flex-shrink:0;">
+        <div
+          style="width:48px; height:48px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow:hidden; flex-shrink:0;">
           <img src="img/logo.png" alt="Beyond Kilo's Logo" style="height:100%; width:100%; object-fit:cover;">
         </div>
         <div style="display:flex; flex-direction:column; line-height:1;">
-          <span style="font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilo's</span>
-          <span style="font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-secondary); margin-top:4px;">Because real health was never about a number.</span>
+          <span
+            style="font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond
+            Kilo's</span>
+          <span
+            style="font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-secondary); margin-top:4px;">Because
+            real health was never about a number.</span>
         </div>
       </a>
       <div class="navbar-links" id="navLinks">
@@ -168,8 +183,10 @@
       <div class="hero-content">
         <div class="animate-fade-up">
           <!-- Mobile Specific Order -->
-          <h1 class="hero-title mobile-only" style="font-size: clamp(1.75rem, 7vw, 2.8rem); line-height: 1.15; margin-bottom: var(--space-md); color: var(--primary); margin-top: 0px;">Meet the Dietitian Who <br /><span class="highlight">Won’t Put You on a Diet.</span></h1>
-          
+          <h1 class="hero-title mobile-only"
+            style="font-size: clamp(1.75rem, 7vw, 2.8rem); line-height: 1.15; margin-bottom: var(--space-md); color: var(--primary); margin-top: 0px;">
+            Meet the Dietitian Who <br /><span class="highlight">Won’t Put You on a Diet.</span></h1>
+
           <div class="hero-visual animate-fade-up mobile-only" style="margin-bottom: var(--space-lg);">
             <div class="relative" style="max-width: 450px; margin-left: auto; margin-right: auto;">
               <div class="hero-image-wrapper" style="aspect-ratio: 4/5; border-radius: var(--radius-2xl);">
@@ -178,26 +195,40 @@
               <div class="about-decoration"></div>
               <div class="hero-float-card animate-float" style="bottom: 30px; right: -20px;">
                 <div class="text-center">
-                  <div style="font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--primary);">6+</div>
+                  <div
+                    style="font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--primary);">
+                    6+</div>
                   <div class="text-label" style="color:var(--text-muted);">Years Experience</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="text-label mb-md" style="color: #b48310; letter-spacing: 1.5px; font-weight: 800;">M.Sc. Clinical Dietetics (spec. Cardiac & Diabetes)</div>
-          
+          <div class="text-label mb-md" style="color: #b48310; letter-spacing: 1.5px; font-weight: 800; line-height: 1.4;">
+            M.Sc. Clinical Dietetics 
+            <span style="display: block; font-size: 0.9em; margin-top: 4px;">(spec. Cardiac & Diabetes)</span>
+          </div>
+
           <!-- Desktop Specific Title -->
-          <h1 class="hero-title desktop-only" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem); line-height: 1.15; margin-bottom: var(--space-lg); color: var(--primary);">Meet the Dietitian Who <br class="hidden sm:block" /><span class="highlight">Won’t Put You on a Diet.</span></h1>
+          <h1 class="hero-title desktop-only"
+            style="font-size: clamp(1.8rem, 3.5vw, 2.8rem); line-height: 1.15; margin-bottom: var(--space-lg); color: var(--primary);">
+            Meet the Dietitian Who <br class="hidden sm:block" /><span class="highlight">Won’t Put You on a Diet.</span>
+          </h1>
           <p class="text-body-lg mb-md" style="color: var(--text-secondary); line-height: 1.6;">
-            Hi, I’m <strong>Dt. Disha</strong>. I help you take back control of your health by connecting the dots between your lab reports, your lifestyle, and your plate. 
-            <em style="color:var(--text); font-weight:500;">Real food, real science, real results.</em>
+            Hi, I’m <strong>Dt. Disha</strong>. I help you take back control of your health by connecting the dots
+            between your lab reports, your lifestyle, and your plate.
+            <em style="color:var(--text); font-weight:500;">Real food, Real science, Real results.</em>
           </p>
-          
-          <div style="background: linear-gradient(to right, rgba(30,111,92,0.05), transparent); border-left: 4px solid var(--primary); padding: var(--space-md) var(--space-lg); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; margin-top: var(--space-lg); margin-bottom: var(--space-xl);">
-            <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: var(--space-xs);">My Philosophy</div>
-            <p style="font-size: 1.15rem; font-style: italic; color: var(--text-secondary); line-height: 1.6; margin: 0;">
-              "Food is not the enemy. Confusion is. Remove the confusion and your body will do the rest — it was designed to heal."
+
+          <div
+            style="background: linear-gradient(to right, rgba(30,111,92,0.05), transparent); border-left: 4px solid var(--primary); padding: var(--space-md) var(--space-lg); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; margin-top: var(--space-lg); margin-bottom: var(--space-xl);">
+            <div
+              style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: var(--space-xs);">
+              My Philosophy</div>
+            <p
+              style="font-size: 1.15rem; font-style: italic; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+              "Food is not the enemy. Confusion is. Remove the confusion and your body will do the rest — it was
+              designed to heal."
             </p>
           </div>
 
@@ -206,9 +237,12 @@
               <span class="material-symbols-outlined">calendar_month</span>
               Request Free Consultation
             </a>
-            <a href="https://www.instagram.com/dietitian.disha/" target="_blank" style="display:flex; align-items:center; gap:8px; color:var(--text-secondary); font-weight:600; text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#E1306C'" onmouseout="this.style.color='var(--text-secondary)'">
+            <a href="https://www.instagram.com/dietitian.disha/" target="_blank"
+              style="display:flex; align-items:center; gap:8px; color:var(--text-secondary); font-weight:600; text-decoration:none; transition:color 0.2s;"
+              onmouseover="this.style.color='#E1306C'" onmouseout="this.style.color='var(--text-secondary)'">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                <path
+                  d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
               </svg>
               @dietitian.disha
             </a>
@@ -216,9 +250,14 @@
 
           <div class="flex items-center gap-md" style="margin-top: var(--space-lg);">
             <div class="flex" style="gap: -8px;">
-              <div class="testimonial-avatar" style="width:36px;height:36px;font-size:0.7rem;border:2px solid white;">RS</div>
-              <div class="testimonial-avatar" style="width:36px;height:36px;font-size:0.7rem;border:2px solid white;margin-left:-8px;background:linear-gradient(135deg,#d4a853,#f0d68a);">AK</div>
-              <div class="testimonial-avatar" style="width:36px;height:36px;font-size:0.7rem;border:2px solid white;margin-left:-8px;background:linear-gradient(135deg,#10b981,#6ee7b7);">PM</div>
+              <div class="testimonial-avatar" style="width:36px;height:36px;font-size:0.7rem;border:2px solid white;">RS
+              </div>
+              <div class="testimonial-avatar"
+                style="width:36px;height:36px;font-size:0.7rem;border:2px solid white;margin-left:-8px;background:linear-gradient(135deg,#d4a853,#f0d68a);">
+                AK</div>
+              <div class="testimonial-avatar"
+                style="width:36px;height:36px;font-size:0.7rem;border:2px solid white;margin-left:-8px;background:linear-gradient(135deg,#10b981,#6ee7b7);">
+                PM</div>
             </div>
             <div>
               <div style="font-weight:600;font-size:0.9rem;">5000+ Happy Clients</div>
@@ -236,7 +275,9 @@
             <!-- Experience badge -->
             <div class="hero-float-card animate-float" style="bottom: 30px; right: -20px;">
               <div class="text-center">
-                <div style="font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--primary);">6+</div>
+                <div
+                  style="font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--primary);">6+
+                </div>
                 <div class="text-label" style="color:var(--text-muted);">Years Experience</div>
               </div>
             </div>
@@ -320,7 +361,8 @@
               <span class="material-symbols-outlined" style="font-size:32px;color:#dc2626;">videocam</span>
             </div>
             <h3 class="text-title" style="font-size:1.1rem;margin-bottom:var(--space-xs);">1-on-1 Video Call</h3>
-            <p class="text-caption" style="line-height:1.5;">Get a personalized consultation directly with Dt. Disha.</p>
+            <p class="text-caption" style="line-height:1.5;">Get a personalized consultation directly with Dt. Disha.
+            </p>
           </div>
         </div>
 
@@ -329,10 +371,12 @@
         <div class="workflow-item animate-fade-up" style="transition-delay:0.4s;">
           <div class="workflow-number">5</div>
           <div class="workflow-card" style="border-color:var(--primary); box-shadow:0 10px 25px rgba(30,111,92,0.15);">
-            <div class="workflow-icon" style="background:var(--primary); color:white; box-shadow:0 4px 15px rgba(30,111,92,0.4);">
+            <div class="workflow-icon"
+              style="background:var(--primary); color:white; box-shadow:0 4px 15px rgba(30,111,92,0.4);">
               <span class="material-symbols-outlined" style="font-size:32px;">flare</span>
             </div>
-            <h3 class="text-title" style="font-size:1.1rem;margin-bottom:var(--space-xs);color:var(--primary);">Transform Yourself</h3>
+            <h3 class="text-title" style="font-size:1.1rem;margin-bottom:var(--space-xs);color:var(--primary);">
+              Transform Yourself</h3>
             <p class="text-caption" style="line-height:1.5;">Execute your plan and achieve the results you deserve.</p>
           </div>
         </div>
@@ -354,7 +398,8 @@
 
       <div class="grid grid-3">
         <div class="testimonial-card animate-fade-up">
-          <p class="testimonial-text">"I came to Disha with a diabetic report and zero hope. Within 3 months, my HbA1c dropped and I finally understood what eating right actually means for my body."</p>
+          <p class="testimonial-text">"I came to Disha with a diabetic report and zero hope. Within 3 months, my HbA1c
+            dropped and I finally understood what eating right actually means for my body."</p>
           <div class="testimonial-author">
             <div class="testimonial-avatar">RS</div>
             <div>
@@ -365,7 +410,8 @@
         </div>
 
         <div class="testimonial-card animate-fade-up" style="transition-delay:0.1s;">
-          <p class="testimonial-text">"I’d tried every diet app out there. Disha was the first person who looked at ME — my lifestyle, my stress, my schedule — and built something that actually fit."</p>
+          <p class="testimonial-text">"I’d tried every diet app out there. Disha was the first person who looked at ME —
+            my lifestyle, my stress, my schedule — and built something that actually fit."</p>
           <div class="testimonial-author">
             <div class="testimonial-avatar" style="background:linear-gradient(135deg,#d4a853,#f0d68a);">SM</div>
             <div>
@@ -376,7 +422,8 @@
         </div>
 
         <div class="testimonial-card animate-fade-up" style="transition-delay:0.2s;">
-          <p class="testimonial-text">"My cardiologist was surprised at my cholesterol numbers at my last check-up. So was I. Disha made it feel effortless."</p>
+          <p class="testimonial-text">"My cardiologist was surprised at my cholesterol numbers at my last check-up. So
+            was I. Disha made it feel effortless."</p>
           <div class="testimonial-author">
             <div class="testimonial-avatar" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">AK</div>
             <div>
@@ -401,48 +448,69 @@
       </div>
 
       <!-- Transformations Carousel -->
-      <div id="transformationsCarousel" class="transformations-carousel" style="display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:var(--space-2xl); padding-bottom:var(--space-xl); scroll-behavior:smooth;">
+      <div id="transformationsCarousel" class="transformations-carousel"
+        style="display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:var(--space-2xl); padding-bottom:var(--space-xl); scroll-behavior:smooth;">
 
         <!-- Side-by-Side Transformations 1 -->
-        <div class="transformation-showcase animate-fade-up" style="flex:0 0 100%; scroll-snap-align:center; display:flex; align-items:stretch; justify-content:center; gap:var(--space-2xl); flex-wrap:wrap;">
-          
+        <div class="transformation-showcase animate-fade-up"
+          style="flex:0 0 100%; scroll-snap-align:center; display:flex; align-items:stretch; justify-content:center; gap:var(--space-2xl); flex-wrap:wrap;">
+
           <!-- Before -->
-          <div class="transform-img-wrapper" style="position:relative; width:100%; max-width:380px; height:480px; border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-md); border:4px solid white; display:flex; align-items:center; justify-content:center; background:var(--bg-alt);">
-            <div style="position:absolute; top:16px; left:16px; background:rgba(0,0,0,0.65); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); color:white; padding:6px 14px; border-radius:var(--radius-full); font-weight:700; font-size:0.85rem; letter-spacing:1px; text-transform:uppercase; z-index:2;">Before</div>
-            <img src="/assets/before1.jpeg" alt="Before Transformation" style="width:100%; height:100%; object-fit:contain; display:block;" />
+          <div class="transform-img-wrapper"
+            style="position:relative; width:100%; max-width:380px; height:480px; border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-md); border:4px solid white; display:flex; align-items:center; justify-content:center; background:var(--bg-alt);">
+            <div
+              style="position:absolute; top:16px; left:16px; background:rgba(0,0,0,0.65); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); color:white; padding:6px 14px; border-radius:var(--radius-full); font-weight:700; font-size:0.85rem; letter-spacing:1px; text-transform:uppercase; z-index:2;">
+              Before</div>
+            <img src="/assets/before1.jpeg" alt="Before Transformation"
+              style="width:100%; height:100%; object-fit:contain; display:block;" />
           </div>
-          
+
           <!-- Arrow -->
-          <div class="transform-arrow" style="color:var(--primary); background:white; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:3; flex-shrink:0; margin:-20px; align-self:center;">
+          <div class="transform-arrow"
+            style="color:var(--primary); background:white; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:3; flex-shrink:0; margin:-20px; align-self:center;">
             <span class="material-symbols-outlined" style="font-size:36px;">arrow_forward</span>
           </div>
-          
+
           <!-- After -->
-          <div class="transform-img-wrapper" style="position:relative; width:100%; max-width:380px; height:480px; border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-md); border:4px solid white; display:flex; align-items:center; justify-content:center; background:var(--bg-alt);">
-            <div style="position:absolute; top:16px; left:16px; background:var(--primary); color:white; padding:6px 14px; border-radius:var(--radius-full); font-weight:700; font-size:0.85rem; letter-spacing:1px; text-transform:uppercase; z-index:2; box-shadow:0 4px 10px rgba(30,111,92,0.4);">After</div>
-            <img src="/assets/after1.jpeg" alt="After Transformation" style="width:100%; height:100%; object-fit:contain; display:block;" />
+          <div class="transform-img-wrapper"
+            style="position:relative; width:100%; max-width:380px; height:480px; border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-md); border:4px solid white; display:flex; align-items:center; justify-content:center; background:var(--bg-alt);">
+            <div
+              style="position:absolute; top:16px; left:16px; background:var(--primary); color:white; padding:6px 14px; border-radius:var(--radius-full); font-weight:700; font-size:0.85rem; letter-spacing:1px; text-transform:uppercase; z-index:2; box-shadow:0 4px 10px rgba(30,111,92,0.4);">
+              After</div>
+            <img src="/assets/after1.jpeg" alt="After Transformation"
+              style="width:100%; height:100%; object-fit:contain; display:block;" />
           </div>
 
         </div>
 
         <!-- Side-by-Side Transformations 2 -->
-        <div class="transformation-showcase animate-fade-up" style="flex:0 0 100%; scroll-snap-align:center; display:flex; align-items:stretch; justify-content:center; gap:var(--space-2xl); flex-wrap:wrap;">
-          
+        <div class="transformation-showcase animate-fade-up"
+          style="flex:0 0 100%; scroll-snap-align:center; display:flex; align-items:stretch; justify-content:center; gap:var(--space-2xl); flex-wrap:wrap;">
+
           <!-- Before 2 -->
-          <div class="transform-img-wrapper" style="position:relative; width:100%; max-width:380px; height:480px; border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-md); border:4px solid white; display:flex; align-items:center; justify-content:center; background:var(--bg-alt);">
-            <div style="position:absolute; top:16px; left:16px; background:rgba(0,0,0,0.65); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); color:white; padding:6px 14px; border-radius:var(--radius-full); font-weight:700; font-size:0.85rem; letter-spacing:1px; text-transform:uppercase; z-index:2;">Before</div>
-            <img src="/assets/before2.png" alt="Before Transformation 2" style="width:100%; height:100%; object-fit:contain; display:block;" />
+          <div class="transform-img-wrapper"
+            style="position:relative; width:100%; max-width:380px; height:480px; border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-md); border:4px solid white; display:flex; align-items:center; justify-content:center; background:var(--bg-alt);">
+            <div
+              style="position:absolute; top:16px; left:16px; background:rgba(0,0,0,0.65); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); color:white; padding:6px 14px; border-radius:var(--radius-full); font-weight:700; font-size:0.85rem; letter-spacing:1px; text-transform:uppercase; z-index:2;">
+              Before</div>
+            <img src="/assets/before2.png" alt="Before Transformation 2"
+              style="width:100%; height:100%; object-fit:contain; display:block;" />
           </div>
-          
+
           <!-- Arrow -->
-          <div class="transform-arrow" style="color:var(--primary); background:white; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:3; flex-shrink:0; margin:-20px; align-self:center;">
+          <div class="transform-arrow"
+            style="color:var(--primary); background:white; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-lg); z-index:3; flex-shrink:0; margin:-20px; align-self:center;">
             <span class="material-symbols-outlined" style="font-size:36px;">arrow_forward</span>
           </div>
-          
+
           <!-- After 2 -->
-          <div class="transform-img-wrapper" style="position:relative; width:100%; max-width:380px; height:480px; border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-md); border:4px solid white; display:flex; align-items:center; justify-content:center; background:var(--bg-alt);">
-            <div style="position:absolute; top:16px; left:16px; background:var(--primary); color:white; padding:6px 14px; border-radius:var(--radius-full); font-weight:700; font-size:0.85rem; letter-spacing:1px; text-transform:uppercase; z-index:2; box-shadow:0 4px 10px rgba(30,111,92,0.4);">After</div>
-            <img src="/assets/after2.png" alt="After Transformation 2" style="width:100%; height:100%; object-fit:contain; display:block;" />
+          <div class="transform-img-wrapper"
+            style="position:relative; width:100%; max-width:380px; height:480px; border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-md); border:4px solid white; display:flex; align-items:center; justify-content:center; background:var(--bg-alt);">
+            <div
+              style="position:absolute; top:16px; left:16px; background:var(--primary); color:white; padding:6px 14px; border-radius:var(--radius-full); font-weight:700; font-size:0.85rem; letter-spacing:1px; text-transform:uppercase; z-index:2; box-shadow:0 4px 10px rgba(30,111,92,0.4);">
+              After</div>
+            <img src="/assets/after2.png" alt="After Transformation 2"
+              style="width:100%; height:100%; object-fit:contain; display:block;" />
           </div>
 
         </div>
@@ -489,31 +557,48 @@
           Click to watch the latest reels, health tips, and client transformations directly on Instagram!
         </p>
       </div>
-      
+
       <!-- Instagram Reels Grid -->
-      <div class="insta-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap:var(--space-lg); max-width:1000px; margin:0 auto;">
-        
+      <div class="insta-grid"
+        style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap:var(--space-lg); max-width:1000px; margin:0 auto;">
+
         <!-- Reel Placeholder 1 -->
-        <a href="https://www.instagram.com/dietitian.disha/" target="_blank" class="insta-item" style="position:relative; aspect-ratio:9/16; border-radius:var(--radius-xl); overflow:hidden; display:block; background:var(--bg-card); box-shadow:var(--shadow-md); transition:transform 0.3s; cursor:pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.querySelector('.play-overlay').style.opacity='1'" onmouseout="this.style.transform='translateY(0)'; this.querySelector('.play-overlay').style.opacity='0'">
-          <img src="/assets/insta1.jpeg" alt="Instagram Reel Thumbnail" style="width:100%; height:100%; object-fit:cover; display:block;" />
-          <div class="play-overlay" style="position:absolute; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s;">
-            <span class="material-symbols-outlined" style="color:white; font-size:64px; text-shadow:0 2px 10px rgba(0,0,0,0.5);">play_circle</span>
+        <a href="https://www.instagram.com/dietitian.disha/" target="_blank" class="insta-item"
+          style="position:relative; aspect-ratio:9/16; border-radius:var(--radius-xl); overflow:hidden; display:block; background:var(--bg-card); box-shadow:var(--shadow-md); transition:transform 0.3s; cursor:pointer;"
+          onmouseover="this.style.transform='translateY(-5px)'; this.querySelector('.play-overlay').style.opacity='1'"
+          onmouseout="this.style.transform='translateY(0)'; this.querySelector('.play-overlay').style.opacity='0'">
+          <img src="/assets/insta1.jpeg" alt="Instagram Reel Thumbnail"
+            style="width:100%; height:100%; object-fit:cover; display:block;" />
+          <div class="play-overlay"
+            style="position:absolute; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s;">
+            <span class="material-symbols-outlined"
+              style="color:white; font-size:64px; text-shadow:0 2px 10px rgba(0,0,0,0.5);">play_circle</span>
           </div>
         </a>
 
         <!-- Reel Placeholder 2 -->
-        <a href="https://www.instagram.com/dietitian.disha/" target="_blank" class="insta-item" style="position:relative; aspect-ratio:9/16; border-radius:var(--radius-xl); overflow:hidden; display:block; background:var(--bg-card); box-shadow:var(--shadow-md); transition:transform 0.3s; cursor:pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.querySelector('.play-overlay').style.opacity='1'" onmouseout="this.style.transform='translateY(0)'; this.querySelector('.play-overlay').style.opacity='0'">
-          <img src="/assets/insta2.jpeg" alt="Instagram Reel Thumbnail" style="width:100%; height:100%; object-fit:cover; display:block;" />
-          <div class="play-overlay" style="position:absolute; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s;">
-            <span class="material-symbols-outlined" style="color:white; font-size:64px; text-shadow:0 2px 10px rgba(0,0,0,0.5);">play_circle</span>
+        <a href="https://www.instagram.com/dietitian.disha/" target="_blank" class="insta-item"
+          style="position:relative; aspect-ratio:9/16; border-radius:var(--radius-xl); overflow:hidden; display:block; background:var(--bg-card); box-shadow:var(--shadow-md); transition:transform 0.3s; cursor:pointer;"
+          onmouseover="this.style.transform='translateY(-5px)'; this.querySelector('.play-overlay').style.opacity='1'"
+          onmouseout="this.style.transform='translateY(0)'; this.querySelector('.play-overlay').style.opacity='0'">
+          <img src="/assets/insta2.jpeg" alt="Instagram Reel Thumbnail"
+            style="width:100%; height:100%; object-fit:cover; display:block;" />
+          <div class="play-overlay"
+            style="position:absolute; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s;">
+            <span class="material-symbols-outlined"
+              style="color:white; font-size:64px; text-shadow:0 2px 10px rgba(0,0,0,0.5);">play_circle</span>
           </div>
         </a>
 
         <!-- Reel Placeholder 3 -->
-        <a href="https://www.instagram.com/dietitian.disha/" target="_blank" class="insta-item" style="position:relative; aspect-ratio:9/16; border-radius:var(--radius-xl); overflow:hidden; display:block; background:linear-gradient(135deg, #833AB4, #FD1D1D, #F77737); box-shadow:var(--shadow-md); transition:transform 0.3s; cursor:pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-          <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; padding:var(--space-md);">
+        <a href="https://www.instagram.com/dietitian.disha/" target="_blank" class="insta-item"
+          style="position:relative; aspect-ratio:9/16; border-radius:var(--radius-xl); overflow:hidden; display:block; background:linear-gradient(135deg, #833AB4, #FD1D1D, #F77737); box-shadow:var(--shadow-md); transition:transform 0.3s; cursor:pointer;"
+          onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div
+            style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; padding:var(--space-md);">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="white" class="mb-sm">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+              <path
+                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
             </svg>
             <div style="font-weight:700; font-size:1.1rem; letter-spacing:0.5px;">@dietitian.disha</div>
             <div style="font-size:0.9rem; opacity:0.9; margin-top:8px;">View More Reels</div>
@@ -521,10 +606,11 @@
         </a>
 
       </div>
-      
+
       <!-- Follow Button -->
       <div class="animate-fade-up" style="margin-top: 5rem;">
-        <a href="https://www.instagram.com/dietitian.disha/" target="_blank" class="btn btn-lg" style="background:linear-gradient(135deg,#833AB4,#FD1D1D,#F77737);color:white;box-shadow:0 4px 20px rgba(131,58,180,0.3); border-radius:var(--radius-full);">
+        <a href="https://www.instagram.com/dietitian.disha/" target="_blank" class="btn btn-lg"
+          style="background:linear-gradient(135deg,#833AB4,#FD1D1D,#F77737);color:white;box-shadow:0 4px 20px rgba(131,58,180,0.3); border-radius:var(--radius-full);">
           Follow For More Updates
         </a>
       </div>
