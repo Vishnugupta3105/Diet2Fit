@@ -1203,3 +1203,12 @@ select.form-input {
     padding: 100px 0 40px 0 !important;
   }
 }
+
+/* Global Mobile/Desktop Visibility Utility Classes */
+.desktop-only { display: block !important; }
+.mobile-only { display: none !important; }
+
+@media (max-width: 968px) {
+  .desktop-only { display: none !important; }
+  .mobile-only { display: block !important; }
+}

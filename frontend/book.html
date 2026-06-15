@@ -89,12 +89,12 @@
         </div>
         <div style="display:flex; flex-direction:column; line-height:1;">
           <span style="font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilo's</span>
-          <span style="font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-secondary); margin-top:4px;">Because real health was never about a number.</span>
+          <span class="desktop-only" style="font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-secondary); margin-top:4px;">Kilos are a symptom. Metabolism is the answer.</span>
         </div>
       </a>
-      <a href="/" class="btn btn-ghost btn-sm">
+      <a href="/" class="btn btn-ghost btn-sm" style="white-space: nowrap;">
         <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
-        Back to Home
+        Back
       </a>
     </div>
   </header>
@@ -276,12 +276,12 @@
           </div>
         </form>
 
-        <div class="flex gap-md" style="margin-top: var(--space-xl);">
+        <div class="flex gap-md" style="margin-top: var(--space-xl); flex-wrap: wrap;">
           <button class="btn btn-ghost" onclick="nextStep(1)">
             <span class="material-symbols-outlined">arrow_back</span>
             Back
           </button>
-          <button class="btn btn-primary w-full btn-lg" onclick="submitBooking()" id="btnSubmit">
+          <button class="btn btn-primary flex-1 btn-lg" onclick="submitBooking()" id="btnSubmit" style="white-space: normal; padding: 12px 16px; font-size: clamp(0.9rem, 4vw, 1.1rem); line-height: 1.2;">
             Request Free Consultation
             <span class="material-symbols-outlined">send</span>
           </button>
