@@ -89,7 +89,7 @@
         </div>
         <div style="display:flex; flex-direction:column; line-height:1;">
           <span style="font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilo's</span>
-          <span class="desktop-only" style="font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-secondary); margin-top:4px;">Kilos are a symptom. Metabolism is the answer.</span>
+          <span class="desktop-only" style="font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-secondary); margin-top:4px;">Because real health was never about a number.</span>
         </div>
       </a>
       <a href="/" class="btn btn-ghost btn-sm" style="white-space: nowrap;">
@@ -184,7 +184,7 @@
           <p style="color: var(--text-secondary);">Tell us about yourself so Dt. Disha can review your request.</p>
         </div>
 
-        <form id="bookingForm" class="flex flex-col gap-lg">
+        <form id="bookingForm" class="flex flex-col gap-lg" style="max-width: 600px; margin: 0 auto;">
           <div class="grid grid-2">
             <div class="form-group">
               <label class="form-label" for="clientName">Full Name *</label>
@@ -276,12 +276,12 @@
           </div>
         </form>
 
-        <div class="flex gap-md" style="margin-top: var(--space-xl); flex-wrap: wrap;">
+        <div class="flex gap-md booking-actions" style="max-width: 600px; margin: var(--space-xl) auto 0 auto;">
           <button class="btn btn-ghost" onclick="nextStep(1)">
             <span class="material-symbols-outlined">arrow_back</span>
             Back
           </button>
-          <button class="btn btn-primary flex-1 btn-lg" onclick="submitBooking()" id="btnSubmit" style="white-space: normal; padding: 12px 16px; font-size: clamp(0.9rem, 4vw, 1.1rem); line-height: 1.2;">
+          <button class="btn btn-primary w-full btn-lg booking-submit-btn" onclick="submitBooking()" id="btnSubmit">
             Request Free Consultation
             <span class="material-symbols-outlined">send</span>
           </button>
