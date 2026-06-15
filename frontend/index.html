@@ -105,6 +105,25 @@
       background: radial-gradient(circle, rgba(212, 168, 83, 0.15) 0%, transparent 70%);
       pointer-events: none;
     }
+  
+    /* Mobile/Desktop Visibility Utility Classes */
+    .desktop-only { display: block !important; }
+    .mobile-only { display: none !important; }
+    
+    @media (max-width: 968px) {
+      .desktop-only { display: none !important; }
+      .mobile-only { display: block !important; }
+      
+      /* Also, make sure mobile title is centered if needed */
+      .hero-content .mobile-only.hero-title {
+        margin-top: 20px;
+        margin-bottom: 24px;
+      }
+      .hero-content .mobile-only .hero-image-wrapper {
+        margin-bottom: 24px;
+      }
+    }
+
   </style>
 </head>
 
@@ -148,8 +167,28 @@
     <div class="container">
       <div class="hero-content">
         <div class="animate-fade-up">
+          <!-- Mobile Specific Order -->
+          <h1 class="hero-title mobile-only" style="font-size: clamp(2rem, 8vw, 2.8rem); line-height: 1.15; margin-bottom: var(--space-md); color: var(--primary); margin-top: 20px;">Meet the Dietitian Who <br class="hidden sm:block" /><span class="highlight">Won’t Put You on a Diet.</span></h1>
+          
+          <div class="hero-visual animate-fade-up mobile-only" style="margin-bottom: var(--space-lg);">
+            <div class="relative" style="max-width: 450px; margin-left: auto; margin-right: auto;">
+              <div class="hero-image-wrapper" style="aspect-ratio: 4/5; border-radius: var(--radius-2xl);">
+                <img src="/assets/p2.jpeg" alt="Dt. Disha at Beyond Kilo's clinic" style="object-fit: cover;" />
+              </div>
+              <div class="about-decoration"></div>
+              <div class="hero-float-card animate-float" style="bottom: 30px; right: -20px;">
+                <div class="text-center">
+                  <div style="font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--primary);">6+</div>
+                  <div class="text-label" style="color:var(--text-muted);">Years Experience</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="text-label mb-md" style="color: #b48310; letter-spacing: 1.5px; font-weight: 800;">M.Sc. Clinical Dietetics (spec. Cardiac & Diabetes)</div>
-          <h1 class="hero-title" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem); line-height: 1.15; margin-bottom: var(--space-lg); color: var(--primary);">Meet the Dietitian Who <br class="hidden sm:block" /><span class="highlight">Won’t Put You on a Diet.</span></h1>
+          
+          <!-- Desktop Specific Title -->
+          <h1 class="hero-title desktop-only" style="font-size: clamp(1.8rem, 3.5vw, 2.8rem); line-height: 1.15; margin-bottom: var(--space-lg); color: var(--primary);">Meet the Dietitian Who <br class="hidden sm:block" /><span class="highlight">Won’t Put You on a Diet.</span></h1>
           <p class="text-body-lg mb-md" style="color: var(--text-secondary); line-height: 1.6;">
             Hi, I’m <strong>Dt. Disha</strong>. I help you take back control of your health by connecting the dots between your lab reports, your lifestyle, and your plate. 
             <em style="color:var(--text); font-weight:500;">Real food, real science, real results.</em>
@@ -188,7 +227,7 @@
           </div>
         </div>
 
-        <div class="hero-visual animate-fade-up" style="transition-delay: 0.2s;">
+        <div class="hero-visual animate-fade-up desktop-only" style="transition-delay: 0.2s;">
           <div class="relative" style="max-width: 450px; margin-left: auto;">
             <div class="hero-image-wrapper" style="aspect-ratio: 4/5; border-radius: var(--radius-2xl);">
               <img src="/assets/p2.jpeg" alt="Dt. Disha at Beyond Kilo's clinic" style="object-fit: cover;" />
@@ -549,7 +588,7 @@
             </div>
             <div class="flex items-center gap-sm">
               <span class="material-symbols-outlined" style="font-size:18px;color:var(--primary-dim);">mail</span>
-              <a href="mailto:hello@beyondkilos.com" style="font-size:0.9rem;">hello@beyondkilos.com</a>
+              <a href="mailto:diticiandisha29@gmail.com" style="font-size:0.9rem;">diticiandisha29@gmail.com</a>
             </div>
           </div>
         </div>
