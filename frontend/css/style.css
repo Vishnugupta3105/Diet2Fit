@@ -1238,4 +1238,16 @@ select.form-input {
     font-size: 0.95rem !important;
     line-height: 1.2 !important;
   }
+  .stats-grid {
+    gap: 8px !important;
+  }
+  .stat-card {
+    padding: 12px 8px !important;
+  }
+  .stat-number {
+    font-size: 1.4rem !important;
+  }
+  .stat-label {
+    font-size: 0.75rem !important;
+  }
 }
