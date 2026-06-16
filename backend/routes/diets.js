@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const db = require('../db/database');
+const { authenticate, requireAdmin } = require('../middleware/auth');
 // Removed Cloudinary configs since we are storing in PostgreSQL DB now
 
 const storage = multer.memoryStorage();
