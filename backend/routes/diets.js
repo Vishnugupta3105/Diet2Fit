@@ -47,10 +47,11 @@ router.get('/:clientId', authenticate, async (req, res) => {
     
     // Build proper URLs for each plan
     const plans = plansRes.rows.map(plan => {
-      // Inject fl_attachment to force download. This works cleanly because Cloudinary handles PDFs as 'image' resource type now.
-      const downloadUrl = plan.filepath.includes('/upload/') 
-        ? plan.filepath.replace('/upload/', '/upload/fl_attachment/') 
-        : plan.filepath;
+      // Inject fl_attachment to force download only if it's an image. Raw files don't support transformations.
+      let downloadUrl = plan.filepath;
+      if (plan.filepath.includes('/image/upload/')) {
+        downloadUrl = plan.filepath.replace('/image/upload/', '/image/upload/fl_attachment/');
+      }
 
       return {
         ...plan,
