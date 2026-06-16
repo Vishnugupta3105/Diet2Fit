@@ -16,9 +16,13 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
+    // Extract original extension
+    const ext = file.originalname.split('.').pop() || 'pdf';
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     return {
       folder: 'diet2fit_diets',
-      resource_type: 'raw' // Upload PDFs as raw documents to fix Cloudinary delivery restrictions
+      resource_type: 'raw', // Upload PDFs as raw documents to fix Cloudinary delivery restrictions
+      public_id: `diet_${uniqueSuffix}.${ext}` // Explicitly add extension so clients download it as a PDF
     };
   },
 });

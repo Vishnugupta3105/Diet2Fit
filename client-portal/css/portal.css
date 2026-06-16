@@ -677,10 +677,26 @@
   
   /* Prevent chart overflow */
   .chart-container {
-    padding: var(--space-md);
+    padding: var(--space-sm);
     overflow: hidden;
   }
   .portal-layout {
     overflow-x: hidden;
   }
+  
+  /* Reduce padding on mobile to prevent cards from pushing out of the viewport */
+  .portal-main {
+    padding: var(--space-sm);
+    padding-top: 80px;
+  }
+  .card-flat, .card, .appointment-card, .diet-card {
+    padding: var(--space-md) !important;
+  }
+}
+
+/* Fix text overflow issues on long emails or filenames */
+.appointment-info, .text-caption, .diet-file {
+  word-break: break-word;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
 }
