@@ -225,8 +225,13 @@
           
           if (confirm(msg + `Would you like to share these credentials directly with the client on WhatsApp?`)) {
             let phoneStr = (data.phone || '').replace(/\D/g, '');
+            // Most Indian users enter 10 digits without +91. WhatsApp requires the country code.
+            if (phoneStr.length === 10) {
+              phoneStr = '91' + phoneStr;
+            }
             if (phoneStr) {
-              window.location.href = `https://wa.me/${phoneStr}?text=${encodeURIComponent(waMessage)}`;
+              // Use api.whatsapp.com directly. Sometimes wa.me fails to trigger intents properly after redirects.
+              window.location.href = `https://api.whatsapp.com/send?phone=${phoneStr}&text=${encodeURIComponent(waMessage)}`;
             } else {
               alert('Could not find a valid phone number for this client.');
             }
