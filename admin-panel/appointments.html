@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Appointments — Beyond Kilo's Admin</title>
+  <title>Appointments — Beyond Kilos Admin</title>
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/portal/css/portal.css" />
   <link rel="stylesheet" href="css/admin.css" />
@@ -16,7 +16,7 @@
             <img src="/img/logo.png" alt="Logo" style="height:100%; width:100%; object-fit:cover;">
           </div>
           <div style="display:flex; flex-direction:column; line-height:1;">
-            <span style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilo's</span>
+            <span style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilos</span>
             <span style="font-size:0.55rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:4px;">Because real health was never about a number.</span>
           </div>
         </span><button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button></div></div>
@@ -27,7 +27,7 @@
           <img src="/img/logo.png" alt="Logo" style="height:100%; width:100%; object-fit:cover;">
         </div>
         <div style="display:flex; flex-direction:column; line-height:1; text-align:left;">
-          <span style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilo's</span>
+          <span style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilos</span>
           <span style="font-size:0.6rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:6px;">Because real health was never about a number.</span>
         </div>
       </div><div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
@@ -215,16 +215,26 @@
           body: JSON.stringify({ password: customPassword })
         });
         
-        let msg = data.message + '\n\n';
-        msg += `Email: ${data.email}\n`;
+        let waMessage = `Hello! Your Beyond Kilos client portal account is ready.\n\nLogin URL: https://www.gobeyondkilos.com/login.html\nUsername (Email): ${data.email}`;
+        
+        let msg = data.message + '\n\nEmail: ' + data.email + '\n';
+        
         if (data.password) {
           msg += `Generated Password: ${data.password}\n\n`;
-          msg += `Please copy this password and send it to the client via WhatsApp so they can log in to their portal!`;
+          waMessage += `\nPassword: ${data.password}\n\nPlease keep this secure. You can log in to access your diet plans and track your progress!`;
+          
+          if (confirm(msg + `Would you like to share these credentials directly with the client on WhatsApp?`)) {
+            let phoneStr = (data.phone || '').replace(/\D/g, '');
+            if (phoneStr) {
+              window.open(`https://wa.me/${phoneStr}?text=${encodeURIComponent(waMessage)}`, '_blank');
+            } else {
+              alert('Could not find a valid phone number for this client.');
+            }
+          }
         } else {
           msg += `This user already had an account, so they can log in with their existing password.`;
+          alert(msg);
         }
-        
-        alert(msg);
         loadAppts();
       } catch (err) { BeyondKilos.showToast(err.message || 'Failed to confirm client', 'error'); }
     }

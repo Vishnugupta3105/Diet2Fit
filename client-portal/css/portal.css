@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   Beyond Kilo's — Client Portal Styles
+   Beyond Kilos — Client Portal Styles
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Portal Layout ─────────────────────────────────────────────── */
@@ -622,10 +622,65 @@
 }
 
 /* ── Responsive ────────────────────────────────────────────────── */
+/* Weight Tracker Form */
+.log-weight-form {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.log-weight-form .form-group-date,
+.log-weight-form .form-group-weight {
+  flex: 1;
+  min-width: 130px;
+}
+.log-weight-form .form-group-notes {
+  flex: 2;
+  min-width: 180px;
+}
+.log-weight-form .btn-save {
+  height: 48px;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .log-weight-form .form-group-notes {
+    flex: 1 1 100%;
+    order: 3;
+  }
+  .log-weight-form .btn-save {
+    flex: 1 1 100%;
+    order: 4;
+  }
+}
+
 @media (max-width: 640px) {
   .dashboard-grid { grid-template-columns: 1fr; }
   .dashboard-grid-wide { grid-template-columns: 1fr; }
   .chart-header { flex-direction: column; align-items: flex-start; }
   .video-local { width: 120px; bottom: 80px; right: 10px; }
   .appointment-card { flex-direction: column; align-items: flex-start; }
+  
+  .log-weight-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-sm);
+  }
+  .log-weight-form > * {
+    flex: 1 1 100% !important;
+    min-width: 100% !important;
+    order: unset !important;
+  }
+  .log-weight-form .btn-save {
+    margin-top: var(--space-xs);
+  }
+  
+  /* Prevent chart overflow */
+  .chart-container {
+    padding: var(--space-md);
+    overflow: hidden;
+  }
+  .portal-layout {
+    overflow-x: hidden;
+  }
 }

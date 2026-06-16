@@ -275,6 +275,7 @@ router.post('/:id/confirm-client', authenticate, requireAdmin, async (req, res) 
     res.json({
       message: 'Client confirmed and account created.',
       email: appt.client_email,
+      phone: appt.client_phone,
       password: newPassword, // Will be null if user already existed
       userId: userId
     });

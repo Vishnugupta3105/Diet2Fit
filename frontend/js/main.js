@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   Beyond Kilo's — Main Frontend JavaScript
+   Beyond Kilos — Main Frontend JavaScript
    Handles animations, navbar, and common interactions
    ═══════════════════════════════════════════════════════════════ */
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Weight Tracker — Beyond Kilo's</title>
+  <title>Weight Tracker — Beyond Kilos</title>
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="css/portal.css" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -18,7 +18,7 @@
             <img src="/img/logo.png" alt="Logo" style="height:100%; width:100%; object-fit:cover;">
           </div>
           <div style="display:flex; flex-direction:column; line-height:1;">
-            <span style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilo's</span>
+            <span style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilos</span>
             <span style="font-size:0.55rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:4px;">Because real health was never about a number.</span>
           </div>
         </span>
@@ -33,7 +33,7 @@
           <img src="/img/logo.png" alt="Logo" style="height:100%; width:100%; object-fit:cover;">
         </div>
         <div style="display:flex; flex-direction:column; line-height:1; text-align:left;">
-          <span style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilo's</span>
+          <span style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilos</span>
           <span style="font-size:0.6rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:6px;">Because real health was never about a number.</span>
         </div>
       </div>
@@ -62,20 +62,20 @@
           <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;color:var(--primary);margin-right:6px;">add_circle</span>
           Log Your Weight
         </h3>
-        <form id="weightForm" class="flex gap-md items-end" style="flex-wrap:wrap;">
-          <div class="form-group" style="flex:1;min-width:140px;">
+        <form id="weightForm" class="log-weight-form">
+          <div class="form-group form-group-date">
             <label class="form-label" for="weightDate">Date</label>
             <input type="date" id="weightDate" class="form-input" required />
           </div>
-          <div class="form-group" style="flex:1;min-width:140px;">
+          <div class="form-group form-group-weight">
             <label class="form-label" for="weightValue">Weight (kg)</label>
             <input type="number" id="weightValue" class="form-input" step="0.1" min="20" max="300" placeholder="e.g. 72.5" required />
           </div>
-          <div class="form-group" style="flex:2;min-width:200px;">
+          <div class="form-group form-group-notes">
             <label class="form-label" for="weightNotes">Notes (optional)</label>
             <input type="text" id="weightNotes" class="form-input" placeholder="How you're feeling today..." />
           </div>
-          <button type="submit" class="btn btn-primary" id="btnLogWeight" style="height:48px;">
+          <button type="submit" class="btn btn-primary btn-save" id="btnLogWeight">
             <span class="material-symbols-outlined" style="font-size:20px;">save</span>
             Save
           </button>

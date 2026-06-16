@@ -16,11 +16,9 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
-    const isPdf = file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf');
     return {
       folder: 'diet2fit_diets',
-      resource_type: 'image', // Upload PDFs as 'image' so Cloudinary allows inline preview and fl_attachment
-      format: isPdf ? 'pdf' : undefined, 
+      resource_type: 'raw' // Upload PDFs as raw documents to fix Cloudinary delivery restrictions
     };
   },
 });
@@ -101,10 +99,11 @@ router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   const id = req.params.id;
   try {
     // Delete from Cloudinary if we have the public_id
-    const planRes = await db.query('SELECT public_id FROM diet_plans WHERE id = $1', [id]);
+    const planRes = await db.query('SELECT public_id, filepath FROM diet_plans WHERE id = $1', [id]);
     if (planRes.rows.length > 0 && planRes.rows[0].public_id) {
       try {
-        await cloudinary.uploader.destroy(planRes.rows[0].public_id, { resource_type: 'raw' });
+        const isImage = planRes.rows[0].filepath.includes('/image/upload/');
+        await cloudinary.uploader.destroy(planRes.rows[0].public_id, { resource_type: isImage ? 'image' : 'raw' });
       } catch (e) {
         console.error('Cloudinary delete error:', e.message);
       }
