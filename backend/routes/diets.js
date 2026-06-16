@@ -1,32 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { v2: cloudinary } = require('cloudinary');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const db = require('../db/database');
-const { authenticate, requireAdmin } = require('../middleware/auth');
+// Removed Cloudinary configs since we are storing in PostgreSQL DB now
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: async (req, file) => {
-    // Extract original extension
-    const ext = file.originalname.split('.').pop() || 'pdf';
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    return {
-      folder: 'diet2fit_diets',
-      resource_type: 'raw', // Upload PDFs as raw documents to fix Cloudinary delivery restrictions
-      public_id: `diet_${uniqueSuffix}.${ext}` // Explicitly add extension so clients download it as a PDF
-    };
-  },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ 
   storage: storage,
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
@@ -43,19 +20,29 @@ router.get('/:clientId', authenticate, async (req, res) => {
   }
 
   try {
-    const plansRes = await db.query('SELECT * FROM diet_plans WHERE client_id = $1 ORDER BY created_at DESC', [clientId]);
+    const plansRes = await db.query('SELECT id, client_id, filename, original_name, filepath, notes, created_at FROM diet_plans WHERE client_id = $1 ORDER BY created_at DESC', [clientId]);
     
+    // Extract token to append to local URLs
+    const tokenStr = req.headers.authorization ? req.headers.authorization.split(' ')[1] : '';
+
     // Build proper URLs for each plan
     const plans = plansRes.rows.map(plan => {
-      // Inject fl_attachment to force download only if it's an image. Raw files don't support transformations.
+      // If it has a file_data entry in the DB, route to our local endpoint
       let downloadUrl = plan.filepath;
-      if (plan.filepath.includes('/image/upload/')) {
+      let previewUrl = plan.filepath;
+      
+      if (plan.filepath && plan.filepath.includes('/api/diets/download/')) {
+        // Safe to attach token since we're using our own backend.
+        downloadUrl = `/api/diets/download/${plan.id}?token=${tokenStr}`;
+        previewUrl = `/api/diets/download/${plan.id}?token=${tokenStr}`;
+      } else if (plan.filepath && plan.filepath.includes('/image/upload/')) {
+        // Legacy Cloudinary fallback
         downloadUrl = plan.filepath.replace('/image/upload/', '/image/upload/fl_attachment/');
       }
 
       return {
         ...plan,
-        preview_url: plan.filepath, // Original URL for browser viewing
+        preview_url: previewUrl,
         download_url: downloadUrl,
       };
     });
@@ -79,19 +66,20 @@ router.post('/', authenticate, requireAdmin, upload.single('diet_file'), async (
   }
 
   try {
-    // req.file.path contains the secure URL from Cloudinary
-    const filepath = req.file.path;
-    const filename = req.file.filename;
-    const original_name = req.file.originalname || filename;
-    const public_id = req.file.filename || null; // Cloudinary public_id
+    const filename = req.file.originalname;
+    const original_name = req.file.originalname;
+    const file_data = req.file.buffer; // Binary PDF data
+    
+    // We set filepath to point to our new local download route
+    const filepath = `/api/diets/download/`; 
     
     const result = await db.query(`
-      INSERT INTO diet_plans (client_id, filename, original_name, filepath, public_id, notes)
+      INSERT INTO diet_plans (client_id, filename, original_name, filepath, file_data, notes)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id
-    `, [client_id, filename, original_name, filepath, public_id, notes || '']);
+    `, [client_id, filename, original_name, filepath, file_data, notes || '']);
 
-    const newPlanRes = await db.query('SELECT * FROM diet_plans WHERE id = $1', [result.rows[0].id]);
+    const newPlanRes = await db.query('SELECT id, client_id, filename, original_name, filepath, notes, created_at FROM diet_plans WHERE id = $1', [result.rows[0].id]);
     res.status(201).json({ message: 'Diet plan uploaded successfully.', plan: newPlanRes.rows[0] });
   } catch (err) {
     console.error(err);
@@ -99,18 +87,47 @@ router.post('/', authenticate, requireAdmin, upload.single('diet_file'), async (
   }
 });
 
+// GET /api/diets/download/:id - Download a diet plan directly from DB
+router.get('/download/:id', authenticate, async (req, res) => {
+  const id = req.params.id;
+  try {
+    const planRes = await db.query('SELECT client_id, filename, file_data FROM diet_plans WHERE id = $1', [id]);
+    if (planRes.rows.length === 0 || !planRes.rows[0].file_data) {
+      return res.status(404).send('File not found in database.');
+    }
+    
+    const plan = planRes.rows[0];
+    
+    // Admins can view any, clients can only view their own
+    if (req.user.role !== 'admin' && req.user.id !== plan.client_id) {
+      return res.status(403).send('Unauthorized to view this file.');
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    // If we want it to open in browser (preview) vs force download
+    // Since browser can open PDF, 'inline' is usually preferred for preview, 'attachment' for download
+    res.setHeader('Content-Disposition', `inline; filename="${plan.filename}"`);
+    res.send(plan.file_data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Database error fetching file.');
+  }
+});
+
 // DELETE /api/diets/:id - Delete a diet plan (Admin only)
 router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   const id = req.params.id;
   try {
-    // Delete from Cloudinary if we have the public_id
+    // Note: We don't need to delete from Cloudinary anymore for new files, 
+    // but we can try for legacy files if public_id exists.
     const planRes = await db.query('SELECT public_id, filepath FROM diet_plans WHERE id = $1', [id]);
     if (planRes.rows.length > 0 && planRes.rows[0].public_id) {
       try {
+        const { v2: cloudinary } = require('cloudinary');
         const isImage = planRes.rows[0].filepath.includes('/image/upload/');
         await cloudinary.uploader.destroy(planRes.rows[0].public_id, { resource_type: isImage ? 'image' : 'raw' });
       } catch (e) {
-        console.error('Cloudinary delete error:', e.message);
+        console.error('Cloudinary delete legacy error:', e.message);
       }
     }
 
