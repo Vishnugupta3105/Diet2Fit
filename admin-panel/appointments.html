@@ -274,7 +274,8 @@
     // ═══ Today's Appointments ═══
     async function loadTodayAppts() {
       try {
-        const data = await BeyondKilos.apiRequest('/api/appointments?today=true');
+        const todayStr = new Date().toISOString().split('T')[0]; // Admin's local date
+        const data = await BeyondKilos.apiRequest(`/api/appointments?from=${todayStr}&to=${todayStr}`);
         const todayAppts = data.appointments || [];
         const list = document.getElementById('todayList');
         const noEl = document.getElementById('noToday');
