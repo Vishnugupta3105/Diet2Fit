@@ -2,52 +2,61 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db/database');
 const { authenticate, requireAdmin } = require('../middleware/auth');
+const bcrypt = require('bcryptjs');
 
 const router = express.Router();
 
 /**
  * POST /api/appointments
- * Book a consultation (public or authenticated)
+ * Book a consultation — can be public (from landing page) or admin-initiated
  */
 router.post('/', async (req, res) => {
   try {
-    const { client_name, client_email, client_phone, type, goal, preferred_date, preferred_time, notes, client_id, client_weight_kg, client_height_cm, client_age, client_gender, client_bmi } = req.body;
+    const { client_name, client_email, client_phone, type, goal, preferred_date, preferred_time, notes, client_id, client_weight_kg, client_height_cm, client_age, client_gender, client_bmi, is_followup } = req.body;
 
-    if (!client_name || !client_phone) {
-      return res.status(400).json({ error: 'Name and phone number are required.' });
+    if (!client_name && !client_id) {
+      return res.status(400).json({ error: 'Client name or client_id is required.' });
+    }
+
+    // If client_id is provided but no name/phone, look them up
+    let name = client_name;
+    let phone = client_phone;
+    let email = client_email;
+
+    if (client_id && (!name || !phone)) {
+      const userRes = await db.query('SELECT name, email, phone FROM users WHERE id = $1', [client_id]);
+      if (userRes.rows.length > 0) {
+        name = name || userRes.rows[0].name;
+        phone = phone || userRes.rows[0].phone;
+        email = email || userRes.rows[0].email;
+      }
     }
 
     const roomId = uuidv4().slice(0, 8);
 
     const result = await db.query(`
-      INSERT INTO appointments (client_id, client_name, client_email, client_phone, client_weight_kg, client_height_cm, client_age, client_gender, client_bmi, type, goal, preferred_date, preferred_time, notes, room_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      INSERT INTO appointments (client_id, client_name, client_email, client_phone, client_weight_kg, client_height_cm, client_age, client_gender, client_bmi, type, goal, preferred_date, preferred_time, notes, room_id, status, is_followup)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING id
     `, [
       client_id || null,
-      client_name,
-      client_email || null,
-      client_phone,
+      name,
+      email || null,
+      phone || null,
       client_weight_kg || null,
       client_height_cm || null,
       client_age || null,
       client_gender || null,
       client_bmi || null,
       type || 'whatsapp',
-      goal || null,
+      goal || 'Consultation',
       preferred_date || null,
       preferred_time || null,
       notes || null,
-      roomId
+      roomId,
+      client_id ? 'confirmed' : 'pending', // Admin-booked = confirmed, public = pending
+      is_followup || false
     ]);
-
-    // Mark the slot as booked if a matching slot exists
-    if (preferred_date && preferred_time) {
-      await db.query(
-        'UPDATE available_slots SET is_booked = true, booked_by = $1 WHERE slot_date = $2 AND slot_time = $3 AND is_booked = false',
-        [client_id || null, preferred_date, preferred_time]
-      );
-    }
 
     const appointmentRes = await db.query('SELECT * FROM appointments WHERE id = $1', [result.rows[0].id]);
     res.status(201).json({ appointment: appointmentRes.rows[0] });
@@ -63,7 +72,7 @@ router.post('/', async (req, res) => {
  */
 router.get('/', authenticate, async (req, res) => {
   try {
-    const { status, from, to } = req.query;
+    const { status, from, to, today } = req.query;
 
     let query, params;
     let paramIndex = 1;
@@ -89,8 +98,11 @@ router.get('/', authenticate, async (req, res) => {
       query += ` AND preferred_date <= $${paramIndex++}`;
       params.push(to);
     }
+    if (today === 'true') {
+      query += ` AND preferred_date = CURRENT_DATE`;
+    }
 
-    query += ' ORDER BY created_at DESC';
+    query += ' ORDER BY preferred_date ASC, preferred_time ASC';
 
     const appointmentsRes = await db.query(query, params);
     res.json({ appointments: appointmentsRes.rows });
@@ -173,51 +185,9 @@ router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
 });
 
 /**
- * PUT /api/appointments/:id/link
- * Link an appointment to a newly registered client
- */
-router.put('/:id/link', async (req, res) => {
-  try {
-    const { client_id } = req.body;
-    if (!client_id) {
-      return res.status(400).json({ error: 'client_id is required.' });
-    }
-
-    const existingRes = await db.query('SELECT * FROM appointments WHERE id = $1', [req.params.id]);
-    if (existingRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Appointment not found.' });
-    }
-
-    await db.query(
-      'UPDATE appointments SET client_id = $1, updated_at = NOW() WHERE id = $2',
-      [client_id, req.params.id]
-    );
-
-    // Also update the slot's booked_by
-    const appt = existingRes.rows[0];
-    if (appt.preferred_date && appt.preferred_time) {
-      await db.query(
-        'UPDATE available_slots SET booked_by = $1 WHERE slot_date = $2 AND slot_time = $3',
-        [client_id, appt.preferred_date, appt.preferred_time]
-      );
-    }
-
-    const updatedRes = await db.query('SELECT * FROM appointments WHERE id = $1', [req.params.id]);
-    res.json({ appointment: updatedRes.rows[0] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-module.exports = router;
-
-/**
  * POST /api/appointments/:id/confirm-client
  * Confirm a pending appointment and create a new client account
  */
-const bcrypt = require('bcryptjs');
-
 router.post('/:id/confirm-client', authenticate, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
@@ -246,7 +216,7 @@ router.post('/:id/confirm-client', authenticate, requireAdmin, async (req, res) 
       userId = existingUserRes.rows[0].id;
     } else {
       // Create new user
-      newPassword = req.body.password || Math.random().toString(36).slice(-8); // Generate 8-char password if not provided
+      newPassword = req.body.password || Math.random().toString(36).slice(-8);
       const hash = bcrypt.hashSync(newPassword, 10);
       
       const userRes = await db.query(`
@@ -276,7 +246,7 @@ router.post('/:id/confirm-client', authenticate, requireAdmin, async (req, res) 
       message: 'Client confirmed and account created.',
       email: appt.client_email,
       phone: appt.client_phone,
-      password: newPassword, // Will be null if user already existed
+      password: newPassword,
       userId: userId
     });
 
@@ -285,3 +255,5 @@ router.post('/:id/confirm-client', authenticate, requireAdmin, async (req, res) 
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+module.exports = router;

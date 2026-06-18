@@ -35,7 +35,6 @@
         <a href="weight-tracker.html" class="sidebar-link"><span class="material-symbols-outlined">monitor_weight</span>Weight Tracker</a>
         <a href="appointments.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">calendar_month</span>Appointments</a>
 
-        <a href="video-call.html" class="sidebar-link"><span class="material-symbols-outlined">videocam</span>Video Call</a>
       </div>
       <div class="sidebar-user"><div class="sidebar-user-avatar" id="userAvatar">—</div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Loading...</div><div class="sidebar-user-role">Client</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
     </nav>
@@ -122,7 +121,6 @@
             </div>
           </div>
           <div class="flex items-center gap-md">
-            ${appt.status === 'confirmed' && appt.type === 'video' ? `<a href="video-call.html?room=${appt.room_id}" class="btn btn-primary btn-sm"><span class="material-symbols-outlined" style="font-size:16px;">videocam</span>Join Call</a>` : ''}
             ${getStatusBadge(appt.status)}
           </div>
         `;
