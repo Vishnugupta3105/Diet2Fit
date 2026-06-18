@@ -1,54 +1,73 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const { createClient } = require('@supabase/supabase-js');
 const db = require('../db/database');
 const { authenticate, requireAdmin } = require('../middleware/auth');
-// Removed Cloudinary configs since we are storing in PostgreSQL DB now
 
-const storage = multer.memoryStorage();
-const upload = multer({ 
-  storage: storage,
+// ── Supabase Storage Setup ────────────────────────────────────────
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY // service_role key bypasses RLS for server-side uploads
+);
+
+const BUCKET = 'diet-plans';
+
+// Use memory storage so we get the file buffer to upload to Supabase
+const upload = multer({
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
+// ── IMPORTANT: Put /download/:id BEFORE /:clientId ────────────────
+// Otherwise Express matches "download" as a clientId parameter
+
+// GET /api/diets/download/:id - Serve the file from Supabase Storage
+router.get('/download/:id', authenticate, async (req, res) => {
+  const id = req.params.id;
+  try {
+    const planRes = await db.query('SELECT client_id, filename, original_name, filepath FROM diet_plans WHERE id = $1', [id]);
+    if (planRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Diet plan not found.' });
+    }
+
+    const plan = planRes.rows[0];
+
+    // Auth check: admins can view any, clients only their own
+    if (req.user.role !== 'admin' && req.user.id !== plan.client_id) {
+      return res.status(403).json({ error: 'Unauthorized to view this file.' });
+    }
+
+    // Redirect to the public Supabase Storage URL
+    res.redirect(plan.filepath);
+  } catch (err) {
+    console.error('Download error:', err);
+    res.status(500).json({ error: 'Error fetching diet plan.' });
+  }
+});
+
 // GET /api/diets/:clientId - Get diets for a specific client
-// Admins can view any, clients can only view their own
 router.get('/:clientId', authenticate, async (req, res) => {
   const clientId = parseInt(req.params.clientId, 10);
-  
-  // NOTE: req.user.id is used because in our JWT we attach id, not userId
+
   if (req.user.role !== 'admin' && req.user.id !== clientId) {
     return res.status(403).json({ error: 'Unauthorized to view these diet plans.' });
   }
 
   try {
-    const plansRes = await db.query('SELECT id, client_id, filename, original_name, filepath, notes, created_at FROM diet_plans WHERE client_id = $1 ORDER BY created_at DESC', [clientId]);
-    
-    // Extract token to append to local URLs
-    const tokenStr = req.headers.authorization ? req.headers.authorization.split(' ')[1] : '';
+    const plansRes = await db.query(
+      'SELECT id, client_id, filename, original_name, filepath, notes, created_at FROM diet_plans WHERE client_id = $1 ORDER BY created_at DESC',
+      [clientId]
+    );
 
-    // Build proper URLs for each plan
     const plans = plansRes.rows.map(plan => {
-      // If it has a file_data entry in the DB, route to our local endpoint
-      let downloadUrl = plan.filepath;
-      let previewUrl = plan.filepath;
-      
-      if (plan.filepath && plan.filepath.includes('/api/diets/download/')) {
-        // Safe to attach token since we're using our own backend.
-        downloadUrl = `/api/diets/download/${plan.id}?token=${tokenStr}`;
-        previewUrl = `/api/diets/download/${plan.id}?token=${tokenStr}`;
-      } else if (plan.filepath && plan.filepath.includes('/image/upload/')) {
-        // Legacy Cloudinary fallback
-        downloadUrl = plan.filepath.replace('/image/upload/', '/image/upload/fl_attachment/');
-      }
-
       return {
         ...plan,
-        preview_url: previewUrl,
-        download_url: downloadUrl,
+        preview_url: plan.filepath,   // Direct Supabase public URL - opens in browser
+        download_url: plan.filepath,  // Same URL - browser handles PDF download
       };
     });
-    
+
     res.json({ plans });
   } catch (err) {
     console.error(err);
@@ -68,51 +87,47 @@ router.post('/', authenticate, requireAdmin, upload.single('diet_file'), async (
   }
 
   try {
-    const filename = req.file.originalname;
-    const original_name = req.file.originalname;
-    const file_data = req.file.buffer; // Binary PDF data
-    
-    // We set filepath to point to our new local download route
-    const filepath = `/api/diets/download/`; 
-    
-    const result = await db.query(`
-      INSERT INTO diet_plans (client_id, filename, original_name, filepath, file_data, notes)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id
-    `, [client_id, filename, original_name, filepath, file_data, notes || '']);
+    // Generate a unique filename for Supabase Storage
+    const ext = req.file.originalname.split('.').pop() || 'pdf';
+    const uniqueName = `client_${client_id}/${Date.now()}_${Math.round(Math.random() * 1E9)}.${ext}`;
 
-    const newPlanRes = await db.query('SELECT id, client_id, filename, original_name, filepath, notes, created_at FROM diet_plans WHERE id = $1', [result.rows[0].id]);
+    // Upload file buffer to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from(BUCKET)
+      .upload(uniqueName, req.file.buffer, {
+        contentType: req.file.mimetype || 'application/pdf',
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error('Supabase upload error:', uploadError);
+      return res.status(500).json({ error: 'Failed to upload file to storage: ' + uploadError.message });
+    }
+
+    // Get the public URL for the uploaded file
+    const { data: urlData } = supabase.storage
+      .from(BUCKET)
+      .getPublicUrl(uniqueName);
+
+    const publicUrl = urlData.publicUrl;
+    const original_name = req.file.originalname;
+
+    // Save to database
+    const result = await db.query(`
+      INSERT INTO diet_plans (client_id, filename, original_name, filepath, notes)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id
+    `, [client_id, uniqueName, original_name, publicUrl, notes || '']);
+
+    const newPlanRes = await db.query(
+      'SELECT id, client_id, filename, original_name, filepath, notes, created_at FROM diet_plans WHERE id = $1',
+      [result.rows[0].id]
+    );
+
     res.status(201).json({ message: 'Diet plan uploaded successfully.', plan: newPlanRes.rows[0] });
   } catch (err) {
-    console.error(err);
+    console.error('Upload error:', err);
     res.status(500).json({ error: 'Database error saving diet plan.' });
-  }
-});
-
-// GET /api/diets/download/:id - Download a diet plan directly from DB
-router.get('/download/:id', authenticate, async (req, res) => {
-  const id = req.params.id;
-  try {
-    const planRes = await db.query('SELECT client_id, filename, file_data FROM diet_plans WHERE id = $1', [id]);
-    if (planRes.rows.length === 0 || !planRes.rows[0].file_data) {
-      return res.status(404).send('File not found in database.');
-    }
-    
-    const plan = planRes.rows[0];
-    
-    // Admins can view any, clients can only view their own
-    if (req.user.role !== 'admin' && req.user.id !== plan.client_id) {
-      return res.status(403).send('Unauthorized to view this file.');
-    }
-
-    res.setHeader('Content-Type', 'application/pdf');
-    // If we want it to open in browser (preview) vs force download
-    // Since browser can open PDF, 'inline' is usually preferred for preview, 'attachment' for download
-    res.setHeader('Content-Disposition', `inline; filename="${plan.filename}"`);
-    res.send(plan.file_data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Database error fetching file.');
   }
 });
 
@@ -120,19 +135,25 @@ router.get('/download/:id', authenticate, async (req, res) => {
 router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   const id = req.params.id;
   try {
-    // Note: We don't need to delete from Cloudinary anymore for new files, 
-    // but we can try for legacy files if public_id exists.
-    const planRes = await db.query('SELECT public_id, filepath FROM diet_plans WHERE id = $1', [id]);
-    if (planRes.rows.length > 0 && planRes.rows[0].public_id) {
-      try {
-        const { v2: cloudinary } = require('cloudinary');
-        const isImage = planRes.rows[0].filepath.includes('/image/upload/');
-        await cloudinary.uploader.destroy(planRes.rows[0].public_id, { resource_type: isImage ? 'image' : 'raw' });
-      } catch (e) {
-        console.error('Cloudinary delete legacy error:', e.message);
+    const planRes = await db.query('SELECT filename, filepath FROM diet_plans WHERE id = $1', [id]);
+    if (planRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Diet plan not found.' });
+    }
+
+    const plan = planRes.rows[0];
+
+    // Delete from Supabase Storage (if it's a Supabase URL)
+    if (plan.filepath && plan.filepath.includes('supabase.co')) {
+      const { error: deleteError } = await supabase.storage
+        .from(BUCKET)
+        .remove([plan.filename]);
+
+      if (deleteError) {
+        console.error('Supabase delete error:', deleteError.message);
       }
     }
 
+    // Delete from database
     await db.query('DELETE FROM diet_plans WHERE id = $1', [id]);
     res.json({ message: 'Diet plan deleted successfully.' });
   } catch (err) {

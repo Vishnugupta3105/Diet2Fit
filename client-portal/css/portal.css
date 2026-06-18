@@ -657,9 +657,8 @@
 @media (max-width: 640px) {
   .dashboard-grid { grid-template-columns: 1fr; }
   .dashboard-grid-wide { grid-template-columns: 1fr; }
-  .chart-header { flex-direction: column; align-items: flex-start; }
+  .chart-header { flex-direction: column; align-items: flex-start; gap: 8px; }
   .video-local { width: 120px; bottom: 80px; right: 10px; }
-  .appointment-card { flex-direction: column; align-items: flex-start; }
   
   .log-weight-form {
     flex-direction: column;
@@ -680,23 +679,161 @@
     padding: var(--space-sm);
     overflow: hidden;
   }
-  .portal-layout {
+}
+
+/* ── Phone View Fix (under 480px) ──────────────────────────────── */
+@media (max-width: 868px) {
+  /* Reduce main content padding on mobile */
+  .portal-main {
+    padding: var(--space-sm) !important;
+    padding-top: 80px !important;
+    max-width: 100vw;
     overflow-x: hidden;
   }
-  
-  /* Reduce padding on mobile to prevent cards from pushing out of the viewport */
-  .portal-main {
-    padding: var(--space-sm);
-    padding-top: 80px;
+
+  /* Stop the whole layout from scrolling horizontally */
+  .portal-layout {
+    overflow-x: hidden;
+    max-width: 100vw;
   }
-  .card-flat, .card, .appointment-card, .diet-card {
+
+  /* Cards should fit inside the screen */
+  .card-flat, .card {
+    padding: var(--space-md) !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Appointment cards stack vertically on mobile */
+  .appointment-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: var(--space-sm) !important;
+    padding: var(--space-md) !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Appointment info wraps properly */
+  .appointment-info {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  /* Buttons row in cards should wrap */
+  .appointment-card .flex {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* Portal header text should wrap */
+  .portal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .portal-title {
+    font-size: 1.4rem;
+  }
+
+  /* Weight log table - make it scrollable */
+  .data-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 10px 10px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  /* Chart legend should wrap */
+  .chart-legend {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Detail header (admin client detail) */
+  .detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  /* Detail tabs scroll horizontally */
+  .detail-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .detail-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .detail-tab {
+    white-space: nowrap;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
+
+  /* Diet plan card buttons should wrap */
+  .diet-card {
+    padding: var(--space-md) !important;
+    max-width: 100%;
+  }
+
+  /* Stat cards in dashboard */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .dashboard-grid-wide {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Client cards in admin */
+  .client-card {
+    padding: var(--space-md) !important;
+  }
+
+  /* Overview cards */
+  .overview-card {
     padding: var(--space-md) !important;
   }
 }
 
-/* Fix text overflow issues on long emails or filenames */
-.appointment-info, .text-caption, .diet-file {
+/* ── Global text overflow prevention ───────────────────────────── */
+.appointment-info,
+.text-caption,
+.diet-file,
+.client-card-header,
+.portal-title,
+.portal-header p {
   word-break: break-word;
+  overflow-wrap: anywhere;
   white-space: normal !important;
+  max-width: 100%;
+}
+
+/* File names in diet plan cards should truncate nicely */
+.appointment-card div[style*="font-weight:600"] {
+  word-break: break-word;
   overflow-wrap: anywhere;
 }
+
+/* Buttons container in diet cards should wrap */
+.appointment-card > .flex:last-child {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Small buttons should not overflow */
+.btn-sm {
+  padding: 6px 12px !important;
+  font-size: 0.8rem !important;
+  white-space: nowrap;
+}
+
