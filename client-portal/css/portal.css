@@ -718,6 +718,7 @@
   .appointment-info {
     max-width: 100%;
     flex-wrap: wrap;
+    min-width: 0;
   }
 
   /* Buttons row in cards should wrap */
@@ -786,9 +787,9 @@
     max-width: 100%;
   }
 
-  /* Stat cards in dashboard */
+  /* Stat cards: 2 columns on tablet, 1 on phone (see 480px below) */
   .dashboard-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, 1fr) !important;
   }
   .dashboard-grid-wide {
     grid-template-columns: 1fr !important;
@@ -802,6 +803,38 @@
   /* Overview cards */
   .overview-card {
     padding: var(--space-md) !important;
+  }
+
+  /* Welcome banner */
+  .welcome-banner {
+    padding: var(--space-lg);
+  }
+  .welcome-banner h2 {
+    font-size: 1.25rem;
+  }
+  .welcome-banner p {
+    font-size: 0.85rem;
+  }
+
+  /* Forms should stack on mobile */
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Metric cards */
+  .metric-card {
+    padding: var(--space-md);
+  }
+  .metric-value {
+    font-size: 1.5rem;
+  }
+}
+
+/* ── Small Phone (under 480px) ─────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Dashboard grid goes single column on small phones */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 

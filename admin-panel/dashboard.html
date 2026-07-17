@@ -93,9 +93,8 @@
         </div>
       </div>
 
-      <!-- Recent Clients & Appointments -->
+      <!-- Recent Clients -->
       <div class="dashboard-grid-wide">
-        <!-- Recent Clients -->
         <div class="card-flat" style="padding:0;overflow:hidden;">
           <div style="padding:var(--space-lg) var(--space-xl);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
             <h3 style="font-size:1.1rem;font-weight:600;">Recent Clients</h3>
@@ -103,17 +102,6 @@
           </div>
           <div id="recentClients" style="padding:var(--space-sm);">
             <div class="empty-state" style="padding:var(--space-xl);"><span class="material-symbols-outlined">group</span><p>No clients yet</p></div>
-          </div>
-        </div>
-
-        <!-- Pending Appointments -->
-        <div class="card-flat" style="padding:0;overflow:hidden;">
-          <div style="padding:var(--space-lg) var(--space-xl);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-            <h3 style="font-size:1.1rem;font-weight:600;">Pending Appointments</h3>
-            <a href="appointments.html" class="btn btn-ghost btn-sm">View All</a>
-          </div>
-          <div id="pendingList" style="padding:var(--space-sm);">
-            <div class="empty-state" style="padding:var(--space-xl);"><span class="material-symbols-outlined">event</span><p>No pending appointments</p></div>
           </div>
         </div>
       </div>
@@ -161,38 +149,9 @@
             </a>
           `).join('');
         }
-
-        // Pending appointments
-        const pl = document.getElementById('pendingList');
-        if (pending.length > 0) {
-          pl.innerHTML = pending.slice(0, 5).map(a => `
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px var(--space-lg);border-radius:var(--radius-md);">
-              <div>
-                <div style="font-weight:600;font-size:0.9rem;">${a.client_name || 'Unknown'}</div>
-                <div class="text-caption">${a.goal || 'Consultation'} • ${a.preferred_date ? BeyondKilos.formatDate(a.preferred_date) : 'No date'}</div>
-              </div>
-              <div class="flex gap-sm">
-                <button onclick="confirmAppt(${a.id})" class="btn btn-primary btn-sm" style="padding:6px 12px;font-size:0.75rem;">Confirm</button>
-              </div>
-            </div>
-          `).join('');
-        }
       } catch (err) {
         console.error(err);
         BeyondKilos.showToast('Failed to load dashboard', 'error');
-      }
-    }
-
-    async function confirmAppt(id) {
-      try {
-        await BeyondKilos.apiRequest(`/api/appointments/${id}`, {
-          method: 'PUT',
-          body: JSON.stringify({ status: 'confirmed' }),
-        });
-        BeyondKilos.showToast('Appointment confirmed!', 'success');
-        loadDashboard();
-      } catch (err) {
-        BeyondKilos.showToast(err.message, 'error');
       }
     }
 

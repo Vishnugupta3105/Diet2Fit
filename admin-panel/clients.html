@@ -128,6 +128,12 @@
         const card = document.createElement('div');
         card.className = 'client-card';
         card.onclick = () => window.location.href = `client-detail.html?id=${c.id}`;
+        let bmiHtml = '—';
+        if (c.latest_weight && c.height_cm) {
+          const hM = c.height_cm / 100;
+          bmiHtml = (c.latest_weight / (hM * hM)).toFixed(1);
+        }
+
         card.innerHTML = `
           <div class="client-card-header">
             <div class="client-avatar">${(c.name||'').substring(0,2).toUpperCase()}</div>
@@ -140,6 +146,10 @@
             <div class="client-stat">
               <div class="client-stat-label">Weight</div>
               <div class="client-stat-value">${c.latest_weight ? c.latest_weight + ' kg' : '—'}</div>
+            </div>
+            <div class="client-stat">
+              <div class="client-stat-label">BMI</div>
+              <div class="client-stat-value">${bmiHtml}</div>
             </div>
             <div class="client-stat">
               <div class="client-stat-label">Goal</div>

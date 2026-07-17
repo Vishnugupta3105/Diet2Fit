@@ -71,6 +71,10 @@
           <div class="metric-value" id="cWeight">—<span class="metric-unit"> kg</span></div>
         </div>
         <div class="metric-card">
+          <div class="metric-label mb-md">Current BMI</div>
+          <div class="metric-value" id="cBMI">—</div>
+        </div>
+        <div class="metric-card">
           <div class="metric-label mb-md">Goal Weight</div>
           <div class="metric-value" id="cGoal">—<span class="metric-unit"> kg</span></div>
         </div>
@@ -256,6 +260,12 @@
           document.getElementById('cWeight').innerHTML = `${current}<span class="metric-unit"> kg</span>`;
           document.getElementById('cChange').innerHTML = `${(current-first) > 0 ? '+' : ''}${(current-first).toFixed(1)}<span class="metric-unit"> kg</span>`;
           document.getElementById('cChange').style.color = (current-first) <= 0 ? 'var(--success)' : 'var(--error)';
+
+          if (client.height_cm > 0) {
+            const hM = client.height_cm / 100;
+            const bmi = (current / (hM * hM)).toFixed(1);
+            document.getElementById('cBMI').innerHTML = `${bmi}`;
+          }
         }
         document.getElementById('cGoal').innerHTML = client.goal_weight ? `${client.goal_weight}<span class="metric-unit"> kg</span>` : '—';
         document.getElementById('cAppts').textContent = appointments.length;

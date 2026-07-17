@@ -115,6 +115,16 @@
 
         <div class="metric-card">
           <div class="metric-header">
+            <div class="metric-label">Current BMI</div>
+            <div class="metric-icon" style="background:#fce7f3;">
+              <span class="material-symbols-outlined" style="color:#db2777;font-size:22px;">monitor_heart</span>
+            </div>
+          </div>
+          <div class="metric-value" id="currentBMI">—</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
             <div class="metric-label">Total Change</div>
             <div class="metric-icon" style="background:#ede9fe;">
               <span class="material-symbols-outlined" style="color:#7c3aed;font-size:22px;">swap_vert</span>
@@ -242,6 +252,12 @@
               document.getElementById('goalProgressFill').style.width = `${progress}%`;
             }, 300);
           }
+        }
+
+        if (profileData.user.height_cm && weightData.stats && weightData.stats.current_weight) {
+          const hM = profileData.user.height_cm / 100;
+          const bmi = (weightData.stats.current_weight / (hM * hM)).toFixed(1);
+          document.getElementById('currentBMI').textContent = bmi;
         }
 
         // Load appointments

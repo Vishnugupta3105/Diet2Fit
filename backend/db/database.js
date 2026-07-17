@@ -106,6 +106,7 @@ const initializeDB = async () => {
     try { await pool.query('ALTER TABLE appointments ADD COLUMN IF NOT EXISTS client_gender TEXT'); } catch(e) {}
     try { await pool.query('ALTER TABLE appointments ADD COLUMN IF NOT EXISTS client_bmi REAL'); } catch(e) {}
     try { await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS age INTEGER'); } catch(e) {}
+    try { await pool.query('ALTER TABLE appointments ADD COLUMN IF NOT EXISTS is_followup BOOLEAN DEFAULT FALSE'); } catch(e) {}
 
     // Seed Admin Account
     const adminRes = await pool.query('SELECT id FROM users WHERE role = $1', ['admin']);
