@@ -134,7 +134,15 @@ async function apiRequest(url, options = {}) {
   } catch (err) {
     if (err.message === 'Invalid or expired token.') {
       clearAuth();
-      window.location.href = '/login.html';
+      // Only redirect to login if we are in a protected area
+      if (window.location.pathname.startsWith('/portal') || window.location.pathname.startsWith('/admin')) {
+        window.location.href = '/login.html';
+      } else {
+        // Just reload to clear UI state if on homepage/pricing
+        if (typeof BeyondKilos !== 'undefined' && typeof window !== 'undefined') {
+          console.warn('Session expired. Cleared auth silently.');
+        }
+      }
     }
     throw err;
   }
