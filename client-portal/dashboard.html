@@ -170,6 +170,35 @@
         </a>
       </div>
 
+      <!-- Your Plan -->
+      <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md);color:var(--text-secondary);">Your Plan</h3>
+      <div id="activePlanSection" class="mb-xl">
+        <div class="card-flat" id="planCard" style="display:none;">
+          <div class="flex justify-between items-center" style="flex-wrap:wrap;gap:var(--space-md);">
+            <div class="flex items-center gap-md">
+              <div style="width:48px;height:48px;border-radius:var(--radius-lg);background:var(--primary-surface);display:flex;align-items:center;justify-content:center;">
+                <span class="material-symbols-outlined" style="color:var(--primary);font-size:24px;">card_membership</span>
+              </div>
+              <div>
+                <div style="font-weight:700;font-size:1.1rem;" id="planName">—</div>
+                <div class="text-caption" id="planDays">—</div>
+              </div>
+            </div>
+            <span class="badge badge-success" id="planBadge">Active</span>
+          </div>
+          <div class="progress-bar" style="margin-top:var(--space-lg);">
+            <div class="progress-fill" id="planProgressFill" style="width:0%"></div>
+          </div>
+        </div>
+        <div id="noPlan" style="text-align:center;">
+          <h4 style="font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: var(--space-xl);">Choose Your Plan</h4>
+          
+          <div class="pricing-grid" id="dashboardPricingCards" style="text-align: left;">
+            <p class="text-caption">Loading plans...</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Your Diet Plans -->
       <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md);color:var(--text-secondary);">Your Diet Plans</h3>
       <div id="myDietPlans" class="flex flex-col gap-md mb-xl">
@@ -195,31 +224,33 @@
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Razorpay SDK for in-dashboard payment -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  
   <script src="/js/main.js"></script>
   <script>
-    // Auth guard
-    if (!BeyondKilos.isLoggedIn()) { window.location.href = '/login.html'; }
-    const user = BeyondKilos.getUser();
-    if (user && user.role === 'admin') { window.location.href = '/admin/'; }
+    // Initialize Dashboard
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await BeyondKilos.validateSession();
+      if (!user) return; // Will redirect to login
 
-    // Populate UI
-    document.getElementById('userName').textContent = user?.name || 'Client';
-    document.getElementById('userAvatar').textContent = (user?.name || 'C').substring(0, 2).toUpperCase();
-    document.getElementById('welcomeTitle').textContent = `Welcome back, ${(user?.name || 'there').split(' ')[0]}!`;
+      document.getElementById('userName').textContent = user.name || 'Client';
+      document.getElementById('userAvatar').textContent = (user?.name || 'C').substring(0, 2).toUpperCase();
+      document.getElementById('welcomeTitle').textContent = `Welcome back, ${(user?.name || 'there').split(' ')[0]}!`;
 
-    // Mobile sidebar
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
-      document.getElementById('sidebarOverlay').classList.toggle('active');
-    }
+      // Mobile sidebar
+      function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+      }
 
-    function logout() {
-      BeyondKilos.clearAuth();
-      window.location.href = '/login.html';
-    }
+      window.logout = function() {
+        BeyondKilos.clearAuth();
+        window.location.href = '/login.html';
+      };
 
-    // Load data
-    async function loadDashboard() {
+      // Load data
       try {
         // Load weight data
         const weightData = await BeyondKilos.apiRequest('/api/weight');
@@ -314,12 +345,175 @@
           });
         }
 
+        // Load active plan
+        const data = await BeyondKilos.apiRequest('/api/plans/my-plan');
+        let hasActivePlan = false;
+        if (data.active_plan) {
+          const plan = data.active_plan;
+          hasActivePlan = true;
+          document.getElementById('noPlan').style.display = 'none';
+          document.getElementById('planCard').style.display = 'block';
+          document.getElementById('planName').textContent = plan.plan_name;
+          document.getElementById('planDays').textContent = `${plan.days_remaining} days remaining`;
+          const totalDays = 30;
+          const progress = Math.max(0, Math.min(100, (plan.days_remaining / totalDays) * 100));
+          setTimeout(() => {
+            document.getElementById('planProgressFill').style.width = `${progress}%`;
+          }, 300);
+          if (plan.days_remaining <= 5) {
+            document.getElementById('planBadge').className = 'badge badge-warning';
+            document.getElementById('planBadge').textContent = 'Expiring Soon';
+          }
+        }
+        
+        // Load Plans directly into dashboard if no active plan
+        if (!hasActivePlan) {
+          loadDashboardPlans();
+        }
+
       } catch (err) {
-        console.error('Dashboard load error:', err);
+        console.error(err);
+        BeyondKilos.showToast('Failed to load dashboard data', 'error');
+      }
+    });
+
+    // ═══ Inline Pricing Plans ═══
+    const FEATURE_LABELS = {
+      video_consultations: { label: 'Video consultations' },
+      whatsapp_support: { label: 'WhatsApp support' },
+      plan_revisions: { label: 'Plan revisions' },
+      lab_report: { label: 'Lab report interpretation' },
+      travel_plan: { label: 'Travel plan' },
+      fasting_plan: { label: 'Fasting plan' },
+      recipe_library: { label: 'Recipe library' },
+      education_modules: { label: 'Weekly education modules' },
+      family_meal_plan: { label: 'Family/partner meal plan' }
+    };
+
+    function buildFeatureHTML(features) {
+      const order = ['video_consultations', 'whatsapp_support', 'plan_revisions', 'lab_report', 'travel_plan', 'fasting_plan', 'recipe_library', 'education_modules', 'family_meal_plan'];
+      return order.map(key => {
+        const val = features[key];
+        const meta = FEATURE_LABELS[key] || { label: key };
+        const isIncluded = val !== false;
+        const displayValue = typeof val === 'string' ? val : (val === true ? 'Included' : '');
+        return `
+          <li class="pricing-feature">
+            <span class="pricing-feature-icon ${isIncluded ? 'check' : 'cross'}">
+              ${isIncluded ? '✓' : '✕'}
+            </span>
+            <span>
+              <span style="color:var(--text-secondary);">${meta.label}</span>
+              ${displayValue && isIncluded ? `<br><span class="pricing-feature-value">${displayValue}</span>` : ''}
+            </span>
+          </li>
+        `;
+      }).join('');
+    }
+
+    async function loadDashboardPlans() {
+      try {
+        const data = await BeyondKilos.apiRequest('/api/plans');
+        if (data.plans && data.plans.length > 0) {
+          renderDashboardPricingCards(data.plans);
+        }
+      } catch (err) {
+        console.error('Failed to load plans:', err);
       }
     }
 
-    loadDashboard();
+    function renderDashboardPricingCards(plans) {
+      const container = document.getElementById('dashboardPricingCards');
+      if (!container) return;
+
+      container.innerHTML = plans.map(plan => `
+        <div class="pricing-card ${plan.is_popular ? 'pricing-popular' : ''}">
+          ${plan.is_popular ? '<div class="pricing-popular-badge">Most Popular</div>' : ''}
+          <div class="pricing-plan-name">${plan.name}</div>
+          <div class="pricing-price" style="margin: 16px 0;">
+            <span class="pricing-amount">${plan.display_price}</span>
+            <span class="pricing-period">/mo</span>
+          </div>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            ${buildFeatureHTML(typeof plan.features === 'string' ? JSON.parse(plan.features) : plan.features)}
+          </ul>
+          <div class="pricing-cta">
+            <button onclick="choosePlan(${plan.id})" class="btn ${plan.is_popular ? 'btn-primary' : 'btn-outline'}">
+              Select ${plan.name}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Handle inline Razorpay checkout
+    async function choosePlan(planId) {
+      try {
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = 'Processing...';
+        btn.disabled = true;
+
+        const orderData = await BeyondKilos.apiRequest('/api/plans/create-order', {
+          method: 'POST',
+          body: JSON.stringify({ plan_id: planId })
+        });
+
+        const options = {
+          key: orderData.key,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'Beyond Kilos',
+          description: `${orderData.plan_name} Plan`,
+          order_id: orderData.order_id,
+          prefill: {
+            name: orderData.user.name,
+            email: orderData.user.email,
+            contact: orderData.user.phone
+          },
+          theme: { color: '#064e3b' },
+          handler: async function (response) {
+            try {
+              const verifyData = await BeyondKilos.apiRequest('/api/plans/verify-payment', {
+                method: 'POST',
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature
+                })
+              });
+              if (verifyData.success) {
+                BeyondKilos.showToast('Payment successful! Reloading...', 'success');
+                setTimeout(() => window.location.reload(), 1500);
+              }
+            } catch (err) {
+              BeyondKilos.showToast('Verification failed.', 'error');
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+          BeyondKilos.showToast('Payment failed: ' + response.error.description, 'error');
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        });
+        rzp.open();
+
+      } catch (err) {
+        console.error(err);
+        BeyondKilos.showToast('Failed to start checkout', 'error');
+      }
+    }
   </script>
 </body>
 </html>

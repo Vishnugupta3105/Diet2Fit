@@ -225,6 +225,12 @@
             <input type="email" id="clientEmail" class="form-input" placeholder="your@email.com" required />
           </div>
 
+          <div class="form-group">
+            <label class="form-label" for="clientPassword">Create a Password *</label>
+            <input type="password" id="clientPassword" class="form-input" placeholder="Minimum 6 characters" required />
+            <div class="text-caption" style="margin-top:4px;">You'll use this to log into your client portal.</div>
+          </div>
+
           <!-- Weight & Height -->
           <div class="grid grid-2">
             <div class="form-group">
@@ -312,7 +318,7 @@
             Back
           </button>
           <button class="btn btn-primary w-full btn-lg booking-submit-btn" onclick="submitBooking()" id="btnSubmit">
-            Request Free Consultation
+            Complete Registration & Book
             <span class="material-symbols-outlined">send</span>
           </button>
         </div>
@@ -324,12 +330,12 @@
           <div class="success-animation">
             <span class="material-symbols-outlined" style="font-size:40px;color:var(--primary);">celebration</span>
           </div>
-          <h1 class="text-headline mb-sm">Request Sent!</h1>
-          <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto var(--space-xl);">
+          <h1 class="text-headline mb-sm" id="successTitle">Request Sent!</h1>
+          <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto var(--space-xl);" id="successText">
             We will connect on your WhatsApp soon! You can also message us directly using the button below.
           </p>
           <div class="flex flex-col gap-md items-center">
-            <a href="https://wa.me/918306404335?text=Hello%20Team%20Beyond%20Kilos%2C%0A%0AI%20would%20like%20to%20book%20a%20consultation%20appointment.%0A%0APlease%20contact%20me%20to%20schedule%20the%20appointment.%20I%20look%20forward%20to%20hearing%20from%20your%20team%20soon.%0A%0AThank%20you." target="_blank" class="btn btn-lg" style="background:#25d366;color:white;">
+            <a href="https://wa.me/918306404335?text=Hello%20Team%20Beyond%20Kilos%2C%0A%0AI%20would%20like%20to%20book%20a%20consultation%20appointment." target="_blank" class="btn btn-lg" style="background:#25d366;color:white;">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
               Confirm via WhatsApp
             </a>
@@ -357,10 +363,7 @@
 
     let selectedGoal = null;
     let selectedSlotTime = null;
-    let bookedAppointmentId = null;
     let clientMetrics = { weight_kg: null, height_cm: null, bmi: null, age: null, gender: null };
-
-
 
     function toggleHeightInput() {
       const unit = document.getElementById('heightUnit').value;
@@ -417,7 +420,6 @@
       const ageVal = parseInt(document.getElementById('clientAge').value);
       const genderVal = document.getElementById('clientGender').value;
 
-      // Only calculate if we have both weight and height
       const bmiWidget = document.getElementById('bmiWidget');
       
       if (weightKg > 0 && heightCm > 0) {
@@ -429,50 +431,40 @@
         clientMetrics.age = !isNaN(ageVal) ? ageVal : null;
         clientMetrics.gender = genderVal;
 
-        // Display widget
         bmiWidget.style.display = 'block';
         document.getElementById('bmiValueDisplay').textContent = bmi;
 
-        // Determine category and UI colors
         let category = '';
         let color = '';
         let posPercentage = 0;
 
         if (bmi < 18.5) {
           category = 'Underweight';
-          color = '#3b82f6'; // blue
-          // map 15-18.5 to 0-18.5%
+          color = '#3b82f6';
           posPercentage = Math.max(0, ((bmi - 15) / 3.5) * 18.5);
         } else if (bmi < 25) {
           category = 'Normal Weight';
-          color = '#22c55e'; // green
-          // map 18.5-25 to 18.5%-43.5%
+          color = '#22c55e';
           posPercentage = 18.5 + ((bmi - 18.5) / 6.5) * 25;
         } else if (bmi < 30) {
           category = 'Overweight';
-          color = '#eab308'; // yellow
-          // map 25-30 to 43.5%-63.5%
+          color = '#eab308';
           posPercentage = 43.5 + ((bmi - 25) / 5) * 20;
         } else {
           category = 'Obese';
-          color = '#ef4444'; // red
-          // map 30-40 to 63.5%-100%
+          color = '#ef4444';
           posPercentage = 63.5 + Math.min(1, (bmi - 30) / 10) * 36.5;
         }
 
         const catDisplay = document.getElementById('bmiCategoryDisplay');
         catDisplay.textContent = category;
-        catDisplay.style.backgroundColor = color + '20'; // 12% opacity background
+        catDisplay.style.backgroundColor = color + '20';
         catDisplay.style.color = color;
-
-        // Move marker
         document.getElementById('bmiMarker').style.left = `${posPercentage}%`;
 
-        // Calculate healthy weight range (BMI 18.5 - 24.9)
         const minWeight = (18.5 * heightM * heightM).toFixed(1);
         const maxWeight = (24.9 * heightM * heightM).toFixed(1);
         document.getElementById('bmiHealthyRange').textContent = `Healthy weight range for your height: ${minWeight} kg - ${maxWeight} kg`;
-        
       } else {
         bmiWidget.style.display = 'none';
         clientMetrics.bmi = null;
@@ -483,11 +475,12 @@
       const name = document.getElementById('clientName').value.trim();
       const phoneVal = phoneInput.value.trim();
       const email = document.getElementById('clientEmail').value.trim();
+      const password = document.getElementById('clientPassword').value.trim();
       const notes = document.getElementById('clientNotes').value.trim();
       const referral = document.getElementById('referralCode').value.trim();
 
-      if (!name || !phoneVal || !email) {
-        BeyondKilos.showToast('Please fill in your name, WhatsApp number, and email.', 'error');
+      if (!name || !phoneVal || !email || !password) {
+        BeyondKilos.showToast('Please fill in all required fields, including password.', 'error');
         return;
       }
 
@@ -496,9 +489,14 @@
         return;
       }
 
-      const phone = iti.getNumber(); // Gets full number with country code
+      if (password.length < 6) {
+        BeyondKilos.showToast('Password must be at least 6 characters.', 'error');
+        return;
+      }
 
-      // Parse metrics
+      const phone = iti.getNumber();
+
+      // Ensure metrics are up to date if they didn't trigger calculateBMI manually
       let weightKg = null;
       const weightVal = parseFloat(document.getElementById('clientWeight').value);
       if (!isNaN(weightVal)) {
@@ -522,31 +520,104 @@
 
       const btn = document.getElementById('btnSubmit');
       btn.disabled = true;
-      btn.innerHTML = '<div class="spinner"></div> Booking...';
+      btn.innerHTML = '<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">refresh</span> Processing...';
 
       try {
-        const result = await BeyondKilos.apiRequest('/api/appointments', {
+        let userToken = null;
+        let userId = null;
+        let userData = null;
+
+        // Step 1: Register User
+        const registerResponse = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            phone,
+            password,
+            weight_kg: clientMetrics.weight_kg,
+            height_cm: clientMetrics.height_cm
+          })
+        });
+
+        const registerData = await registerResponse.json();
+        
+        if (!registerResponse.ok) {
+          // If account exists (409), try to log them in instead!
+          if (registerResponse.status === 409) {
+            const loginResponse = await fetch('/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password })
+            });
+            const loginData = await loginResponse.json();
+            if (!loginResponse.ok) {
+              throw new Error('Account already exists. Incorrect password provided.');
+            }
+            userToken = loginData.token;
+            userId = loginData.user.id;
+            userData = loginData.user;
+          } else {
+            throw new Error(registerData.error || 'Registration failed');
+          }
+        } else {
+          userToken = registerData.token;
+          userId = registerData.user.id;
+          userData = registerData.user;
+        }
+
+        // Auto-login using the token
+        BeyondKilos.setAuth(userToken, userData);
+
+        // Step 2: Book Appointment (now linked to the user)
+        await BeyondKilos.apiRequest('/api/appointments', {
           method: 'POST',
           body: JSON.stringify({
+            client_id: userId,
             client_name: name,
-            client_phone: phone,
             client_email: email,
+            client_phone: phone,
+            type: 'whatsapp',
+            goal: selectedGoal,
+            preferred_date: document.querySelector('.time-slot-btn.selected')?.dataset.date || null,
+            preferred_time: selectedSlotTime,
+            notes: referral ? `${notes ? notes + ' | ' : ''}Referral: ${referral}` : notes,
             client_weight_kg: clientMetrics.weight_kg,
             client_height_cm: clientMetrics.height_cm,
             client_age: clientMetrics.age,
             client_gender: clientMetrics.gender,
-            client_bmi: clientMetrics.bmi,
-            type: 'whatsapp',
-            goal: selectedGoal,
-            notes: referral ? `${notes ? notes + ' | ' : ''}Referral: ${referral}` : notes,
-          }),
+            client_bmi: clientMetrics.bmi
+          })
         });
-        
+
+        // Step 3: Check where to redirect
+        const savedPlanId = sessionStorage.getItem('selected_plan_id');
+        const redirectUrl = sessionStorage.getItem('redirect_after_login');
+
+        // Transition to success screen using the wizard's built-in nextStep function
         nextStep(3);
+
+        if (savedPlanId && redirectUrl) {
+          // Came from plan selection
+          document.getElementById('successTitle').textContent = 'Account Created!';
+          document.getElementById('successText').textContent = 'Taking you back to complete your plan purchase...';
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 2000);
+        } else {
+          // Standard booking
+          document.getElementById('successTitle').textContent = 'Booking Confirmed!';
+          document.getElementById('successText').textContent = 'Your account has been created. Redirecting to your client portal...';
+          setTimeout(() => {
+            window.location.href = '/portal/dashboard.html';
+          }, 3000);
+        }
+
       } catch (err) {
-        BeyondKilos.showToast(err.message || 'Failed to submit request. Please try again.', 'error');
+        BeyondKilos.showToast(err.message || 'Failed to complete registration', 'error');
         btn.disabled = false;
-        btn.innerHTML = 'Request Free Consultation <span class="material-symbols-outlined">send</span>';
+        btn.innerHTML = 'Complete Registration & Book';
       }
     }
   </script>

@@ -15,6 +15,7 @@ const weightRoutes = require('./routes/weight');
 const appointmentRoutes = require('./routes/appointments');
 const dietRoutes = require('./routes/diets');
 const deviceRoutes = require('./routes/devices');
+const plansRoutes = require('./routes/plans');
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use('/api/weight', weightRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diets', dietRoutes);
 app.use('/api/devices', deviceRoutes);
+app.use('/api/plans', plansRoutes);
 
 // ── Health Check ─────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

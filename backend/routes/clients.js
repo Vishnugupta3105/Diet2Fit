@@ -39,7 +39,7 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
     const clientsRes = await db.query(query, params);
     const clients = clientsRes.rows;
 
-    // Attach latest weight for each client
+    // Attach latest weight, appt count, and active plan for each client
     const enriched = await Promise.all(clients.map(async (client) => {
       const weightRes = await db.query(`
         SELECT weight_kg, date FROM weight_logs 
@@ -48,13 +48,17 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
       const apptCountRes = await db.query(`
         SELECT COUNT(*) as count FROM appointments WHERE client_id = $1
       `, [client.id]);
+      const planRes = await db.query(`
+        SELECT plan_name FROM plan_orders 
+        WHERE user_id = $1 AND status = 'paid' AND expires_at > NOW() 
+        ORDER BY expires_at DESC LIMIT 1
+      `, [client.id]);
 
-      const latestWeight = weightRes.rows[0];
       return {
         ...client,
-        latest_weight: latestWeight ? latestWeight.weight_kg : null,
-        latest_weight_date: latestWeight ? latestWeight.date : null,
-        appointment_count: parseInt(apptCountRes.rows[0].count, 10),
+        latest_weight: weightRes.rows.length > 0 ? weightRes.rows[0].weight_kg : null,
+        appointment_count: apptCountRes.rows[0].count,
+        active_plan: planRes.rows.length > 0 ? planRes.rows[0].plan_name : null
       };
     }));
 

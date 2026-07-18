@@ -1251,3 +1251,297 @@ select.form-input {
     font-size: 0.75rem !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Pricing Cards
+   ═══════════════════════════════════════════════════════════════ */
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xl);
+  align-items: stretch;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.pricing-card {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl) var(--space-xl);
+  border: 2px solid var(--border);
+  position: relative;
+  transition: all 0.4s var(--ease);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pricing-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-dim), var(--primary-lighter));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease);
+}
+
+.pricing-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--primary-dim);
+}
+
+.pricing-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* ── Popular Card (Signature) ──────────────────────────────────── */
+.pricing-card.pricing-popular {
+  border-color: var(--primary);
+  background: linear-gradient(180deg, var(--primary-surface) 0%, var(--surface) 30%);
+  box-shadow: 0 0 0 1px var(--primary), var(--shadow-lg), 0 0 60px rgba(6, 78, 59, 0.08);
+  transform: scale(1.03);
+  z-index: 2;
+}
+
+.pricing-card.pricing-popular::before {
+  transform: scaleX(1);
+  background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+  background-size: 200% auto;
+  animation: gradient-shift 3s ease infinite;
+  height: 5px;
+}
+
+.pricing-card.pricing-popular:hover {
+  transform: scale(1.05) translateY(-4px);
+  box-shadow: 0 0 0 1px var(--primary), var(--shadow-xl), 0 0 80px rgba(6, 78, 59, 0.12);
+}
+
+.pricing-popular-badge {
+  position: absolute;
+  top: 20px;
+  right: -32px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  padding: 6px 40px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 10px rgba(6, 78, 59, 0.3);
+}
+
+/* ── Card Header ───────────────────────────────────────────────── */
+.pricing-plan-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.pricing-tagline {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+.pricing-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.pricing-amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.pricing-period {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.pricing-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-lg) 0;
+}
+
+/* ── Features List ─────────────────────────────────────────────── */
+.pricing-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  margin-bottom: var(--space-xl);
+}
+
+.pricing-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.pricing-feature-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px;
+  margin-top: 1px;
+}
+
+.pricing-feature-icon.check {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.pricing-feature-icon.cross {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.pricing-feature-value {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── CTA Button ────────────────────────────────────────────────── */
+.pricing-cta {
+  margin-top: auto;
+}
+
+.pricing-cta .btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+}
+
+/* ── Comparison Table (Pricing Page) ──────────────────────────── */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.comparison-table th {
+  padding: 18px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  background: var(--bg-alt);
+  border-bottom: 2px solid var(--border);
+}
+
+.comparison-table th:first-child {
+  text-align: left;
+}
+
+.comparison-table th.popular-col {
+  background: var(--primary-surface);
+  color: var(--primary);
+}
+
+.comparison-table td {
+  padding: 14px 20px;
+  font-size: 0.88rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.comparison-table td:first-child {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.comparison-table tr:hover td {
+  background: var(--bg-alt);
+}
+
+/* ── Note Card ─────────────────────────────────────────────────── */
+.pricing-note {
+  background: var(--accent-surface);
+  border: 1px solid var(--accent-glow);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg) var(--space-xl);
+  margin-top: var(--space-2xl);
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+}
+
+.pricing-note-icon {
+  color: var(--accent-dim);
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 968px) {
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+    gap: var(--space-lg);
+  }
+
+  .pricing-card.pricing-popular {
+    transform: none;
+    order: -1;
+  }
+
+  .pricing-card.pricing-popular:hover {
+    transform: translateY(-6px);
+  }
+
+  .pricing-amount {
+    font-size: 2.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .comparison-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    padding: 12px 14px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .pricing-note {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+}

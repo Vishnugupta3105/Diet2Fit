@@ -91,6 +91,24 @@
             <div class="overview-label">Completed Total</div>
           </div>
         </div>
+        <div class="overview-card">
+          <div class="overview-icon" style="background:#dbeafe;">
+            <span class="material-symbols-outlined" style="color:#2563eb;font-size:28px;">card_membership</span>
+          </div>
+          <div>
+            <div class="overview-value" id="activePlans">0</div>
+            <div class="overview-label">Active Plans</div>
+          </div>
+        </div>
+        <div class="overview-card">
+          <div class="overview-icon" style="background:#fce7f3;">
+            <span class="material-symbols-outlined" style="color:#db2777;font-size:28px;">payments</span>
+          </div>
+          <div>
+            <div class="overview-value" id="totalRevenue">₹0</div>
+            <div class="overview-label">Plan Revenue</div>
+          </div>
+        </div>
       </div>
 
       <!-- Recent Clients -->
@@ -142,7 +160,10 @@
             <a href="client-detail.html?id=${c.id}" style="display:flex;align-items:center;gap:var(--space-md);padding:12px var(--space-lg);border-radius:var(--radius-md);transition:background 0.2s;cursor:pointer;" onmouseover="this.style.background='var(--bg-alt)'" onmouseout="this.style.background='transparent'">
               <div class="client-avatar" style="width:36px;height:36px;font-size:0.75rem;">${(c.name||'').substring(0,2).toUpperCase()}</div>
               <div style="flex:1;">
-                <div style="font-weight:600;font-size:0.9rem;">${c.name}</div>
+                <div style="font-weight:600;font-size:0.9rem;display:flex;align-items:center;gap:8px;">
+                  ${c.name}
+                  ${c.active_plan ? `<span class="badge badge-success" style="font-size:0.6rem;padding:2px 6px;">${c.active_plan}</span>` : ''}
+                </div>
                 <div class="text-caption">${c.email}</div>
               </div>
               <div class="text-caption">${c.latest_weight ? c.latest_weight + ' kg' : '—'}</div>
@@ -152,6 +173,16 @@
       } catch (err) {
         console.error(err);
         BeyondKilos.showToast('Failed to load dashboard', 'error');
+      }
+
+      // Load plan stats
+      try {
+        const planStats = await BeyondKilos.apiRequest('/api/plans/stats');
+        document.getElementById('activePlans').textContent = planStats.active_subscriptions || 0;
+        const revenue = (planStats.total_revenue || 0) / 100;
+        document.getElementById('totalRevenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+      } catch (err) {
+        console.error('Failed to load plan stats:', err);
       }
     }
 

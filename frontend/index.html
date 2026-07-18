@@ -159,6 +159,7 @@
       <div class="navbar-links" id="navLinks">
         <a href="#results" class="navbar-link">Results</a>
         <a href="#testimonials" class="navbar-link">Testimonials</a>
+        <a href="#pricing" class="navbar-link">Pricing</a>
         <a href="login.html" class="navbar-link">Client Login</a>
         <a href="book.html" class="btn btn-primary btn-sm">Request Free Consultation</a>
       </div>
@@ -547,6 +548,31 @@
     </div>
   </section>
 
+  <!-- ═══ Pricing Plans ═══ -->
+  <section class="section" id="pricing" style="background: var(--bg);">
+    <div class="container">
+      <div class="text-center mb-2xl animate-fade-up">
+        <div class="text-label mb-md" style="color: var(--primary-lighter);">CHOOSE YOUR PLAN</div>
+        <h2 class="text-headline mb-md">Invest in Your Health</h2>
+        <p class="text-body-lg" style="color:var(--text-secondary); max-width:600px; margin:0 auto;">
+          Personalized nutrition plans with ongoing support from Dt. Disha. Every plan includes lab report interpretation — because clinical care isn't a paywalled feature.
+        </p>
+      </div>
+
+      <div class="pricing-grid animate-fade-up" id="pricingCards">
+        <!-- Cards loaded dynamically -->
+      </div>
+
+      <div class="pricing-note animate-fade-up" style="max-width:1100px; margin-left:auto; margin-right:auto;">
+        <span class="material-symbols-outlined pricing-note-icon">info</span>
+        <div>
+          <strong style="color:var(--accent-dim);">Note:</strong>
+          <span style="color:var(--text-secondary); font-size:0.88rem;">Lab report interpretation is included at every tier — clinical care isn't a paywalled feature. The family/partner meal plan is exclusive to Complete Care.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ═══ Insta Wall ═══ -->
   <section class="section" id="insta-wall">
     <div class="container text-center">
@@ -652,6 +678,7 @@
           <div class="flex flex-col gap-sm">
             <a href="#specializations">Specializations</a>
             <a href="#about">About Dt. Disha</a>
+            <a href="pricing.html">Pricing Plans</a>
             <a href="book.html">Request Free Consultation</a>
             <a href="login.html">Client Portal</a>
           </div>
@@ -700,6 +727,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- ═══ Scripts ═══ -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/main.js"></script>
   <script>
     // Show welcome back banner for logged-in users
@@ -737,6 +765,187 @@
       carousel.addEventListener('touchstart', () => clearInterval(scrollInterval));
       carousel.addEventListener('touchend', startScroll);
     }
+
+    // ═══ Pricing Plans ═══
+    const FEATURE_LABELS = {
+      video_consultations: { label: 'Video consultations', icon: 'videocam' },
+      whatsapp_support: { label: 'WhatsApp support', icon: 'chat' },
+      plan_revisions: { label: 'Plan revisions', icon: 'edit_note' },
+      lab_report: { label: 'Lab report interpretation', icon: 'biotech' },
+      travel_plan: { label: 'Travel plan', icon: 'flight' },
+      fasting_plan: { label: 'Fasting plan', icon: 'restaurant' },
+      recipe_library: { label: 'Recipe library', icon: 'menu_book' },
+      education_modules: { label: 'Weekly education modules', icon: 'school' },
+      family_meal_plan: { label: 'Family/partner meal plan', icon: 'family_restroom' }
+    };
+
+    function buildFeatureHTML(features) {
+      const order = ['video_consultations', 'whatsapp_support', 'plan_revisions', 'lab_report', 'travel_plan', 'fasting_plan', 'recipe_library', 'education_modules', 'family_meal_plan'];
+      return order.map(key => {
+        const val = features[key];
+        const meta = FEATURE_LABELS[key] || { label: key, icon: 'check' };
+        const isIncluded = val !== false;
+        const displayValue = typeof val === 'string' ? val : (val === true ? 'Included' : '');
+
+        return `
+          <li class="pricing-feature">
+            <span class="pricing-feature-icon ${isIncluded ? 'check' : 'cross'}">
+              ${isIncluded ? '✓' : '✕'}
+            </span>
+            <span>
+              <span style="color:var(--text-secondary);">${meta.label}</span>
+              ${displayValue && isIncluded ? `<br><span class="pricing-feature-value">${displayValue}</span>` : ''}
+            </span>
+          </li>
+        `;
+      }).join('');
+    }
+
+    function renderPricingCards(plans) {
+      const container = document.getElementById('pricingCards');
+      if (!plans || plans.length === 0) {
+        container.innerHTML = '<p class="text-center text-caption" style="grid-column:1/-1;">Plans loading...</p>';
+        return;
+      }
+
+      container.innerHTML = plans.map(plan => `
+        <div class="pricing-card ${plan.is_popular ? 'pricing-popular' : ''}">
+          ${plan.is_popular ? '<div class="pricing-popular-badge">Most Popular</div>' : ''}
+          <div class="pricing-plan-name">${plan.name}</div>
+          <div class="pricing-tagline">${plan.tagline || ''}</div>
+          <div class="pricing-price">
+            <span class="pricing-amount">${plan.display_price}</span>
+            <span class="pricing-period">/month</span>
+          </div>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            ${buildFeatureHTML(typeof plan.features === 'string' ? JSON.parse(plan.features) : plan.features)}
+          </ul>
+          <div class="pricing-cta">
+            <button onclick="choosePlan(${plan.id}, '${plan.slug}')" class="btn ${plan.is_popular ? 'btn-primary' : 'btn-outline'}">
+              Choose ${plan.name}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Load plans from API
+    async function loadPlans() {
+      try {
+        const data = await BeyondKilos.apiRequest('/api/plans');
+        if (data.plans && data.plans.length > 0) {
+          renderPricingCards(data.plans);
+        } else {
+          renderFallbackPlans();
+        }
+      } catch (err) {
+        console.error('Failed to load plans:', err);
+        renderFallbackPlans();
+      }
+    }
+
+    function renderFallbackPlans() {
+      const fallback = [
+        { id: 1, name: 'Starter', slug: 'starter', display_price: '₹1,499', tagline: 'Perfect to begin your health journey', is_popular: false, features: { video_consultations: '2/month', whatsapp_support: '9am–7pm, next-day reply', plan_revisions: '2/month', lab_report: true, travel_plan: false, fasting_plan: false, recipe_library: 'Core (30 recipes)', education_modules: true, family_meal_plan: false } },
+        { id: 2, name: 'Signature', slug: 'signature', display_price: '₹1,999', tagline: 'Our most popular — weekly guidance & full access', is_popular: true, features: { video_consultations: '4/month (weekly)', whatsapp_support: '24-hour', plan_revisions: '4/month', lab_report: true, travel_plan: true, fasting_plan: true, recipe_library: 'Full (100+ recipes)', education_modules: true, family_meal_plan: false } },
+        { id: 3, name: 'Complete Care', slug: 'complete-care', display_price: '₹3,499', tagline: 'Premium care with priority access & family plan', is_popular: false, features: { video_consultations: '4/month + on-demand calls', whatsapp_support: 'Priority, under 4hr reply', plan_revisions: 'Unlimited', lab_report: true, travel_plan: true, fasting_plan: true, recipe_library: 'Full (100+ recipes)', education_modules: true, family_meal_plan: '1 included' } }
+      ];
+      renderPricingCards(fallback);
+    }
+
+    // Choose Plan & Razorpay checkout
+    async function choosePlan(planId, planSlug) {
+      // Check if user is logged in
+      if (!BeyondKilos.isLoggedIn()) {
+        sessionStorage.setItem('redirect_after_login', `/#pricing`);
+        sessionStorage.setItem('selected_plan_id', planId);
+        BeyondKilos.showToast('Please complete registration to purchase a plan', 'info');
+        setTimeout(() => { window.location.href = '/book.html'; }, 1000);
+        return;
+      }
+
+      try {
+        BeyondKilos.showToast('Preparing checkout...', 'info');
+
+        // Create Razorpay order
+        const orderData = await BeyondKilos.apiRequest('/api/plans/create-order', {
+          method: 'POST',
+          body: JSON.stringify({ plan_id: planId })
+        });
+
+        // Open Razorpay checkout
+        const options = {
+          key: orderData.key,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'Beyond Kilos',
+          description: `${orderData.plan_name} — Monthly Plan`,
+          order_id: orderData.order_id,
+          prefill: {
+            name: orderData.user.name,
+            email: orderData.user.email,
+            contact: orderData.user.phone
+          },
+          theme: {
+            color: '#064e3b'
+          },
+          handler: async function (response) {
+            // Verify payment
+            try {
+              const verifyData = await BeyondKilos.apiRequest('/api/plans/verify-payment', {
+                method: 'POST',
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature
+                })
+              });
+
+              if (verifyData.success) {
+                BeyondKilos.showToast('🎉 Payment successful! Welcome aboard!', 'success', 5000);
+                setTimeout(() => {
+                  window.location.href = '/portal/dashboard.html';
+                }, 2000);
+              }
+            } catch (err) {
+              BeyondKilos.showToast('Payment verification failed. Please contact support.', 'error', 5000);
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              BeyondKilos.showToast('Payment cancelled', 'info');
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+          BeyondKilos.showToast('Payment failed: ' + response.error.description, 'error', 5000);
+        });
+        rzp.open();
+
+      } catch (err) {
+        console.error('Checkout error:', err);
+        BeyondKilos.showToast(err.message || 'Failed to start checkout', 'error');
+      }
+    }
+
+    // Check if redirected after login with a selected plan
+    (function checkPlanRedirect() {
+      const savedPlanId = sessionStorage.getItem('selected_plan_id');
+      if (savedPlanId && BeyondKilos.isLoggedIn()) {
+        sessionStorage.removeItem('selected_plan_id');
+        sessionStorage.removeItem('redirect_after_login');
+        // Scroll to pricing and auto-trigger plan selection
+        setTimeout(() => {
+          document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+          setTimeout(() => choosePlan(parseInt(savedPlanId)), 1000);
+        }, 500);
+      }
+    })();
+
+    loadPlans();
   </script>
 </body>
 
