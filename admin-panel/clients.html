@@ -144,6 +144,11 @@
               </div>
               <div class="text-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.email}</div>
             </div>
+            <button class="btn-delete-client" onclick="event.stopPropagation(); deleteClient(${c.id}, '${(c.name||'').replace(/'/g, "\\'")}')"
+              title="Delete client" 
+              style="background:none; border:none; cursor:pointer; padding:6px; border-radius:var(--radius-md); color:var(--text-muted); transition:all 0.2s; flex-shrink:0;">
+              <span class="material-symbols-outlined" style="font-size:20px;">delete</span>
+            </button>
           </div>
           <div class="client-card-stats">
             <div class="client-stat">
@@ -225,6 +230,19 @@
         btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">person_add</span> Create Client';
       }
     });
+
+    async function deleteClient(clientId, clientName) {
+      const confirmed = confirm(`⚠️ Permanently delete "${clientName}"?\n\nThis will remove ALL their data including:\n• Weight logs\n• Appointments\n• Diet plans\n• Payment orders\n\nThis action CANNOT be undone.`);
+      if (!confirmed) return;
+
+      try {
+        await BeyondKilos.apiRequest(`/api/clients/${clientId}`, { method: 'DELETE' });
+        BeyondKilos.showToast(`"${clientName}" has been permanently deleted.`, 'success');
+        await loadClients();
+      } catch (err) {
+        BeyondKilos.showToast(err.message || 'Failed to delete client', 'error');
+      }
+    }
 
     loadClients();
   </script>

@@ -234,9 +234,9 @@
           <!-- Weight & Height -->
           <div class="grid grid-2">
             <div class="form-group">
-              <label class="form-label">Current Weight</label>
+              <label class="form-label">Current Weight *</label>
               <div style="display:flex; gap:8px;">
-                <input type="number" id="clientWeight" class="form-input" placeholder="e.g. 70" step="0.1" style="flex:1;" oninput="calculateBMI()" />
+                <input type="number" id="clientWeight" class="form-input" placeholder="e.g. 70" step="0.1" style="flex:1;" oninput="calculateBMI()" required />
                 <select id="weightUnit" class="form-input" style="width:80px;" onchange="calculateBMI()">
                   <option value="kg">kg</option>
                   <option value="lbs">lbs</option>
@@ -244,9 +244,9 @@
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">Height</label>
+              <label class="form-label">Height *</label>
               <div style="display:flex; gap:8px;">
-                <input type="number" id="clientHeight" class="form-input" placeholder="e.g. 170" step="0.1" style="flex:1;" oninput="calculateBMI()" />
+                <input type="number" id="clientHeight" class="form-input" placeholder="e.g. 170" step="0.1" style="flex:1;" oninput="calculateBMI()" required />
                 <div id="heightFtContainer" style="display:none; gap:8px; flex:1;">
                   <input type="number" id="heightFt" class="form-input" placeholder="ft" style="width:100%;" oninput="calculateBMI()" />
                   <input type="number" id="heightIn" class="form-input" placeholder="in" style="width:100%;" oninput="calculateBMI()" />
@@ -262,12 +262,13 @@
           <!-- Age & Gender -->
           <div class="grid grid-2">
             <div class="form-group">
-              <label class="form-label" for="clientAge">Age</label>
-              <input type="number" id="clientAge" class="form-input" placeholder="e.g. 25" min="1" max="120" oninput="calculateBMI()" />
+              <label class="form-label" for="clientAge">Age *</label>
+              <input type="number" id="clientAge" class="form-input" placeholder="e.g. 25" min="1" max="120" oninput="calculateBMI()" required />
             </div>
             <div class="form-group">
-              <label class="form-label" for="clientGender">Gender</label>
-              <select id="clientGender" class="form-input" onchange="calculateBMI()">
+              <label class="form-label" for="clientGender">Gender *</label>
+              <select id="clientGender" class="form-input" onchange="calculateBMI()" required>
+                <option value="" disabled selected>Select gender</option>
                 <option value="female">Female</option>
                 <option value="male">Male</option>
                 <option value="other">Other</option>
@@ -479,8 +480,22 @@
       const notes = document.getElementById('clientNotes').value.trim();
       const referral = document.getElementById('referralCode').value.trim();
 
+      const weightVal = parseFloat(document.getElementById('clientWeight').value);
+      const ageVal = parseInt(document.getElementById('clientAge').value);
+      const genderVal = document.getElementById('clientGender').value;
+
+      // Check height based on selected unit
+      let hasHeight = false;
+      if (document.getElementById('heightUnit').value === 'cm') {
+        hasHeight = !isNaN(parseFloat(document.getElementById('clientHeight').value)) && parseFloat(document.getElementById('clientHeight').value) > 0;
+      } else {
+        const ft = parseFloat(document.getElementById('heightFt').value) || 0;
+        const inc = parseFloat(document.getElementById('heightIn').value) || 0;
+        hasHeight = (ft > 0 || inc > 0);
+      }
+
       if (!name || !phoneVal || !email || !password) {
-        BeyondKilos.showToast('Please fill in all required fields, including password.', 'error');
+        BeyondKilos.showToast('Please fill in all required fields.', 'error');
         return;
       }
 
@@ -491,6 +506,26 @@
 
       if (password.length < 6) {
         BeyondKilos.showToast('Password must be at least 6 characters.', 'error');
+        return;
+      }
+
+      if (isNaN(weightVal) || weightVal <= 0) {
+        BeyondKilos.showToast('Please enter your current weight.', 'error');
+        return;
+      }
+
+      if (!hasHeight) {
+        BeyondKilos.showToast('Please enter your height.', 'error');
+        return;
+      }
+
+      if (isNaN(ageVal) || ageVal < 1 || ageVal > 120) {
+        BeyondKilos.showToast('Please enter a valid age (1-120).', 'error');
+        return;
+      }
+
+      if (!genderVal) {
+        BeyondKilos.showToast('Please select your gender.', 'error');
         return;
       }
 

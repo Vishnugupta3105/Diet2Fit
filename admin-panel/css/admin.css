@@ -56,6 +56,11 @@
   margin-bottom: var(--space-lg);
 }
 
+.btn-delete-client:hover {
+  color: #dc2626 !important;
+  background: #fef2f2 !important;
+}
+
 .client-card-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;

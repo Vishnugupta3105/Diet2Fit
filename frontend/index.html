@@ -890,6 +890,30 @@
           theme: {
             color: '#064e3b'
           },
+          method: {
+            upi: true,
+            card: true,
+            netbanking: true,
+            wallet: true,
+            emi: false,
+            paylater: false
+          },
+          config: {
+            display: {
+              blocks: {
+                upi: {
+                  name: 'Pay using UPI',
+                  instruments: [
+                    { method: 'upi', flows: ['intent', 'qr', 'collect'], apps: ['google_pay', 'phonepe', 'paytm'] }
+                  ]
+                }
+              },
+              sequence: ['block.upi'],
+              preferences: {
+                show_default_blocks: true
+              }
+            }
+          },
           handler: async function (response) {
             // Verify payment
             try {
