@@ -21,9 +21,30 @@
       display: flex;
       align-items: flex-start;
       gap: 16px;
+      position: relative;
+      -webkit-user-select: none;
+      user-select: none;
     }
+    .goal-option * { pointer-events: none; }
     .goal-option:hover { border-color: var(--primary-dim); background: var(--primary-surface); }
     .goal-option.selected { border-color: var(--primary); background: var(--primary-surface); box-shadow: 0 0 0 4px var(--primary-glow); }
+    .goal-option.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      animation: successPop 0.3s ease;
+    }
     .goal-option .goal-icon {
       width: 48px; height: 48px; border-radius: var(--radius-md);
       display: flex; align-items: center; justify-content: center;
@@ -378,9 +399,12 @@
     }
 
     function selectGoal(el) {
+      // Always resolve to the .goal-option parent in case a child was clicked
+      const option = el.closest ? el.closest('.goal-option') : el;
+      if (!option) return;
       document.querySelectorAll('.goal-option').forEach(o => o.classList.remove('selected'));
-      el.classList.add('selected');
-      selectedGoal = el.dataset.goal;
+      option.classList.add('selected');
+      selectedGoal = option.dataset.goal;
       document.getElementById('btnNext1').disabled = false;
     }
 
