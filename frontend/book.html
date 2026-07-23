@@ -557,7 +557,6 @@
 
       // Ensure metrics are up to date if they didn't trigger calculateBMI manually
       let weightKg = null;
-      const weightVal = parseFloat(document.getElementById('clientWeight').value);
       if (!isNaN(weightVal)) {
         weightKg = document.getElementById('weightUnit').value === 'lbs' ? weightVal * 0.453592 : weightVal;
       }
