@@ -146,6 +146,11 @@
             </select>
           </div>
         </div>
+        <div class="form-group">
+          <label class="form-label">Payment Date *</label>
+          <input type="date" id="assignStartDate" class="form-input" required />
+          <div class="text-caption" style="margin-top:4px;">The plan period will start from this date</div>
+        </div>
         <div style="background:#ecfdf5; padding:var(--space-md); border-radius:var(--radius-md); border:1px solid #a7f3d0;">
           <div class="text-caption" style="color:#059669; font-weight:600;">PLAN SUMMARY</div>
           <div style="font-size:1.2rem; font-weight:700; color:#064e3b; margin-top:4px;" id="assignPlanSummary">Select a plan above</div>
@@ -331,6 +336,7 @@
       document.getElementById('assignPlanId').selectedIndex = 0;
       document.getElementById('assignDuration').value = '1';
       document.getElementById('assignPaymentMethod').value = 'cash';
+      document.getElementById('assignStartDate').value = new Date().toISOString().split('T')[0];
       document.getElementById('assignPlanSummary').textContent = 'Select a plan above';
       document.getElementById('assignPlanModal').classList.add('active');
     }
@@ -372,7 +378,8 @@
             user_id: parseInt(document.getElementById('assignUserId').value),
             plan_id: parseInt(document.getElementById('assignPlanId').value),
             duration_months: parseInt(document.getElementById('assignDuration').value),
-            payment_method: document.getElementById('assignPaymentMethod').value
+            payment_method: document.getElementById('assignPaymentMethod').value,
+            start_date: document.getElementById('assignStartDate').value
           })
         });
         BeyondKilos.showToast(result.message || 'Plan assigned successfully!', 'success');

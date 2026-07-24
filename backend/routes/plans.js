@@ -294,7 +294,7 @@ router.get('/stats', authMiddleware, adminOnly, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 router.post('/assign', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { user_id, plan_id, payment_method, duration_months } = req.body;
+    const { user_id, plan_id, payment_method, duration_months, start_date } = req.body;
 
     if (!user_id || !plan_id) {
       return res.status(400).json({ error: 'user_id and plan_id are required.' });
@@ -315,8 +315,8 @@ router.post('/assign', authMiddleware, adminOnly, async (req, res) => {
     const plan = planRes.rows[0];
 
     const months = parseInt(duration_months) || 1;
-    const now = new Date();
-    const expiresAt = new Date(now);
+    const startsAt = start_date ? new Date(start_date) : new Date();
+    const expiresAt = new Date(startsAt);
     expiresAt.setMonth(expiresAt.getMonth() + months);
 
     // Create a paid order entry (manual/offline)
@@ -333,7 +333,7 @@ router.post('/assign', authMiddleware, adminOnly, async (req, res) => {
       plan.price_monthly * months,
       'INR',
       'paid',
-      now,
+      startsAt,
       expiresAt,
       user.name,
       user.email,
