@@ -103,6 +103,61 @@
     </div>
   </div>
 
+  <!-- Assign Plan Modal -->
+  <div class="admin-modal-overlay" id="assignPlanModal">
+    <div class="admin-modal">
+      <div class="flex justify-between items-center mb-lg">
+        <h3 style="margin:0;">Assign Plan (Offline Payment)</h3>
+        <button onclick="closeAssignModal()" style="color:var(--text-muted);padding:4px;"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div style="background:var(--bg-alt); padding:var(--space-md); border-radius:var(--radius-md); margin-bottom:var(--space-lg); display:flex; align-items:center; gap:var(--space-md);">
+        <div class="client-avatar" style="width:40px;height:40px;font-size:0.8rem;" id="assignClientAvatar">--</div>
+        <div>
+          <div style="font-weight:600;" id="assignClientName">Client Name</div>
+          <div class="text-caption" id="assignClientEmail">email@example.com</div>
+        </div>
+      </div>
+      <form id="assignPlanForm" class="flex flex-col gap-md">
+        <input type="hidden" id="assignUserId" />
+        <div class="form-group">
+          <label class="form-label">Select Plan *</label>
+          <select id="assignPlanId" class="form-input" required>
+            <option value="" disabled selected>Loading plans...</option>
+          </select>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">Duration *</label>
+            <select id="assignDuration" class="form-input">
+              <option value="1">1 Month</option>
+              <option value="2">2 Months</option>
+              <option value="3">3 Months</option>
+              <option value="6">6 Months</option>
+              <option value="12">12 Months</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Method *</label>
+            <select id="assignPaymentMethod" class="form-input">
+              <option value="cash">Cash</option>
+              <option value="upi_personal">UPI (Personal)</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div style="background:#ecfdf5; padding:var(--space-md); border-radius:var(--radius-md); border:1px solid #a7f3d0;">
+          <div class="text-caption" style="color:#059669; font-weight:600;">PLAN SUMMARY</div>
+          <div style="font-size:1.2rem; font-weight:700; color:#064e3b; margin-top:4px;" id="assignPlanSummary">Select a plan above</div>
+        </div>
+        <button type="submit" class="btn btn-primary w-full" id="btnAssignPlan">
+          <span class="material-symbols-outlined" style="font-size:20px;">card_membership</span>
+          Assign Plan
+        </button>
+      </form>
+    </div>
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
   <script src="/js/main.js"></script>
   <script>
@@ -172,6 +227,15 @@
               <div class="client-stat-value" style="font-size:0.8rem;">${BeyondKilos.formatDate(c.created_at)}</div>
             </div>
           </div>
+          ${!c.active_plan ? `
+          <div style="margin-top:var(--space-md); padding-top:var(--space-md); border-top:1px solid var(--border);">
+            <button class="btn btn-outline btn-sm w-full" 
+              onclick="event.stopPropagation(); openAssignPlan(${c.id}, '${(c.name||'').replace(/'/g, "\\\'")}', '${(c.email||'').replace(/'/g, "\\\'")}')" 
+              style="gap:6px;">
+              <span class="material-symbols-outlined" style="font-size:16px;">card_membership</span>
+              Assign Plan
+            </button>
+          </div>` : ''}
         `;
         grid.appendChild(card);
       });
@@ -244,7 +308,86 @@
       }
     }
 
+    // ── Assign Plan ──────────────────────────────────────────────
+    let availablePlans = [];
+
+    async function loadAvailablePlans() {
+      try {
+        const data = await BeyondKilos.apiRequest('/api/plans');
+        availablePlans = data.plans || [];
+        const select = document.getElementById('assignPlanId');
+        select.innerHTML = '<option value="" disabled selected>Select a plan</option>' +
+          availablePlans.map(p => `<option value="${p.id}" data-price="${p.price_monthly}" data-display="${p.display_price}">${p.name} — ${p.display_price}/month</option>`).join('');
+      } catch (err) {
+        console.error('Failed to load plans:', err);
+      }
+    }
+
+    function openAssignPlan(userId, name, email) {
+      document.getElementById('assignUserId').value = userId;
+      document.getElementById('assignClientName').textContent = name;
+      document.getElementById('assignClientEmail').textContent = email;
+      document.getElementById('assignClientAvatar').textContent = (name || '').substring(0, 2).toUpperCase();
+      document.getElementById('assignPlanId').selectedIndex = 0;
+      document.getElementById('assignDuration').value = '1';
+      document.getElementById('assignPaymentMethod').value = 'cash';
+      document.getElementById('assignPlanSummary').textContent = 'Select a plan above';
+      document.getElementById('assignPlanModal').classList.add('active');
+    }
+
+    function closeAssignModal() {
+      document.getElementById('assignPlanModal').classList.remove('active');
+    }
+
+    // Update summary when plan or duration changes
+    document.getElementById('assignPlanId').addEventListener('change', updatePlanSummary);
+    document.getElementById('assignDuration').addEventListener('change', updatePlanSummary);
+
+    function updatePlanSummary() {
+      const select = document.getElementById('assignPlanId');
+      const option = select.options[select.selectedIndex];
+      const months = parseInt(document.getElementById('assignDuration').value) || 1;
+      if (!option || !option.value) {
+        document.getElementById('assignPlanSummary').textContent = 'Select a plan above';
+        return;
+      }
+      const displayPrice = option.dataset.display;
+      const planName = option.text.split(' — ')[0];
+      const priceNum = parseInt(option.dataset.price) / 100;
+      const total = priceNum * months;
+      document.getElementById('assignPlanSummary').innerHTML = 
+        `<span>${planName}</span> × ${months} month${months > 1 ? 's' : ''} = <strong>₹${total.toLocaleString('en-IN')}</strong>`;
+    }
+
+    document.getElementById('assignPlanForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnAssignPlan');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Assigning...';
+
+      try {
+        const result = await BeyondKilos.apiRequest('/api/plans/assign', {
+          method: 'POST',
+          body: JSON.stringify({
+            user_id: parseInt(document.getElementById('assignUserId').value),
+            plan_id: parseInt(document.getElementById('assignPlanId').value),
+            duration_months: parseInt(document.getElementById('assignDuration').value),
+            payment_method: document.getElementById('assignPaymentMethod').value
+          })
+        });
+        BeyondKilos.showToast(result.message || 'Plan assigned successfully!', 'success');
+        closeAssignModal();
+        await loadClients();
+      } catch (err) {
+        BeyondKilos.showToast(err.message || 'Failed to assign plan', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">card_membership</span> Assign Plan';
+      }
+    });
+
     loadClients();
+    loadAvailablePlans();
   </script>
 </body>
 </html>

@@ -288,4 +288,67 @@ router.get('/stats', authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
+// ══════════════════════════════════════════════════════════════════
+// POST /api/plans/assign — Admin manually assigns a plan (ADMIN)
+// For clients who paid offline (cash, UPI to personal account, etc.)
+// ══════════════════════════════════════════════════════════════════
+router.post('/assign', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { user_id, plan_id, payment_method, duration_months } = req.body;
+
+    if (!user_id || !plan_id) {
+      return res.status(400).json({ error: 'user_id and plan_id are required.' });
+    }
+
+    // Verify user exists
+    const userRes = await db.query('SELECT id, name, email, phone FROM users WHERE id = $1 AND role = $2', [user_id, 'client']);
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Client not found.' });
+    }
+    const user = userRes.rows[0];
+
+    // Verify plan exists
+    const planRes = await db.query('SELECT * FROM subscription_plans WHERE id = $1 AND is_active = true', [plan_id]);
+    if (planRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Plan not found or inactive.' });
+    }
+    const plan = planRes.rows[0];
+
+    const months = parseInt(duration_months) || 1;
+    const now = new Date();
+    const expiresAt = new Date(now);
+    expiresAt.setMonth(expiresAt.getMonth() + months);
+
+    // Create a paid order entry (manual/offline)
+    const orderRes = await db.query(`
+      INSERT INTO plan_orders (user_id, plan_id, plan_name, razorpay_order_id, razorpay_payment_id, amount, currency, status, starts_at, expires_at, buyer_name, buyer_email, buyer_phone)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      RETURNING *
+    `, [
+      user_id,
+      plan.id,
+      plan.name,
+      `manual_${Date.now()}`,
+      `offline_${payment_method || 'cash'}_${Date.now()}`,
+      plan.price_monthly * months,
+      'INR',
+      'paid',
+      now,
+      expiresAt,
+      user.name,
+      user.email,
+      user.phone
+    ]);
+
+    res.status(201).json({
+      success: true,
+      message: `${plan.name} plan assigned to ${user.name} for ${months} month(s).`,
+      order: orderRes.rows[0]
+    });
+  } catch (err) {
+    console.error('Error assigning plan:', err);
+    res.status(500).json({ error: 'Failed to assign plan.' });
+  }
+});
+
 module.exports = router;
