@@ -25,8 +25,18 @@ router.post('/login', [
   try {
     const { email, password } = req.body;
 
-    const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-    const user = result.rows[0];
+    let result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+    let user = result.rows[0];
+
+    // Backward compatibility: old accounts may have been stored with dots removed from Gmail
+    if (!user && email.includes('@gmail.com')) {
+      const [localPart, domain] = email.split('@');
+      const dotlessEmail = localPart.replace(/\./g, '') + '@' + domain;
+      if (dotlessEmail !== email) {
+        result = await db.query('SELECT * FROM users WHERE email = $1', [dotlessEmail]);
+        user = result.rows[0];
+      }
+    }
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password.' });
