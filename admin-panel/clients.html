@@ -216,6 +216,11 @@
           <label class="form-label">Notes</label>
           <textarea id="editNotes" class="form-input" rows="2" placeholder="Diet goals, medical conditions..."></textarea>
         </div>
+        <div class="form-group" style="background:var(--bg-alt); padding:var(--space-md); border-radius:var(--radius-md); border:1px solid var(--border);">
+          <label class="form-label" style="display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:16px;color:var(--primary);">lock_reset</span> Reset Password</label>
+          <input type="text" id="editPassword" class="form-input" placeholder="Leave empty to keep current password" />
+          <div class="text-caption" style="margin-top:4px;">Min 6 characters. Only fill if client needs a new password.</div>
+        </div>
         <button type="submit" class="btn btn-primary w-full" id="btnEditClient">
           <span class="material-symbols-outlined" style="font-size:20px;">save</span>
           Save Changes
@@ -484,6 +489,7 @@
         document.getElementById('editGender').value = c.gender || '';
         document.getElementById('editDob').value = c.date_of_birth || '';
         document.getElementById('editNotes').value = c.notes || '';
+        document.getElementById('editPassword').value = '';
 
         document.getElementById('editModal').classList.add('active');
       } catch (err) {
@@ -501,16 +507,30 @@
 
       try {
         // Update profile info
+        const updateBody = {
+          name: document.getElementById('editName').value.trim(),
+          goal_weight: parseFloat(document.getElementById('editGoalWeight').value) || null,
+          height_cm: parseFloat(document.getElementById('editHeight').value) || null,
+          gender: document.getElementById('editGender').value || null,
+          date_of_birth: document.getElementById('editDob').value || null,
+          notes: document.getElementById('editNotes').value.trim() || null
+        };
+
+        // Include password if admin wants to reset it
+        const newPassword = document.getElementById('editPassword').value.trim();
+        if (newPassword) {
+          if (newPassword.length < 6) {
+            BeyondKilos.showToast('Password must be at least 6 characters', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">save</span> Save Changes';
+            return;
+          }
+          updateBody.password = newPassword;
+        }
+
         await BeyondKilos.apiRequest(`/api/clients/${clientId}`, {
           method: 'PUT',
-          body: JSON.stringify({
-            name: document.getElementById('editName').value.trim(),
-            goal_weight: parseFloat(document.getElementById('editGoalWeight').value) || null,
-            height_cm: parseFloat(document.getElementById('editHeight').value) || null,
-            gender: document.getElementById('editGender').value || null,
-            date_of_birth: document.getElementById('editDob').value || null,
-            notes: document.getElementById('editNotes').value.trim() || null
-          })
+          body: JSON.stringify(updateBody)
         });
 
         // Log new weight if provided

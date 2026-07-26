@@ -81,7 +81,7 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
  */
 router.post('/', authenticate, requireAdmin, [
   body('name').notEmpty().withMessage('Name is required').trim().escape(),
-  body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
+  body('email').isEmail().withMessage('Valid email is required').normalizeEmail({ gmail_remove_dots: false }),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
   body('phone').optional({ checkFalsy: true }).trim().escape(),
   body('notes').optional({ checkFalsy: true }).trim().escape(),
