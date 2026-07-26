@@ -148,6 +148,13 @@ const initializeDB = async () => {
     try { await pool.query('ALTER TABLE subscription_plans ADD COLUMN IF NOT EXISTS price_monthly_usd INTEGER'); } catch(e) {}
     try { await pool.query('ALTER TABLE subscription_plans ADD COLUMN IF NOT EXISTS display_price_usd TEXT'); } catch(e) {}
 
+    // Backfill USD prices for existing plans in production
+    try {
+      await pool.query("UPDATE subscription_plans SET price_monthly_usd = 14900, display_price_usd = '$149' WHERE slug = 'starter' AND price_monthly_usd IS NULL");
+      await pool.query("UPDATE subscription_plans SET price_monthly_usd = 19900, display_price_usd = '$199' WHERE slug = 'signature' AND price_monthly_usd IS NULL");
+      await pool.query("UPDATE subscription_plans SET price_monthly_usd = 34900, display_price_usd = '$349' WHERE slug = 'complete-care' AND price_monthly_usd IS NULL");
+    } catch(e) { console.error('Error backfilling USD prices:', e); }
+
 
     // Seed Admin Account
     const adminRes = await pool.query('SELECT id FROM users WHERE role = $1', ['admin']);
