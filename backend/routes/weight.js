@@ -169,4 +169,44 @@ router.delete('/:id', authenticate, async (req, res) => {
   }
 });
 
+/**
+ * POST /api/weight/admin-log
+ * Admin logs a weight entry on behalf of a client
+ */
+router.post('/admin-log', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { user_id, weight_kg, date, notes } = req.body;
+
+    if (!user_id || !weight_kg || !date) {
+      return res.status(400).json({ error: 'user_id, weight_kg, and date are required.' });
+    }
+
+    if (weight_kg <= 0 || weight_kg > 500) {
+      return res.status(400).json({ error: 'Please enter a valid weight.' });
+    }
+
+    // Check if entry already exists for this date
+    const existingRes = await db.query('SELECT id FROM weight_logs WHERE user_id = $1 AND date = $2', [user_id, date]);
+    
+    if (existingRes.rows.length > 0) {
+      const existingId = existingRes.rows[0].id;
+      await db.query('UPDATE weight_logs SET weight_kg = $1, notes = $2 WHERE id = $3', [weight_kg, notes || null, existingId]);
+      const entryRes = await db.query('SELECT * FROM weight_logs WHERE id = $1', [existingId]);
+      return res.json({ entry: entryRes.rows[0], updated: true });
+    }
+
+    const result = await db.query(`
+      INSERT INTO weight_logs (user_id, weight_kg, date, notes)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id
+    `, [user_id, weight_kg, date, notes || null]);
+
+    const entryRes = await db.query('SELECT * FROM weight_logs WHERE id = $1', [result.rows[0].id]);
+    res.status(201).json({ entry: entryRes.rows[0] });
+  } catch (err) {
+    console.error('Admin weight log error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

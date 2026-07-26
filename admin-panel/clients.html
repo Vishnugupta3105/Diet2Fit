@@ -163,6 +163,67 @@
     </div>
   </div>
 
+  <!-- Edit Client Modal -->
+  <div class="admin-modal-overlay" id="editModal">
+    <div class="admin-modal" style="max-width:520px;">
+      <div class="flex justify-between items-center mb-lg">
+        <h3 style="margin:0;">Edit Client</h3>
+        <button onclick="closeEditModal()" style="color:var(--text-muted);padding:4px;"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div style="background:var(--bg-alt); padding:var(--space-md); border-radius:var(--radius-md); margin-bottom:var(--space-lg); display:flex; align-items:center; gap:var(--space-md);">
+        <div class="client-avatar" style="width:40px;height:40px;font-size:0.8rem;" id="editClientAvatar">--</div>
+        <div>
+          <div style="font-weight:600;" id="editClientDisplayName">Client Name</div>
+          <div class="text-caption" id="editClientDisplayEmail">email@example.com</div>
+        </div>
+      </div>
+      <form id="editClientForm" class="flex flex-col gap-md">
+        <input type="hidden" id="editClientId" />
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" id="editName" class="form-input" required />
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">Current Weight (kg)</label>
+            <input type="number" id="editCurrentWeight" class="form-input" step="0.1" placeholder="Log new weight" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Goal Weight (kg)</label>
+            <input type="number" id="editGoalWeight" class="form-input" step="0.1" />
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">Height (cm)</label>
+            <input type="number" id="editHeight" class="form-input" step="0.1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gender</label>
+            <select id="editGender" class="form-input">
+              <option value="">Select</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date of Birth</label>
+          <input type="date" id="editDob" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea id="editNotes" class="form-input" rows="2" placeholder="Diet goals, medical conditions..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary w-full" id="btnEditClient">
+          <span class="material-symbols-outlined" style="font-size:20px;">save</span>
+          Save Changes
+        </button>
+      </form>
+    </div>
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
   <script src="/js/main.js"></script>
   <script>
@@ -204,6 +265,11 @@
               <div class="text-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.email}</div>
               ${c.active_plan ? `<div style="margin-top:6px;"><span class="badge badge-success" style="font-size:0.65rem;padding:3px 8px;">${c.active_plan} · ${c.plan_days_left} days left</span></div>` : ''}
             </div>
+            <button class="btn-delete-client" onclick="event.stopPropagation(); openEditClient(${c.id})"
+              title="Edit client" 
+              style="background:none; border:none; cursor:pointer; padding:6px; border-radius:var(--radius-md); color:var(--text-muted); transition:all 0.2s; flex-shrink:0;">
+              <span class="material-symbols-outlined" style="font-size:20px;">edit</span>
+            </button>
             <button class="btn-delete-client" onclick="event.stopPropagation(); deleteClient(${c.id}, '${(c.name||'').replace(/'/g, "\\'")}')"
               title="Delete client" 
               style="background:none; border:none; cursor:pointer; padding:6px; border-radius:var(--radius-md); color:var(--text-muted); transition:all 0.2s; flex-shrink:0;">
@@ -395,6 +461,82 @@
 
     loadClients();
     loadAvailablePlans();
+
+    // ── Edit Client ──────────────────────────────────────────────
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('active');
+    }
+
+    async function openEditClient(clientId) {
+      try {
+        const data = await BeyondKilos.apiRequest(`/api/clients/${clientId}`);
+        const c = data.client;
+        const latestWeight = data.weights && data.weights.length > 0 ? data.weights[0].weight_kg : '';
+
+        document.getElementById('editClientId').value = c.id;
+        document.getElementById('editClientAvatar').textContent = (c.name || '').substring(0, 2).toUpperCase();
+        document.getElementById('editClientDisplayName').textContent = c.name;
+        document.getElementById('editClientDisplayEmail').textContent = c.email;
+        document.getElementById('editName').value = c.name || '';
+        document.getElementById('editCurrentWeight').value = latestWeight;
+        document.getElementById('editGoalWeight').value = c.goal_weight || '';
+        document.getElementById('editHeight').value = c.height_cm || '';
+        document.getElementById('editGender').value = c.gender || '';
+        document.getElementById('editDob').value = c.date_of_birth || '';
+        document.getElementById('editNotes').value = c.notes || '';
+
+        document.getElementById('editModal').classList.add('active');
+      } catch (err) {
+        BeyondKilos.showToast('Failed to load client details', 'error');
+      }
+    }
+
+    document.getElementById('editClientForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnEditClient');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Saving...';
+
+      const clientId = document.getElementById('editClientId').value;
+
+      try {
+        // Update profile info
+        await BeyondKilos.apiRequest(`/api/clients/${clientId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            name: document.getElementById('editName').value.trim(),
+            goal_weight: parseFloat(document.getElementById('editGoalWeight').value) || null,
+            height_cm: parseFloat(document.getElementById('editHeight').value) || null,
+            gender: document.getElementById('editGender').value || null,
+            date_of_birth: document.getElementById('editDob').value || null,
+            notes: document.getElementById('editNotes').value.trim() || null
+          })
+        });
+
+        // Log new weight if provided
+        const newWeight = parseFloat(document.getElementById('editCurrentWeight').value);
+        if (newWeight && newWeight > 0) {
+          await BeyondKilos.apiRequest('/api/weight/admin-log', {
+            method: 'POST',
+            body: JSON.stringify({
+              user_id: parseInt(clientId),
+              weight_kg: newWeight,
+              date: new Date().toISOString().split('T')[0],
+              notes: 'Updated by admin'
+            })
+          });
+        }
+
+        BeyondKilos.showToast('Client updated successfully!', 'success');
+        closeEditModal();
+        await loadClients();
+      } catch (err) {
+        BeyondKilos.showToast(err.message || 'Failed to update client', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">save</span> Save Changes';
+      }
+    });
   </script>
 </body>
 </html>
