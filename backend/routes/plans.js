@@ -50,7 +50,7 @@ function getRazorpay() {
 router.get('/', async (req, res) => {
   try {
     const result = await db.query(
-      'SELECT id, name, slug, price_monthly, display_price, tagline, features, is_popular, sort_order FROM subscription_plans WHERE is_active = true ORDER BY sort_order ASC'
+      'SELECT id, name, slug, price_monthly, display_price, price_monthly_usd, display_price_usd, tagline, features, is_popular, sort_order FROM subscription_plans WHERE is_active = true ORDER BY sort_order ASC'
     );
     res.json({ plans: result.rows });
   } catch (err) {
@@ -75,8 +75,11 @@ router.get('/razorpay-key', (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 router.post('/create-order', authMiddleware, async (req, res) => {
   try {
-    const { plan_id } = req.body;
+    const { plan_id, currency = 'INR' } = req.body;
     if (!plan_id) return res.status(400).json({ error: 'plan_id is required.' });
+
+    // Validate currency
+    const validCurrency = currency.toUpperCase() === 'USD' ? 'USD' : 'INR';
 
     // Get plan details
     const planRes = await db.query('SELECT * FROM subscription_plans WHERE id = $1 AND is_active = true', [plan_id]);
@@ -84,6 +87,12 @@ router.post('/create-order', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Plan not found or inactive.' });
     }
     const plan = planRes.rows[0];
+
+    const orderAmount = validCurrency === 'USD' ? plan.price_monthly_usd : plan.price_monthly;
+    
+    if (!orderAmount) {
+      return res.status(400).json({ error: 'Pricing not configured for this plan.' });
+    }
 
     // Get user details
     const userRes = await db.query('SELECT name, email, phone FROM users WHERE id = $1', [req.user.id]);
@@ -96,8 +105,8 @@ router.post('/create-order', authMiddleware, async (req, res) => {
 
     // Create Razorpay order
     const order = await razorpay.orders.create({
-      amount: plan.price_monthly,
-      currency: 'INR',
+      amount: orderAmount,
+      currency: validCurrency,
       receipt: `plan_${plan.slug}_${req.user.id}_${Date.now()}`,
       notes: {
         plan_id: plan.id.toString(),
@@ -111,7 +120,7 @@ router.post('/create-order', authMiddleware, async (req, res) => {
     await db.query(`
       INSERT INTO plan_orders (user_id, plan_id, plan_name, razorpay_order_id, amount, currency, status, buyer_name, buyer_email, buyer_phone)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-    `, [req.user.id, plan.id, plan.name, order.id, plan.price_monthly, 'INR', 'created', user.name, user.email, user.phone]);
+    `, [req.user.id, plan.id, plan.name, order.id, orderAmount, validCurrency, 'created', user.name, user.email, user.phone]);
 
     res.json({
       order_id: order.id,

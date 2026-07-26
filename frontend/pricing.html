@@ -47,6 +47,19 @@
   <!-- Pricing Cards -->
   <section style="padding: 0 0 var(--space-3xl);">
     <div class="container">
+      
+      <!-- Currency Toggle -->
+      <div style="display: flex; justify-content: center; margin-bottom: var(--space-xl);">
+        <div style="display: inline-flex; background: var(--bg-alt); padding: 4px; border-radius: var(--radius-full); border: 1px solid var(--border);">
+          <button id="btnToggleINR" onclick="setCurrency('INR')" class="btn btn-sm" style="border-radius: var(--radius-full); border: none; background: var(--primary); color: white; padding: 6px 20px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            🇮🇳 INR (₹)
+          </button>
+          <button id="btnToggleUSD" onclick="setCurrency('USD')" class="btn btn-sm" style="border-radius: var(--radius-full); border: none; background: transparent; color: var(--text-secondary); padding: 6px 20px; font-weight: 600;">
+            🌎 USD ($)
+          </button>
+        </div>
+      </div>
+
       <div class="pricing-grid" id="pricingCards">
         <!-- Loaded dynamically -->
       </div>
@@ -259,15 +272,63 @@
       }).join('');
     }
 
+    // State for currency
+    let activeCurrency = 'INR';
+    let loadedPlans = [];
+
+    function setCurrency(currency) {
+      activeCurrency = currency;
+      
+      // Update toggle UI
+      const btnINR = document.getElementById('btnToggleINR');
+      const btnUSD = document.getElementById('btnToggleUSD');
+      
+      if (currency === 'INR') {
+        btnINR.style.background = 'var(--primary)';
+        btnINR.style.color = 'white';
+        btnINR.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+        btnUSD.style.background = 'transparent';
+        btnUSD.style.color = 'var(--text-secondary)';
+        btnUSD.style.boxShadow = 'none';
+      } else {
+        btnUSD.style.background = 'var(--primary)';
+        btnUSD.style.color = 'white';
+        btnUSD.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+        btnINR.style.background = 'transparent';
+        btnINR.style.color = 'var(--text-secondary)';
+        btnINR.style.boxShadow = 'none';
+      }
+
+      // Re-render cards
+      if (loadedPlans.length > 0) {
+        renderPricingCards(loadedPlans);
+      }
+    }
+
+    // Auto-detect currency via IP
+    async function detectCurrency() {
+      try {
+        const response = await fetch('https://get.geojs.io/v1/ip/country.json');
+        const data = await response.json();
+        if (data && data.country && data.country !== 'IN') {
+          setCurrency('USD');
+        }
+      } catch (e) {
+        console.log('Could not auto-detect location', e);
+      }
+    }
+
     function renderPricingCards(plans) {
       const container = document.getElementById('pricingCards');
-      container.innerHTML = plans.map(plan => `
+      container.innerHTML = plans.map(plan => {
+        const displayPrice = activeCurrency === 'USD' ? (plan.display_price_usd || plan.display_price) : plan.display_price;
+        return `
         <div class="pricing-card ${plan.is_popular ? 'pricing-popular' : ''}">
           ${plan.is_popular ? '<div class="pricing-popular-badge">Most Popular</div>' : ''}
           <div class="pricing-plan-name">${plan.name}</div>
           <div class="pricing-tagline">${plan.tagline || ''}</div>
           <div class="pricing-price">
-            <span class="pricing-amount">${plan.display_price}</span>
+            <span class="pricing-amount">${displayPrice}</span>
             <span class="pricing-period">/month</span>
           </div>
           <div class="pricing-divider"></div>
@@ -280,13 +341,15 @@
             </button>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     async function loadPlans() {
       try {
         const data = await BeyondKilos.apiRequest('/api/plans');
         if (data.plans && data.plans.length > 0) {
+          loadedPlans = data.plans;
           renderPricingCards(data.plans);
         } else { renderFallback(); }
       } catch (err) { renderFallback(); }
@@ -294,10 +357,11 @@
 
     function renderFallback() {
       const fallback = [
-        { id: 1, name: 'Starter', slug: 'starter', display_price: '₹1,499', tagline: 'Perfect to begin your health journey', is_popular: false, features: { video_consultations: '2/month', whatsapp_support: '9am–7pm, next-day reply', plan_revisions: '2/month', lab_report: true, travel_plan: false, fasting_plan: false, recipe_library: 'Core (30 recipes)', education_modules: true, family_meal_plan: false } },
-        { id: 2, name: 'Signature', slug: 'signature', display_price: '₹1,999', tagline: 'Our most popular — weekly guidance & full access', is_popular: true, features: { video_consultations: '4/month (weekly)', whatsapp_support: '24-hour', plan_revisions: '4/month', lab_report: true, travel_plan: true, fasting_plan: true, recipe_library: 'Full (100+ recipes)', education_modules: true, family_meal_plan: false } },
-        { id: 3, name: 'Complete Care', slug: 'complete-care', display_price: '₹3,499', tagline: 'Premium care with priority access & family plan', is_popular: false, features: { video_consultations: '4/month + on-demand calls', whatsapp_support: 'Priority, under 4hr reply', plan_revisions: 'Unlimited', lab_report: true, travel_plan: true, fasting_plan: true, recipe_library: 'Full (100+ recipes)', education_modules: true, family_meal_plan: '1 included' } }
+        { id: 1, name: 'Starter', slug: 'starter', display_price: '₹1,499', display_price_usd: '$149', tagline: 'Perfect to begin your health journey', is_popular: false, features: { video_consultations: '2/month', whatsapp_support: '9am–7pm, next-day reply', plan_revisions: '2/month', lab_report: true, travel_plan: false, fasting_plan: false, recipe_library: 'Core (30 recipes)', education_modules: true, family_meal_plan: false } },
+        { id: 2, name: 'Signature', slug: 'signature', display_price: '₹1,999', display_price_usd: '$199', tagline: 'Our most popular — weekly guidance & full access', is_popular: true, features: { video_consultations: '4/month (weekly)', whatsapp_support: '24-hour', plan_revisions: '4/month', lab_report: true, travel_plan: true, fasting_plan: true, recipe_library: 'Full (100+ recipes)', education_modules: true, family_meal_plan: false } },
+        { id: 3, name: 'Complete Care', slug: 'complete-care', display_price: '₹3,499', display_price_usd: '$349', tagline: 'Premium care with priority access & family plan', is_popular: false, features: { video_consultations: '4/month + on-demand calls', whatsapp_support: 'Priority, under 4hr reply', plan_revisions: 'Unlimited', lab_report: true, travel_plan: true, fasting_plan: true, recipe_library: 'Full (100+ recipes)', education_modules: true, family_meal_plan: '1 included' } }
       ];
+      loadedPlans = fallback;
       renderPricingCards(fallback);
     }
 
@@ -314,7 +378,10 @@
         BeyondKilos.showToast('Preparing checkout...', 'info');
         const orderData = await BeyondKilos.apiRequest('/api/plans/create-order', {
           method: 'POST',
-          body: JSON.stringify({ plan_id: planId })
+          body: JSON.stringify({ 
+            plan_id: planId,
+            currency: activeCurrency 
+          })
         });
 
         const options = {
@@ -388,6 +455,7 @@
     }
 
     loadPlans();
+    detectCurrency();
   </script>
 </body>
 </html>

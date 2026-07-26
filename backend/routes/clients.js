@@ -49,16 +49,23 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
         SELECT COUNT(*) as count FROM appointments WHERE client_id = $1
       `, [client.id]);
       const planRes = await db.query(`
-        SELECT plan_name FROM plan_orders 
+        SELECT plan_name, expires_at FROM plan_orders 
         WHERE user_id = $1 AND status = 'paid' AND expires_at > NOW() 
         ORDER BY expires_at DESC LIMIT 1
       `, [client.id]);
+
+      let days_left = null;
+      if (planRes.rows.length > 0) {
+        const expiresAt = new Date(planRes.rows[0].expires_at);
+        days_left = Math.ceil((expiresAt - new Date()) / (1000 * 60 * 60 * 24));
+      }
 
       return {
         ...client,
         latest_weight: weightRes.rows.length > 0 ? weightRes.rows[0].weight_kg : null,
         appointment_count: apptCountRes.rows[0].count,
-        active_plan: planRes.rows.length > 0 ? planRes.rows[0].plan_name : null
+        active_plan: planRes.rows.length > 0 ? planRes.rows[0].plan_name : null,
+        plan_days_left: days_left
       };
     }));
 

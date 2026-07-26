@@ -103,6 +103,8 @@ const initializeDB = async () => {
         slug TEXT UNIQUE NOT NULL,
         price_monthly INTEGER NOT NULL,
         display_price TEXT NOT NULL,
+        price_monthly_usd INTEGER,
+        display_price_usd TEXT,
         tagline TEXT,
         features JSONB NOT NULL DEFAULT '{}',
         is_popular BOOLEAN DEFAULT FALSE,
@@ -143,6 +145,9 @@ const initializeDB = async () => {
     try { await pool.query('ALTER TABLE appointments ADD COLUMN IF NOT EXISTS client_bmi REAL'); } catch(e) {}
     try { await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS age INTEGER'); } catch(e) {}
     try { await pool.query('ALTER TABLE appointments ADD COLUMN IF NOT EXISTS is_followup BOOLEAN DEFAULT FALSE'); } catch(e) {}
+    try { await pool.query('ALTER TABLE subscription_plans ADD COLUMN IF NOT EXISTS price_monthly_usd INTEGER'); } catch(e) {}
+    try { await pool.query('ALTER TABLE subscription_plans ADD COLUMN IF NOT EXISTS display_price_usd TEXT'); } catch(e) {}
+
 
     // Seed Admin Account
     const adminRes = await pool.query('SELECT id FROM users WHERE role = $1', ['admin']);
@@ -164,6 +169,8 @@ const initializeDB = async () => {
           slug: 'starter',
           price_monthly: 149900,
           display_price: '₹1,499',
+          price_monthly_usd: 14900,
+          display_price_usd: '$149',
           tagline: 'Perfect to begin your health journey',
           is_popular: false,
           sort_order: 1,
@@ -184,6 +191,8 @@ const initializeDB = async () => {
           slug: 'signature',
           price_monthly: 199900,
           display_price: '₹1,999',
+          price_monthly_usd: 19900,
+          display_price_usd: '$199',
           tagline: 'Our most popular — weekly guidance & full access',
           is_popular: true,
           sort_order: 2,
@@ -204,6 +213,8 @@ const initializeDB = async () => {
           slug: 'complete-care',
           price_monthly: 349900,
           display_price: '₹3,499',
+          price_monthly_usd: 34900,
+          display_price_usd: '$349',
           tagline: 'Premium care with priority access & family plan',
           is_popular: false,
           sort_order: 3,
@@ -223,9 +234,9 @@ const initializeDB = async () => {
 
       for (const p of plans) {
         await pool.query(`
-          INSERT INTO subscription_plans (name, slug, price_monthly, display_price, tagline, features, is_popular, sort_order)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        `, [p.name, p.slug, p.price_monthly, p.display_price, p.tagline, JSON.stringify(p.features), p.is_popular, p.sort_order]);
+          INSERT INTO subscription_plans (name, slug, price_monthly, display_price, price_monthly_usd, display_price_usd, tagline, features, is_popular, sort_order)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        `, [p.name, p.slug, p.price_monthly, p.display_price, p.price_monthly_usd, p.display_price_usd, p.tagline, JSON.stringify(p.features), p.is_popular, p.sort_order]);
       }
       console.log('✅ Subscription plans seeded: Starter, Signature, Complete Care');
     }
