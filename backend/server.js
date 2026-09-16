@@ -23,6 +23,10 @@ const app = express();
 app.set('trust proxy', 1); // Trust Render's reverse proxy for correct rate limiting
 app.use(helmet({
   contentSecurityPolicy: false,
+  // Allow WhatsApp/Facebook/Twitter crawlers to read pages & images for link previews
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 app.use(cors());
 app.use(express.json());
