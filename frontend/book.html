@@ -18,10 +18,50 @@
   <meta property="og:site_name" content="Beyond Kilos" />
 
   <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Book Free Consultation — Online Dietitian | Beyond Kilos" />
   <meta name="twitter:description" content="Request your free nutrition consultation with Dt. Disha, M.Sc. Clinical Dietetics." />
   <meta name="twitter:image" content="https://www.gobeyondkilos.com/img/og-card.jpg" />
+
+  <!-- BreadcrumbList Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://www.gobeyondkilos.com/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Book Free Consultation",
+        "item": "https://www.gobeyondkilos.com/book.html"
+      }
+    ]
+  }
+  </script>
+
+  <!-- ContactPage Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Book Free Nutrition Consultation — Beyond Kilos",
+    "description": "Request your free 1-on-1 online nutrition consultation with Dt. Disha, M.Sc. Clinical Dietetics. Personalized plans for weight management, PCOS, diabetes, and heart health.",
+    "url": "https://www.gobeyondkilos.com/book.html",
+    "mainEntity": {
+      "@type": "ProfessionalService",
+      "name": "Beyond Kilos",
+      "url": "https://www.gobeyondkilos.com",
+      "telephone": "+91-8306404335",
+      "email": "dieticiandisha29@gmail.com"
+    }
+  }
+  </script>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -176,7 +216,7 @@
       <!-- Step 1: Choose Goal -->
       <div class="step active" id="step1">
         <div class="text-center mb-xl">
-          <h1 class="text-headline mb-sm">What's your health goal?</h1>
+          <h1 class="text-headline mb-sm">Book Free Consultation — What's Your Health Goal?</h1>
           <p style="color: var(--text-secondary);">Select the area where you need expert guidance from Dt. Disha.</p>
         </div>
 
@@ -243,7 +283,7 @@
       <!-- Step 2: Contact Details + Slot Picker -->
       <div class="step" id="step2">
         <div class="text-center mb-xl">
-          <h1 class="text-headline mb-sm">Your Details</h1>
+          <h2 class="text-headline mb-sm">Your Details</h2>
           <p style="color: var(--text-secondary);">Tell us about yourself so Dt. Disha can review your request.</p>
         </div>
 
@@ -369,7 +409,7 @@
           <div class="success-animation">
             <span class="material-symbols-outlined" style="font-size:40px;color:var(--primary);">celebration</span>
           </div>
-          <h1 class="text-headline mb-sm" id="successTitle">Request Sent!</h1>
+          <h2 class="text-headline mb-sm" id="successTitle">Request Sent!</h2>
           <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto var(--space-xl);" id="successText">
             We will connect on your WhatsApp soon! You can also message us directly using the button below.
           </p>
