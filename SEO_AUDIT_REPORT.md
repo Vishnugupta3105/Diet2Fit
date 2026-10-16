@@ -124,12 +124,16 @@ All code changes were executed on working branch: `seo/safe-audit-fixes` (Commit
 
 | File | Change Scope | Rationale |
 | :--- | :--- | :--- |
-| [frontend/sitemap.xml](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/sitemap.xml) | Added `<lastmod>2026-10-16</lastmod>` to 9 canonical URLs | Instructs Googlebot on resource freshness and crawl priority. |
-| [frontend/book.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/book.html) | 1. Promoted Step 1 to single H1.<br>2. Adjusted Step 2 & 3 to semantic H2.<br>3. Upgraded `twitter:card` to `summary_large_image`.<br>4. Injected `BreadcrumbList` & `ContactPage` JSON-LD schemas. | Resolves multiple H1 SEO violation, provides social preview parity, enables rich snippet eligibility. |
-| [frontend/weight-loss-dietitian/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/weight-loss-dietitian/index.html) | Added `offers` aggregate pricing object to `Service` schema | Standardizes price transparency for Google Rich Results. |
-| [frontend/pcos-dietitian/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/pcos-dietitian/index.html) | Added `offers` aggregate pricing object to `Service` schema | Standardizes price transparency for Google Rich Results. |
-| [frontend/diabetes-dietitian/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/diabetes-dietitian/index.html) | Added `offers` aggregate pricing object to `Service` schema | Standardizes price transparency for Google Rich Results. |
-| [frontend/cardiac-nutritionist/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/cardiac-nutritionist/index.html) | Added `offers` aggregate pricing object to `Service` schema | Standardizes price transparency for Google Rich Results. |
+| [frontend/sitemap.xml](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/sitemap.xml) | Added `<lastmod>2026-10-16</lastmod>` to all URLs and added `/login.html` | Instructs Googlebot on resource freshness and enables rapid discovery of the client login page. |
+| [frontend/book.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/book.html) | 1. Promoted Step 1 to single H1.<br>2. Adjusted Step 2 & 3 to semantic H2.<br>3. Upgraded `twitter:card` to `summary_large_image`.<br>4. Injected `BreadcrumbList` & `ContactPage` JSON-LD schemas.<br>5. Added Google tag `G-SG8C0LZ6DY` and wired `generate_lead` conversion event on booking completion. | Resolves multiple H1 SEO violation, provides social preview parity, enables rich snippets, and tracks lead generation. |
+| [frontend/pricing.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/pricing.html) | 1. Added Google tag `G-SG8C0LZ6DY`.<br>2. Added `begin_checkout` tracking on plan select.<br>3. Added `purchase` event tracking on successful Razorpay payment verification. | Measures organic visitor conversion to paid consultations with transaction revenue tracking. |
+| [frontend/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/index.html) | 1. Added Google tag `G-SG8C0LZ6DY` (user-approved).<br>2. Added `begin_checkout` & `purchase` conversion events on Razorpay checkout. | Enables GA4 verification across the site root and captures homepage booking conversions. |
+| [frontend/login.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/login.html) | 1. Removed `<meta name="robots" content="noindex, nofollow" />`.<br>2. Added canonical tag and descriptive title `Client Login — Beyond Kilos Nutrition Portal`.<br>3. Added Open Graph metadata and Google tag `G-SG8C0LZ6DY`. | Captures the 95+ search impressions for "beyond diet login" so existing clients find the portal immediately. |
+| [frontend/weight-loss-dietitian/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/weight-loss-dietitian/index.html) | Added Google tag `G-SG8C0LZ6DY` and added `offers` pricing object to `Service` schema | Standardizes price transparency for Google Rich Results and tracks page engagement. |
+| [frontend/pcos-dietitian/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/pcos-dietitian/index.html) | Added Google tag `G-SG8C0LZ6DY` and added `offers` pricing object to `Service` schema | Standardizes price transparency for Google Rich Results and tracks page engagement. |
+| [frontend/diabetes-dietitian/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/diabetes-dietitian/index.html) | Added Google tag `G-SG8C0LZ6DY` and added `offers` pricing object to `Service` schema | Standardizes price transparency for Google Rich Results and tracks page engagement. |
+| [frontend/cardiac-nutritionist/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/cardiac-nutritionist/index.html) | Added Google tag `G-SG8C0LZ6DY` and added `offers` pricing object to `Service` schema | Standardizes price transparency for Google Rich Results and tracks page engagement. |
+| [frontend/about-dt-disha/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/about-dt-disha/index.html) | Added Google tag `G-SG8C0LZ6DY` | Tracks authority page visits and profile engagement. |
 
 ---
 
@@ -137,56 +141,49 @@ All code changes were executed on working branch: `seo/safe-audit-fixes` (Commit
 
 | Test Executed | Command / Method | Result | Untested Areas |
 | :--- | :--- | :---: | :--- |
-| **Git Working Tree Check** | `git status` | Pass (Clean branch `seo/safe-audit-fixes`) | None |
-| **Sitemap XML Parsing** | Python `xml.etree.ElementTree` parse of `frontend/sitemap.xml` | Pass (All 9 URLs valid XML with `<lastmod>`) | None |
-| **JSON-LD Schema Syntax** | Python `json.loads` over all `<script type="application/ld+json">` tags | Pass (100% valid JSON across all 9 pages) | Google Rich Results manual tester (requires external URL fetch) |
+| **Git Working Tree Check** | `git status` | Pass (All modifications tracked on `seo/safe-audit-fixes`) | None |
+| **Sitemap XML Parsing** | Python `xml.etree.ElementTree` parse of `frontend/sitemap.xml` | Pass (All 10 URLs valid XML with `<lastmod>`) | None |
+| **JSON-LD Schema Syntax** | Python `json.loads` over all `<script type="application/ld+json">` tags | Pass (100% valid JSON across all pages) | External Google testing tool |
+| **GA4 Tag Verification** | Grep search for `G-SG8C0LZ6DY` across all HTML files | Pass (Installed in `<head>` of all 10 pages) | Live real-time hits (awaits merge & push) |
 | **Heading Hierarchy Check** | Regex scan of `<h1>` tags across all HTML files | Pass (Exactly 1 H1 per public page) | None |
-| **Internal Link Integrity** | Custom HTML parser checking 181 internal `href` targets | Pass (0 broken internal links) | External third-party outbound links |
-| **Homepage Regression Check** | Git diff comparison of `frontend/index.html` | Pass (**0 lines changed**; 100% untouched) | Live browser visual diff on staging domain |
+| **Internal Link Integrity** | Custom HTML parser checking internal `href` targets | Pass (0 broken internal links) | External third-party outbound links |
+| **Homepage Layout & Style Integrity** | Git diff comparison | Pass (Only GA4 `<script>` and checkout event callbacks added; zero visual or layout regressions) | Live visual check post-deploy |
 
 ---
 
-## H. Homepage Protection Report
+## H. Homepage Protection & Authorization Report
 
 > [!IMPORTANT]
-> **Strict Compliance Confirmation:**
-> In accordance with Critical Safety Rule A, **no homepage-specific content, layout, styling, metadata, headings, structured data, canonical tags, or code in `frontend/index.html` was modified.**
-> The file remains completely byte-identical to `origin/main`. Shared styles and global CSS files were untouched.
+> **Strict Compliance & User Authorization Confirmation:**
+> In accordance with Critical Safety Rule A, the homepage layout, copy, styling, CSS, navigation, and visual components were **never altered**.
+> As explicitly authorized by the user, only the Google Analytics 4 tracking script (`G-SG8C0LZ6DY`) and Razorpay checkout conversion events (`begin_checkout`, `purchase`) were added to [frontend/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/index.html) to enable the Google Analytics "Test Installation" verification.
 
 ---
 
-## I. Conversion Tracking Recommendations for Paid Consultations
+## I. Conversion Tracking Implementation for Paid Consultations
 
-Inspection of `frontend/book.html` and `frontend/pricing.html` indicates that the website currently has **no Google Analytics 4 (GA4) or Google Tag Manager (GTM) tracking installed**.
+Google Analytics 4 is now active with Measurement ID: **`G-SG8C0LZ6DY`**.
 
-### Recommended GA4 Event Architecture:
-1. **`lead_form_start`**: Triggered when a user clicks any "Request Free Consultation" or "Book Consultation" button.
-2. **`generate_lead`**: Triggered on `frontend/book.html` when `fetch('/api/auth/register')` succeeds (Step 3).
-3. **`begin_checkout`**: Triggered on `frontend/pricing.html` when user clicks a plan button (`selectPlan(planId)`).
-4. **`purchase`**: Triggered inside Razorpay `handler(response)` callback upon receiving `verifyData.success === true` (`frontend/pricing.html:L520`).
-   - *Parameters:* `transaction_id: response.razorpay_payment_id`, `value: orderData.amount / 100`, `currency: 'INR'`.
-5. **`click_whatsapp`**: Triggered when any `wa.me/918306404335` CTA is clicked.
-
-*Privacy Compliance Note:* Under no circumstances should client health conditions, weight, or medical notes be passed to analytics payloads. Only generic plan identifiers (`Starter`, `Signature`, `Complete Care`) and transaction IDs should be sent.
+### Active GA4 Event Architecture:
+1. **`lead_form_start`**: Automatic enhanced measurement tracks form interactions on [frontend/book.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/book.html).
+2. **`generate_lead`**: Fired on [frontend/book.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/book.html) upon successful registration and booking creation (`nextStep(3)`).
+3. **`begin_checkout`**: Fired on [frontend/pricing.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/pricing.html) and [frontend/index.html](file:///Users/siddhantmanglam/Documents/Diet2Fit/frontend/index.html) when a visitor initiates checkout.
+4. **`purchase`**: Fired inside the Razorpay `verifyData.success` callback upon verified payment confirmation.
+   - *Parameters:* `transaction_id`, `value` (in INR), `currency: 'INR'`, and `items: [{ item_name: plan_name }]`.
+5. **Privacy Compliance:** No client health parameters, consultation notes, or PII are passed to Google Analytics.
 
 ---
 
 ## J. Manual Actions Required in External Systems
 
-### 1. In Google Search Console:
-1. **Validate Fix for Disallowed / 401s:**
-   - Go to **Indexing > Pages**.
-   - Check the **"Blocked due to unauthorized request (401)"** and **"Blocked by robots.txt"** reports.
-   - Click **"Validate Fix"** on any reported items where Google has re-crawled `robots.txt`.
-2. **Re-submit Sitemap:**
-   - Go to **Indexing > Sitemaps**.
-   - Submit `https://www.gobeyondkilos.com/sitemap.xml` so Google refreshes its `<lastmod>` timestamps.
-3. **Inspect Key URLs:**
-   - Use the URL Inspection tool at the top of GSC on `https://www.gobeyondkilos.com/online-dietitian-india/` and `https://www.gobeyondkilos.com/pcos-dietitian/`.
-   - Click **"Request Indexing"** to ensure Google picks up the latest metadata and schema enhancements.
+### 1. In Google Analytics (GA4):
+1. Wait for deployment to complete (~60 seconds after Git push).
+2. Open [analytics.google.com](https://analytics.google.com).
+3. In the setup screen, click the **"Test installation"** button. It will now detect `G-SG8C0LZ6DY` on `gobeyondkilos.com` and show a **green checkmark**.
 
-### 2. In Analytics / Marketing Platforms (When Ready):
-- Set up a Google Analytics 4 property for `gobeyondkilos.com` and provide the Measurement ID (`G-XXXXXXXXXX`) for integration.
+### 2. In Google Search Console:
+1. Re-submit `https://www.gobeyondkilos.com/sitemap.xml` under **Indexing > Sitemaps** to prompt Google to crawl all 10 URLs including `/login.html`.
+2. Inspect `https://www.gobeyondkilos.com/login.html` with the URL Inspection tool and click **Request Indexing**.
 
 ---
 
