@@ -210,3 +210,30 @@ window.BeyondKilos = {
   getTodayDate,
   API_BASE,
 };
+
+// ── GA4 WhatsApp Contact Click Tracking ──────────────────────
+(function initWhatsAppTracking() {
+  if (typeof document === 'undefined') return;
+
+  let lastClickTime = 0;
+  document.addEventListener('click', function(e) {
+    const waLink = e.target.closest('a[href*="wa.me"], a[href*="api.whatsapp.com"]');
+    if (!waLink) return;
+
+    // Prevent duplicate event dispatch within 1 second
+    const now = Date.now();
+    if (now - lastClickTime < 1000) return;
+    lastClickTime = now;
+
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'contact_whatsapp', {
+        event_category: 'engagement',
+        event_label: 'WhatsApp Contact Click',
+        link_url: waLink.href,
+        page_location: window.location.href,
+        page_title: document.title
+      });
+    }
+  }, { passive: true });
+})();
+

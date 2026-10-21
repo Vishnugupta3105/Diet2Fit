@@ -39,14 +39,26 @@ const loginLimiter = rateLimit({
   message: { error: 'Too many login attempts, please try again after 15 minutes' }
 });
 
-// ── Static File Serving ──────────────────────────────────────────
+// ── Private Portal & Admin Security & Indexing Headers ───────────
+app.use(['/portal', '/admin'], (req, res, next) => {
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+  next();
+});
 
+// ── Static File Serving ──────────────────────────────────────────
 app.use('/', express.static(path.join(__dirname, '..', 'frontend')));
 app.use('/portal', express.static(path.join(__dirname, '..', 'client-portal')));
 app.use('/admin', express.static(path.join(__dirname, '..', 'admin-panel')));
 
 app.get('/portal/?', (req, res) => res.redirect('/portal/dashboard.html'));
 app.get('/admin/?', (req, res) => res.redirect('/admin/dashboard.html'));
+
+// ── API Crawling Protection ──────────────────────────────────────
+app.use('/api', (req, res, next) => {
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  next();
+});
 
 // ── API Routes ───────────────────────────────────────────────────
 app.use('/api/auth/login', loginLimiter);

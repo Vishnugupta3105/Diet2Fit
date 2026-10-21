@@ -1,10 +1,9 @@
 User-agent: *
 Allow: /
 
-# Block private areas
-Disallow: /portal/
-Disallow: /admin/
+# Block API endpoints from crawling
 Disallow: /api/
 
 # Sitemap
 Sitemap: https://www.gobeyondkilos.com/sitemap.xml
+
