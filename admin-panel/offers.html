@@ -157,16 +157,19 @@
               <span class="material-symbols-outlined" style="color:var(--primary); font-size:20px;">share</span>
               Direct Offer Link
             </h4>
-            <p class="text-caption mb-md">Share this link directly on WhatsApp, Instagram stories, or bio:</p>
-            <div style="display:flex; gap:8px; background:var(--bg-alt); padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border); font-size:0.82rem; word-break:break-all;" id="shareUrlBox">
+            <p class="text-caption mb-md">Share this link with clients. Opening it directly loads the pricing page and immediately pops open the ₹799 checkout form:</p>
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-alt); padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border); font-size:0.82rem; word-break:break-all; font-family:monospace; color:#064e3b; font-weight:600;" id="shareUrlBox">
               https://www.gobeyondkilos.com/pricing.html?offer=diwali
             </div>
-            <div class="flex gap-sm mt-md">
-              <button class="btn btn-outline btn-sm w-full" onclick="copyShareLink()">
+            <div class="flex gap-xs mt-md">
+              <button class="btn btn-outline btn-sm" style="flex:1;" onclick="copyShareLink()">
                 <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span> Copy Link
               </button>
               <a id="btnShareWhatsApp" href="https://api.whatsapp.com/send?text=🪔%20Diwali%20Glow%20Reset%20by%20Dt.%20Disha%20is%20live!%20Get%20a%2030-Day%20Personalized%20Plan%20%2B%202%20Consultations%20for%20just%20₹799%20(Worth%20₹3,500).%20Book%20your%20slot%20now:%20https://www.gobeyondkilos.com/pricing.html?offer=diwali" target="_blank" class="btn btn-sm" style="background:#25D366; color:white; border:none; display:inline-flex; align-items:center; gap:4px; text-decoration:none;">
                 <span class="material-symbols-outlined" style="font-size:16px;">chat</span> WhatsApp
+              </a>
+              <a id="btnTestOfferLink" href="https://www.gobeyondkilos.com/pricing.html?offer=diwali" target="_blank" class="btn btn-ghost btn-sm" style="padding:6px 10px; border:1px solid var(--border);" title="Test and open the offer page directly">
+                <span class="material-symbols-outlined" style="font-size:16px;">open_in_new</span> Test
               </a>
             </div>
           </div>
@@ -490,7 +493,7 @@
     function copyShareLink() {
       const url = document.getElementById('shareUrlBox').textContent.trim();
       navigator.clipboard.writeText(url).then(() => {
-        BeyondKilos.showToast('Direct offer link copied to clipboard!', 'success');
+        BeyondKilos.showToast('Offer link copied! Clients clicking this will directly land on the ₹799 checkout form.', 'success', 4000);
       }).catch(() => {
         BeyondKilos.showToast('Copied: ' + url, 'info');
       });
