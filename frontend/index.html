@@ -261,7 +261,7 @@
         <span style="font-size:20px;">🪔</span>
         <strong id="diwaliTopBarText">Diwali Glow Reset is Live! 30-Day Transformation Plan for ₹799 (Worth ₹3,500+)</strong>
       </span>
-      <a href="/pricing.html?offer=diwali" class="btn btn-sm" style="background:#d4a853; color:#064e3b; font-weight:700; border:none; padding:4px 14px; border-radius:20px; text-decoration:none; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+      <a href="/pricing.html?offer=diwali" onclick="goToDiwaliOffer(event)" class="btn btn-sm" style="background:#d4a853; color:#064e3b; font-weight:700; border:none; padding:4px 14px; border-radius:20px; text-decoration:none; box-shadow:0 2px 8px rgba(0,0,0,0.2); cursor:pointer;">
         Claim Offer (₹799) →
       </a>
     </div>
@@ -715,9 +715,9 @@
                 <span style="font-size:1.8rem; font-weight:800; line-height:1; color:#fff;" id="diwaliHomePrice">₹799</span>
                 <span style="font-size:0.7rem; color:#a7f3d0; text-decoration:line-through; margin-top:2px;">Worth ₹3,500+</span>
               </div>
-              <a href="/pricing.html?offer=diwali" class="btn btn-primary btn-md w-full" style="background:#064e3b; text-decoration:none; padding:10px 24px; border-radius:var(--radius-full); font-weight:700;">
+              <button onclick="claimDiwaliOffer()" class="btn btn-primary btn-md w-full" style="background:#064e3b; border:none; color:#fff; text-decoration:none; padding:12px 24px; border-radius:var(--radius-full); font-weight:700; cursor:pointer;" id="btnClaimDiwaliHome">
                 Avail Offer — ₹799
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -893,6 +893,60 @@
         d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
     </svg>
   </a>
+
+  <!-- Diwali Quick Checkout Modal (For Guests & Direct Pay) -->
+  <div class="diwali-modal-overlay" id="diwaliCheckoutModal">
+    <div class="diwali-modal">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:24px;">🪔</span>
+          <h3 style="font-size:1.25rem; font-weight:700; margin:0; color:#064e3b;">Diwali Glow Reset</h3>
+        </div>
+        <button onclick="closeDiwaliModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div style="background:#fdfbf7; border:1px solid #e7dfd3; border-radius:12px; padding:12px 16px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:700; color:#064e3b; font-size:0.9rem;">30-Day Personalized Plan + 2 Consultations</div>
+          <div class="text-caption" style="font-size:0.75rem;">Includes DIY Glow Guide (PDF) & WhatsApp Check-ins</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:1.25rem; font-weight:800; color:#064e3b;" id="modalDiwaliPrice">₹799</div>
+          <div style="font-size:0.7rem; color:#92400e; text-decoration:line-through;">Worth ₹3,500+</div>
+        </div>
+      </div>
+
+      <form id="diwaliCheckoutForm" class="flex flex-col gap-md">
+        <div class="form-group">
+          <label class="form-label" style="font-weight:600;">Your Full Name *</label>
+          <input type="text" id="diwaliBuyerName" class="form-input" placeholder="e.g. Priya Sharma" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="font-weight:600;">WhatsApp Mobile Number *</label>
+          <input type="tel" id="diwaliBuyerPhone" class="form-input" placeholder="e.g. 9876543210" required />
+          <div class="text-caption" style="margin-top:3px;">Dt. Disha will connect with you here for consultations</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="font-weight:600;">Email Address *</label>
+          <input type="email" id="diwaliBuyerEmail" class="form-input" placeholder="e.g. priya@gmail.com" required />
+          <div class="text-caption" style="margin-top:3px;">Your login credentials and plan receipt will be sent here</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-full" id="btnDiwaliPaySubmit" style="background:#064e3b; margin-top:8px;">
+          <span class="material-symbols-outlined" style="font-size:20px;">lock</span>
+          Proceed to Pay ₹799
+        </button>
+
+        <p class="text-center text-caption" style="margin:0; font-size:0.75rem; color:var(--text-muted);">
+          🔒 Secured by Razorpay • UPI, GPay, PhonePe, Cards, NetBanking accepted
+        </p>
+      </form>
+    </div>
+  </div>
 
   <!-- ═══ Toast Container ═══ -->
   <div class="toast-container" id="toastContainer"></div>
@@ -1155,12 +1209,14 @@
     })();
 
     // Check active Diwali offer for homepage
+    let activeHomeDiwaliOffer = null;
     async function checkHomeDiwaliOffer() {
       try {
         const data = await BeyondKilos.apiRequest('/api/offers/active');
         const topBar = document.getElementById('diwaliTopBar');
         const homeCard = document.getElementById('diwaliHomeOfferCard');
         if (data && data.active && data.offer) {
+          activeHomeDiwaliOffer = data.offer;
           topBar.style.display = 'block';
           homeCard.style.display = 'block';
           document.getElementById('diwaliTopBarText').textContent = data.offer.banner_text || 'Diwali Glow Reset is Live! 30-Day Plan for ₹799 (Worth ₹3,500+)';
@@ -1169,12 +1225,172 @@
           if (slotsBadge) {
             slotsBadge.textContent = `🔥 Only ${data.offer.slots_remaining} slots left • Offer ends before Diwali`;
           }
+
+          // If URL has ?offer=diwali or ?plan=diwali, auto-scroll and pop open ₹799 checkout form!
+          const urlParams = new URLSearchParams(window.location.search);
+          const offerParam = (urlParams.get('offer') || urlParams.get('plan') || '').toLowerCase();
+          if (offerParam === 'diwali' || offerParam === '799' || offerParam === 'glow') {
+            setTimeout(() => {
+              homeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              claimDiwaliOffer();
+            }, 400);
+          }
         } else {
           topBar.style.display = 'none';
           homeCard.style.display = 'none';
         }
       } catch (e) {
         console.log('Home offer check:', e);
+      }
+    }
+
+    function openDiwaliModal() {
+      const modal = document.getElementById('diwaliCheckoutModal');
+      if (modal) {
+        modal.classList.add('active');
+        setTimeout(() => {
+          const input = document.getElementById('diwaliBuyerName');
+          if (input) input.focus();
+        }, 150);
+      }
+    }
+
+    function closeDiwaliModal() {
+      document.getElementById('diwaliCheckoutModal')?.classList.remove('active');
+    }
+
+    async function claimDiwaliOffer() {
+      if (BeyondKilos.isLoggedIn()) {
+        const user = BeyondKilos.getUser();
+        launchDiwaliCheckout({
+          name: user.name,
+          email: user.email,
+          phone: user.phone
+        });
+      } else {
+        openDiwaliModal();
+      }
+    }
+
+    function goToDiwaliOffer(e) {
+      if (e) e.preventDefault();
+      const card = document.getElementById('diwaliHomeOfferCard');
+      if (card && card.style.display !== 'none') {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          claimDiwaliOffer();
+        }, 400);
+      } else {
+        window.location.href = '/pricing.html?offer=diwali';
+      }
+    }
+
+    // Modal submit handler
+    document.getElementById('diwaliCheckoutForm')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('diwaliBuyerName').value.trim();
+      const phone = document.getElementById('diwaliBuyerPhone').value.trim();
+      const email = document.getElementById('diwaliBuyerEmail').value.trim();
+
+      if (!name || !phone || !email) {
+        BeyondKilos.showToast('Please fill all fields', 'error');
+        return;
+      }
+
+      closeDiwaliModal();
+      launchDiwaliCheckout({ name, email, phone });
+    });
+
+    async function launchDiwaliCheckout(buyerData) {
+      const btn = document.getElementById('btnClaimDiwaliHome');
+      if (btn) btn.disabled = true;
+
+      try {
+        BeyondKilos.showToast('Preparing Diwali Offer Checkout...', 'info');
+
+        if (typeof gtag === 'function') {
+          gtag('event', 'begin_checkout', {
+            items: [{ item_name: 'Diwali Glow Reset' }],
+            value: 799,
+            currency: 'INR'
+          });
+        }
+
+        const orderData = await BeyondKilos.apiRequest('/api/offers/create-order', {
+          method: 'POST',
+          body: JSON.stringify(buyerData)
+        });
+
+        let tempAuthToken = orderData.token;
+        let tempUser = orderData.user;
+
+        const options = {
+          key: orderData.key,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'Beyond Kilos',
+          description: '🪔 Diwali Glow Reset — 30-Day Plan',
+          order_id: orderData.order_id,
+          prefill: {
+            name: orderData.user.name,
+            email: orderData.user.email,
+            contact: orderData.user.phone
+          },
+          theme: { color: '#064e3b' },
+          method: {
+            upi: true,
+            card: true,
+            netbanking: true,
+            wallet: true
+          },
+          handler: async function (response) {
+            try {
+              const verifyData = await BeyondKilos.apiRequest('/api/offers/verify-payment', {
+                method: 'POST',
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature
+                })
+              });
+
+              if (verifyData.success) {
+                if (verifyData.token && verifyData.user) {
+                  BeyondKilos.setAuth(verifyData.token, verifyData.user);
+                } else if (tempAuthToken && tempUser) {
+                  BeyondKilos.setAuth(tempAuthToken, tempUser);
+                }
+
+                if (typeof gtag === 'function') {
+                  gtag('event', 'purchase', {
+                    transaction_id: response.razorpay_payment_id,
+                    value: 799,
+                    currency: 'INR',
+                    items: [{ item_name: 'Diwali Glow Reset' }]
+                  });
+                }
+
+                BeyondKilos.showToast('🎉 Payment Successful! Welcome to Diwali Glow Reset!', 'success', 5000);
+                setTimeout(() => {
+                  window.location.href = '/portal/dashboard.html';
+                }, 2000);
+              }
+            } catch (err) {
+              BeyondKilos.showToast('Payment verification failed: ' + (err.message || 'Please contact support'), 'error');
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              if (btn) btn.disabled = false;
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        if (btn) btn.disabled = false;
+        BeyondKilos.showToast(err.message || 'Failed to start checkout. Please try again.', 'error');
       }
     }
 

@@ -724,18 +724,21 @@
             remainingBadge.textContent = `🔥 Only ${data.offer.slots_remaining} slots left • Offer ends before Diwali`;
           }
 
-          // If URL has ?offer=diwali, auto-scroll and highlight
+          // If URL has ?offer=diwali or ?plan=diwali, auto-scroll and auto-open checkout selection form
           const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('offer') === 'diwali') {
+          const offerParam = (urlParams.get('offer') || urlParams.get('plan') || '').toLowerCase();
+          if (offerParam === 'diwali' || offerParam === '799' || offerParam === 'glow') {
             setTimeout(() => {
               offerSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 600);
+              claimDiwaliOffer();
+            }, 400);
           }
         } else {
           // Closed by admin — hide completely
           offerSection.style.display = 'none';
           const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('offer') === 'diwali') {
+          const offerParam = (urlParams.get('offer') || urlParams.get('plan') || '').toLowerCase();
+          if (offerParam === 'diwali' || offerParam === '799' || offerParam === 'glow') {
             BeyondKilos.showToast('The Diwali Glow Reset offer has ended. Explore our regular consultation plans below.', 'info', 6000);
           }
         }
@@ -745,7 +748,14 @@
     }
 
     function openDiwaliModal() {
-      document.getElementById('diwaliCheckoutModal').classList.add('active');
+      const modal = document.getElementById('diwaliCheckoutModal');
+      if (modal) {
+        modal.classList.add('active');
+        setTimeout(() => {
+          const input = document.getElementById('diwaliBuyerName');
+          if (input) input.focus();
+        }, 150);
+      }
     }
 
     function closeDiwaliModal() {
