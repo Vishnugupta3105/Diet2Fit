@@ -37,9 +37,10 @@
       </div>
       <div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
       <div class="sidebar-nav">
-        <a href="dashboard.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">dashboard</span>Dashboard</a>
-        <a href="clients.html" class="sidebar-link"><span class="material-symbols-outlined">group</span>Clients</a>
-        <a href="appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="/admin/dashboard.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">dashboard</span>Dashboard</a>
+        <a href="/admin/clients.html" class="sidebar-link"><span class="material-symbols-outlined">group</span>Clients</a>
+        <a href="/admin/appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="/admin/offers.html" class="sidebar-link"><span class="material-symbols-outlined">local_offer</span>Offers & Campaigns <span class="badge-festive" style="font-size:0.6rem; padding:1px 5px; margin-left:auto;">🪔</span></a>
       </div>
       <div class="sidebar-user"><div class="sidebar-user-avatar" id="userAvatar">DD</div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Dt. Disha</div><div class="sidebar-user-role">Admin</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
     </nav>
@@ -54,6 +55,25 @@
           <span class="material-symbols-outlined" style="font-size:18px;">person_add</span>
           Add Client
         </a>
+      </div>
+
+      <!-- Diwali Offer Live Banner (Dynamic) -->
+      <div id="dashDiwaliCard" class="card-flat mb-lg" style="display:none; background:linear-gradient(135deg, #ecfdf5 0%, #fef3c7 100%); border:1px solid #10b981; padding:16px 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size:26px;">🪔</span>
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <strong style="color:#064e3b; font-size:1rem;">Diwali Glow Reset Campaign is LIVE</strong>
+                <span class="badge-festive">₹799 / 30 Days</span>
+              </div>
+              <div class="text-caption" style="color:#065f46;" id="dashDiwaliStats">Loading campaign progress...</div>
+            </div>
+          </div>
+          <div class="flex gap-sm">
+            <a href="offers.html" class="btn btn-primary btn-sm">Manage Offer</a>
+          </div>
+        </div>
       </div>
 
       <!-- Overview Cards -->
@@ -186,6 +206,19 @@
         document.getElementById('totalRevenue').textContent = '₹' + revenue.toLocaleString('en-IN');
       } catch (err) {
         console.error('Failed to load plan stats:', err);
+      }
+
+      // Check Diwali offer status
+      try {
+        const offerData = await BeyondKilos.apiRequest('/api/offers/admin/current');
+        if (offerData && offerData.stats && offerData.stats.is_active) {
+          const dashCard = document.getElementById('dashDiwaliCard');
+          const statsText = document.getElementById('dashDiwaliStats');
+          dashCard.style.display = 'block';
+          statsText.textContent = `${offerData.stats.slots_taken || 0} clients enrolled • ${offerData.stats.total_revenue_formatted || '₹0'} collected • ${offerData.stats.slots_remaining} slots remaining`;
+        }
+      } catch (e) {
+        console.log('Offer status check:', e);
       }
     }
 

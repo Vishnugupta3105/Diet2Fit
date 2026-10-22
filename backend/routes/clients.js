@@ -60,12 +60,22 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
         days_left = Math.ceil((expiresAt - new Date()) / (1000 * 60 * 60 * 24));
       }
 
+      const diwaliRes = await db.query(`
+        SELECT id, plan_name, amount, starts_at, expires_at, created_at 
+        FROM plan_orders 
+        WHERE user_id = $1 AND status = 'paid' 
+          AND (plan_name ILIKE '%diwali%' OR plan_id = (SELECT id FROM subscription_plans WHERE slug = 'diwali-glow-reset' LIMIT 1))
+        ORDER BY created_at DESC LIMIT 1
+      `, [client.id]);
+
       return {
         ...client,
         latest_weight: weightRes.rows.length > 0 ? weightRes.rows[0].weight_kg : null,
         appointment_count: apptCountRes.rows[0].count,
         active_plan: planRes.rows.length > 0 ? planRes.rows[0].plan_name : null,
-        plan_days_left: days_left
+        plan_days_left: days_left,
+        is_diwali_client: diwaliRes.rows.length > 0,
+        diwali_details: diwaliRes.rows.length > 0 ? diwaliRes.rows[0] : null
       };
     }));
 
@@ -136,8 +146,9 @@ router.get('/:id', authenticate, requireAdmin, async (req, res) => {
 
     const weightsRes = await db.query('SELECT * FROM weight_logs WHERE user_id = $1 ORDER BY date DESC', [req.params.id]);
     const appointmentsRes = await db.query('SELECT * FROM appointments WHERE client_id = $1 ORDER BY created_at DESC', [req.params.id]);
+    const ordersRes = await db.query('SELECT * FROM plan_orders WHERE user_id = $1 ORDER BY created_at DESC', [req.params.id]);
 
-    res.json({ client: clientRes.rows[0], weights: weightsRes.rows, appointments: appointmentsRes.rows });
+    res.json({ client: clientRes.rows[0], weights: weightsRes.rows, appointments: appointmentsRes.rows, orders: ordersRes.rows });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
   }

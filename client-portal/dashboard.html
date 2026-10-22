@@ -363,7 +363,10 @@
           setTimeout(() => {
             document.getElementById('planProgressFill').style.width = `${progress}%`;
           }, 300);
-          if (plan.days_remaining <= 5) {
+          if (plan.plan_name.toLowerCase().includes('diwali')) {
+            document.getElementById('planBadge').className = 'badge-festive';
+            document.getElementById('planBadge').textContent = '🪔 Diwali Special';
+          } else if (plan.days_remaining <= 5) {
             document.getElementById('planBadge').className = 'badge badge-warning';
             document.getElementById('planBadge').textContent = 'Expiring Soon';
           }

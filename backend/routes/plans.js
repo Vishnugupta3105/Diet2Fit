@@ -49,9 +49,13 @@ function getRazorpay() {
 // ══════════════════════════════════════════════════════════════════
 router.get('/', async (req, res) => {
   try {
-    const result = await db.query(
-      'SELECT id, name, slug, price_monthly, display_price, price_monthly_usd, display_price_usd, tagline, features, is_popular, sort_order FROM subscription_plans WHERE is_active = true ORDER BY sort_order ASC'
-    );
+    const { all } = req.query;
+    let query = 'SELECT id, name, slug, price_monthly, display_price, price_monthly_usd, display_price_usd, tagline, features, is_popular, sort_order FROM subscription_plans WHERE is_active = true';
+    if (!all) {
+      query += " AND slug != 'diwali-glow-reset'";
+    }
+    query += ' ORDER BY sort_order ASC';
+    const result = await db.query(query);
     res.json({ plans: result.rows });
   } catch (err) {
     console.error('Error fetching plans:', err);
@@ -316,17 +320,23 @@ router.post('/assign', authMiddleware, adminOnly, async (req, res) => {
     }
     const user = userRes.rows[0];
 
-    // Verify plan exists
-    const planRes = await db.query('SELECT * FROM subscription_plans WHERE id = $1 AND is_active = true', [plan_id]);
+    // Verify plan exists (allow admin to assign even if temporarily inactive)
+    const planRes = await db.query('SELECT * FROM subscription_plans WHERE id = $1', [plan_id]);
     if (planRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Plan not found or inactive.' });
+      return res.status(404).json({ error: 'Plan not found.' });
     }
     const plan = planRes.rows[0];
 
-    const months = parseInt(duration_months) || 1;
+    const isDiwali = plan.slug === 'diwali-glow-reset' || plan.name.toLowerCase().includes('diwali');
+    const months = isDiwali ? 1 : (parseInt(duration_months) || 1);
     const startsAt = start_date ? new Date(start_date) : new Date();
     const expiresAt = new Date(startsAt);
-    expiresAt.setMonth(expiresAt.getMonth() + months);
+    if (isDiwali) {
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30-day validity
+    } else {
+      expiresAt.setMonth(expiresAt.getMonth() + months);
+    }
+    const totalAmount = isDiwali ? plan.price_monthly : (plan.price_monthly * months);
 
     // Create a paid order entry (manual/offline)
     const orderRes = await db.query(`
@@ -339,7 +349,7 @@ router.post('/assign', authMiddleware, adminOnly, async (req, res) => {
       plan.name,
       `manual_${Date.now()}`,
       `offline_${payment_method || 'cash'}_${Date.now()}`,
-      plan.price_monthly * months,
+      totalAmount,
       'INR',
       'paid',
       startsAt,

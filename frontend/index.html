@@ -254,6 +254,19 @@
 
 <body>
 
+  <!-- ═══ Diwali Festive Top Announcement Bar (Dynamic) ═══ -->
+  <div id="diwaliTopBar" class="diwali-top-banner" style="display:none;">
+    <div class="container" style="display:flex; justify-content:center; align-items:center; gap:14px; flex-wrap:wrap; font-size:0.9rem;">
+      <span style="display:flex; align-items:center; gap:6px;">
+        <span style="font-size:20px;">🪔</span>
+        <strong id="diwaliTopBarText">Diwali Glow Reset is Live! 30-Day Transformation Plan for ₹799 (Worth ₹3,500+)</strong>
+      </span>
+      <a href="/pricing.html?offer=diwali" class="btn btn-sm" style="background:#d4a853; color:#064e3b; font-weight:700; border:none; padding:4px 14px; border-radius:20px; text-decoration:none; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+        Claim Offer (₹799) →
+      </a>
+    </div>
+  </div>
+
   <!-- ═══ Navbar ═══ -->
   <nav class="navbar" id="navbar">
     <div class="navbar-inner">
@@ -672,6 +685,42 @@
         <p class="text-body-lg" style="color:var(--text-secondary); max-width:600px; margin:0 auto;">
           Personalized nutrition plans with ongoing support from Dt. Disha. Every plan includes lab report interpretation — because clinical care isn't a paywalled feature.
         </p>
+      </div>
+
+      <!-- Diwali Glow Reset Spotlight (Shows only when active) -->
+      <div id="diwaliHomeOfferCard" style="display:none; margin-bottom: var(--space-2xl);">
+        <div class="diwali-featured-card">
+          <div class="diwali-featured-grid" style="display:grid; grid-template-columns: 1fr auto; gap: 32px; align-items:center;">
+            <div>
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+                <span class="diwali-badge-pill">🪔 DIWALI GLOW RESET</span>
+                <span style="font-size:0.75rem; font-weight:700; color:#b48535; letter-spacing:1px; text-transform:uppercase;">Special 30-Day Festive Plan</span>
+              </div>
+              <h3 style="font-family:'Playfair Display',serif; font-size:clamp(1.6rem, 3vw, 2.2rem); font-weight:800; color:#064e3b; line-height:1.2; margin-bottom:8px;">
+                Glow from within. <span style="background:linear-gradient(135deg, #b48535, #064e3b); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Diwali-ready.</span>
+              </h3>
+              <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:18px;">
+                30-Day Personalized Plan • 2 Consultations (1-on-1) • DIY Glow Guide (PDF) • WhatsApp Guidance
+              </p>
+              <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <span class="badge" style="background:#fee2e2; color:#991b1b; font-weight:700; border:1px solid #fca5a5;" id="diwaliHomeSlotsBadge">
+                  🔥 Limited slots available • Offer ends before Diwali
+                </span>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center;">
+              <div class="diwali-price-seal" style="width:125px; height:125px;">
+                <span style="font-size:0.55rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#d4a853;">DIWALI PRICE</span>
+                <span style="font-size:1.8rem; font-weight:800; line-height:1; color:#fff;" id="diwaliHomePrice">₹799</span>
+                <span style="font-size:0.7rem; color:#a7f3d0; text-decoration:line-through; margin-top:2px;">Worth ₹3,500+</span>
+              </div>
+              <a href="/pricing.html?offer=diwali" class="btn btn-primary btn-md w-full" style="background:#064e3b; text-decoration:none; padding:10px 24px; border-radius:var(--radius-full); font-weight:700;">
+                Avail Offer — ₹799
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="pricing-grid animate-fade-up" id="pricingCards">
@@ -1105,7 +1154,32 @@
       }
     })();
 
+    // Check active Diwali offer for homepage
+    async function checkHomeDiwaliOffer() {
+      try {
+        const data = await BeyondKilos.apiRequest('/api/offers/active');
+        const topBar = document.getElementById('diwaliTopBar');
+        const homeCard = document.getElementById('diwaliHomeOfferCard');
+        if (data && data.active && data.offer) {
+          topBar.style.display = 'block';
+          homeCard.style.display = 'block';
+          document.getElementById('diwaliTopBarText').textContent = data.offer.banner_text || 'Diwali Glow Reset is Live! 30-Day Plan for ₹799 (Worth ₹3,500+)';
+          document.getElementById('diwaliHomePrice').textContent = data.offer.display_price || '₹799';
+          const slotsBadge = document.getElementById('diwaliHomeSlotsBadge');
+          if (slotsBadge) {
+            slotsBadge.textContent = `🔥 Only ${data.offer.slots_remaining} slots left • Offer ends before Diwali`;
+          }
+        } else {
+          topBar.style.display = 'none';
+          homeCard.style.display = 'none';
+        }
+      } catch (e) {
+        console.log('Home offer check:', e);
+      }
+    }
+
     loadPlans();
+    checkHomeDiwaliOffer();
   </script>
 </body>
 

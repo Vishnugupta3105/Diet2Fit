@@ -16,6 +16,7 @@ const appointmentRoutes = require('./routes/appointments');
 const dietRoutes = require('./routes/diets');
 const deviceRoutes = require('./routes/devices');
 const plansRoutes = require('./routes/plans');
+const offersRoutes = require('./routes/offers');
 
 const app = express();
 
@@ -69,6 +70,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diets', dietRoutes);
 app.use('/api/devices', deviceRoutes);
 app.use('/api/plans', plansRoutes);
+app.use('/api/offers', offersRoutes);
 
 // ── Health Check ─────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

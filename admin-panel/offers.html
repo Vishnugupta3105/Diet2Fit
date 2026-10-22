@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="64x64" href="../frontend/img/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Offers & Campaigns — Beyond Kilos Admin</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/portal/css/portal.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="portal-layout">
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+      <div class="mobile-header-inner">
+        <span style="display:flex; align-items:center; gap:10px; text-decoration:none;">
+          <div style="width:40px; height:40px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.05); overflow:hidden; flex-shrink:0;">
+            <img src="/img/logo.png" alt="Logo" style="height:100%; width:100%; object-fit:cover;">
+          </div>
+          <div style="display:flex; flex-direction:column; line-height:1;">
+            <span style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilos</span>
+            <span style="font-size:0.55rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:4px;">Because real health was never about a number.</span>
+          </div>
+        </span>
+        <button onclick="toggleSidebar()" style="padding:8px;"><span class="material-symbols-outlined">menu</span></button>
+      </div>
+    </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand" style="display:flex; align-items:center; gap:12px; padding-bottom: 24px;">
+        <div style="width:52px; height:52px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,0.08); overflow:hidden; flex-shrink:0;">
+          <img src="/img/logo.png" alt="Logo" style="height:100%; width:100%; object-fit:cover;">
+        </div>
+        <div style="display:flex; flex-direction:column; line-height:1; text-align:left;">
+          <span style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:800; color:var(--primary); letter-spacing:-0.5px;">Beyond Kilos</span>
+          <span style="font-size:0.6rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:6px;">Because real health was never about a number.</span>
+        </div>
+      </div>
+      <div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
+      <div class="sidebar-nav">
+        <a href="/admin/dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="/admin/clients.html" class="sidebar-link"><span class="material-symbols-outlined">group</span>Clients</a>
+        <a href="/admin/appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="/admin/offers.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">local_offer</span>Offers & Campaigns <span id="sidebarOfferBadge" class="badge-festive" style="font-size:0.6rem; padding:1px 5px; margin-left:auto; display:none;">LIVE</span></a>
+      </div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="userAvatar">DD</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="userName">Dt. Disha</div>
+          <div class="sidebar-user-role">Admin</div>
+        </div>
+        <button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="portal-main">
+      <div class="portal-header">
+        <div>
+          <h1 class="portal-title" style="display:flex; align-items:center; gap:10px;">
+            Festive Offers & Campaigns 🪔
+          </h1>
+          <p class="text-caption">Manage special festive offers, toggle public visibility, and track enrolled clients</p>
+        </div>
+        <div class="flex gap-sm">
+          <button class="btn btn-primary btn-sm" onclick="openAssignModal()">
+            <span class="material-symbols-outlined" style="font-size:18px;">person_add</span>
+            Assign Offer to Client
+          </button>
+        </div>
+      </div>
+
+      <!-- Master Offer Status Switch Card -->
+      <div id="offerStatusCard" class="offer-status-card active mb-xl">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="width:52px; height:52px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,0,0,0.08); font-size:28px;">
+              🪔
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <h3 id="offerTitleStatus" style="font-size:1.3rem; font-weight:700; margin:0; color:#064e3b;">Diwali Glow Reset (₹799)</h3>
+                <span id="offerLiveBadge" class="badge-festive">🟢 LIVE ON WEBSITE</span>
+              </div>
+              <p id="offerDescriptionStatus" class="text-caption" style="margin:4px 0 0; color:#065f46; font-size:0.88rem;">
+                Offer is currently ACTIVE on the website. Visitors can view the Diwali Glow Reset card and pay directly.
+              </p>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <label class="toggle-switch">
+              <input type="checkbox" id="offerToggle" onchange="toggleOfferStatus(this.checked)" checked />
+              <span class="toggle-slider"></span>
+            </label>
+            <span id="toggleText" style="font-weight:700; font-size:0.95rem; color:#064e3b; min-width:80px;">Offer Live</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overview Metrics Grid -->
+      <div class="dashboard-grid mb-xl">
+        <div class="overview-card">
+          <div class="overview-icon" style="background:#fef3c7;">
+            <span class="material-symbols-outlined" style="color:#d97706;font-size:28px;">workspace_premium</span>
+          </div>
+          <div>
+            <div class="overview-value" id="statClientsCount">0</div>
+            <div class="overview-label">Diwali Offer Clients</div>
+          </div>
+        </div>
+        <div class="overview-card">
+          <div class="overview-icon" style="background:#ecfdf5;">
+            <span class="material-symbols-outlined" style="color:#059669;font-size:28px;">payments</span>
+          </div>
+          <div>
+            <div class="overview-value" id="statRevenue">₹0</div>
+            <div class="overview-label">Diwali Campaign Revenue</div>
+          </div>
+        </div>
+        <div class="overview-card">
+          <div class="overview-icon" style="background:#dbeafe;">
+            <span class="material-symbols-outlined" style="color:#2563eb;font-size:28px;">group_add</span>
+          </div>
+          <div>
+            <div class="overview-value" id="statSlots">0 / 20</div>
+            <div class="overview-label">Slots Claimed</div>
+            <div class="offer-slots-bar" style="width:120px;">
+              <div id="slotsFillBar" class="offer-slots-fill" style="width:0%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="overview-card">
+          <div class="overview-icon" style="background:#ede9fe;">
+            <span class="material-symbols-outlined" style="color:#7c3aed;font-size:28px;">hourglass_bottom</span>
+          </div>
+          <div>
+            <div class="overview-value">30 Days</div>
+            <div class="overview-label">Validity per Client</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Column Layout: Share/Poster Preview + Client List -->
+      <div style="display:grid; grid-template-columns: 360px 1fr; gap:var(--space-xl); align-items:start;" id="campaignLayout">
+        
+        <!-- Left Column: Poster Details & Share Link -->
+        <div class="flex flex-col gap-lg">
+          <!-- Promotional Share Box -->
+          <div class="card-flat">
+            <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+              <span class="material-symbols-outlined" style="color:var(--primary); font-size:20px;">share</span>
+              Direct Offer Link
+            </h4>
+            <p class="text-caption mb-md">Share this link directly on WhatsApp, Instagram stories, or bio:</p>
+            <div style="display:flex; gap:8px; background:var(--bg-alt); padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border); font-size:0.82rem; word-break:break-all;" id="shareUrlBox">
+              https://www.gobeyondkilos.com/pricing.html?offer=diwali
+            </div>
+            <div class="flex gap-sm mt-md">
+              <button class="btn btn-outline btn-sm w-full" onclick="copyShareLink()">
+                <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span> Copy Link
+              </button>
+              <a id="btnShareWhatsApp" href="https://api.whatsapp.com/send?text=🪔%20Diwali%20Glow%20Reset%20by%20Dt.%20Disha%20is%20live!%20Get%20a%2030-Day%20Personalized%20Plan%20%2B%202%20Consultations%20for%20just%20₹799%20(Worth%20₹3,500).%20Book%20your%20slot%20now:%20https://www.gobeyondkilos.com/pricing.html?offer=diwali" target="_blank" class="btn btn-sm" style="background:#25D366; color:white; border:none; display:inline-flex; align-items:center; gap:4px; text-decoration:none;">
+                <span class="material-symbols-outlined" style="font-size:16px;">chat</span> WhatsApp
+              </a>
+            </div>
+          </div>
+
+          <!-- Flyer Preview Card -->
+          <div class="offer-poster-card text-center">
+            <div class="offer-poster-badge mb-md">DIWALI GLOW RESET</div>
+            <div style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:800; color:#064e3b; letter-spacing:1px; margin-bottom:2px;">BEYOND KILOS</div>
+            <div style="font-size:0.75rem; color:#b48535; font-style:italic; margin-bottom:16px;">by Dietitian Disha</div>
+            
+            <h3 style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:800; color:#064e3b; line-height:1.2; margin-bottom:8px;">
+              Glow from within.<br>Diwali-ready.
+            </h3>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:18px;">
+              Start today • Glow by Diwali • Transform in 30 days
+            </p>
+
+            <div style="background:#fff; border:1px solid #e2d9cd; border-radius:12px; padding:16px; text-align:left; margin-bottom:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <div>
+                  <div style="font-size:0.85rem; font-weight:700; color:#064e3b;">✦ 30-Day Personalized Plan</div>
+                  <div class="text-caption" style="font-size:0.75rem; margin-bottom:8px;">Made around your body & lifestyle</div>
+
+                  <div style="font-size:0.85rem; font-weight:700; color:#064e3b;">✦ 2 One-on-One Consultations</div>
+                  <div class="text-caption" style="font-size:0.75rem; margin-bottom:8px;">Start strong, stay on track</div>
+
+                  <div style="font-size:0.85rem; font-weight:700; color:#064e3b;">✦ DIY Glow Guide (PDF)</div>
+                  <div class="text-caption" style="font-size:0.75rem;">Face-pack & hair remedies for festive glow</div>
+                </div>
+                <div style="width:85px; height:85px; border-radius:50%; background:#064e3b; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; text-align:center; box-shadow:0 4px 10px rgba(6,78,59,0.2);">
+                  <span style="font-size:0.5rem; text-transform:uppercase; letter-spacing:1px; color:#d4a853;">DIWALI PRICE</span>
+                  <span style="font-size:1.25rem; font-weight:800; line-height:1;">₹799</span>
+                  <span style="font-size:0.55rem; color:#a7f3d0; text-decoration:line-through;">₹3,500+</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:0.75rem; font-weight:600; color:#b48535;">
+              Only 20 slots • Offer ends before Diwali
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Diwali Clients Roster -->
+        <div class="card-flat" style="padding:0; overflow:hidden;">
+          <div style="padding:var(--space-lg) var(--space-xl); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 style="font-size:1.1rem; font-weight:700; margin:0;">Enrolled Clients</h3>
+              <p class="text-caption" style="margin:2px 0 0;">All clients who availed or were assigned the Diwali Glow Reset</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input type="text" id="clientSearch" class="form-input" placeholder="Search client name, phone..." style="width:220px; padding:6px 12px; font-size:0.85rem;" oninput="filterClientsTable(this.value)" />
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="table-compact" style="width:100%; border-collapse:collapse;" id="diwaliClientsTable">
+              <thead>
+                <tr style="background:var(--bg-alt); text-align:left; border-bottom:1px solid var(--border);">
+                  <th style="padding:12px 16px; font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Client</th>
+                  <th style="padding:12px 16px; font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Contact</th>
+                  <th style="padding:12px 16px; font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Enrolled On</th>
+                  <th style="padding:12px 16px; font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Status / Days Left</th>
+                  <th style="padding:12px 16px; font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Amount</th>
+                  <th style="padding:12px 16px; font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="clientsTableBody">
+                <tr>
+                  <td colspan="6" style="padding:32px; text-align:center; color:var(--text-muted);">
+                    <div class="spinner" style="margin:0 auto 12px;"></div>
+                    Loading Diwali clients...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Assign Offer Modal -->
+  <div class="admin-modal-overlay" id="assignOfferModal">
+    <div class="admin-modal" style="max-width:480px;">
+      <div class="flex justify-between items-center mb-lg">
+        <h3 style="margin:0; display:flex; align-items:center; gap:8px;">
+          🪔 Assign Diwali Offer
+        </h3>
+        <button onclick="closeAssignModal()" style="color:var(--text-muted);padding:4px;"><span class="material-symbols-outlined">close</span></button>
+      </div>
+
+      <p class="text-caption mb-lg">Manually enroll a client who paid offline (Cash, UPI to personal QR, etc.) for the 30-Day Diwali Glow Reset at ₹799.</p>
+
+      <form id="assignOfferForm" class="flex flex-col gap-md">
+        <div class="form-group">
+          <label class="form-label">Select Client *</label>
+          <select id="modalSelectUser" class="form-input" required>
+            <option value="" disabled selected>Loading registered clients...</option>
+          </select>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">Payment Method *</label>
+            <select id="modalPaymentMethod" class="form-input">
+              <option value="cash">Cash</option>
+              <option value="upi_personal">UPI (Personal)</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Start Date *</label>
+            <input type="date" id="modalStartDate" class="form-input" required />
+          </div>
+        </div>
+
+        <div style="background:#ecfdf5; padding:var(--space-md); border-radius:var(--radius-md); border:1px solid #a7f3d0;">
+          <div class="text-caption" style="color:#059669; font-weight:700;">OFFER PACKAGE DETAILS</div>
+          <div style="font-size:1.15rem; font-weight:700; color:#064e3b; margin-top:2px;">Diwali Glow Reset — ₹799</div>
+          <div style="font-size:0.8rem; color:#065f46; margin-top:4px;">
+            ✦ 30-Day Personalized Plan • 2 Consultations • DIY Glow Guide (PDF)
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-full" id="btnSubmitAssign">
+          <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+          Confirm & Assign Offer
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    if (!BeyondKilos.isLoggedIn()) { window.location.href = '/login.html'; }
+    const currentUser = BeyondKilos.getUser();
+    if (currentUser && currentUser.role !== 'admin') { window.location.href = '/portal/'; }
+    document.getElementById('userName').textContent = currentUser?.name || 'Admin';
+    document.getElementById('userAvatar').textContent = (currentUser?.name || 'A').substring(0, 2).toUpperCase();
+
+    function toggleSidebar() { 
+      document.getElementById('sidebar').classList.toggle('open'); 
+      document.getElementById('sidebarOverlay').classList.toggle('active'); 
+    }
+    function logout() { BeyondKilos.clearAuth(); window.location.href = '/login.html'; }
+
+    let allDiwaliClients = [];
+
+    async function loadOfferData() {
+      try {
+        const data = await BeyondKilos.apiRequest('/api/offers/admin/current');
+        const offer = data.offer;
+        const stats = data.stats;
+        allDiwaliClients = data.clients || [];
+
+        // Update toggle card
+        const card = document.getElementById('offerStatusCard');
+        const toggle = document.getElementById('offerToggle');
+        const liveBadge = document.getElementById('offerLiveBadge');
+        const toggleText = document.getElementById('toggleText');
+        const desc = document.getElementById('offerDescriptionStatus');
+        const sidebarBadge = document.getElementById('sidebarOfferBadge');
+
+        toggle.checked = Boolean(stats.is_active);
+        if (stats.is_active) {
+          card.className = 'offer-status-card active mb-xl';
+          liveBadge.className = 'badge-festive';
+          liveBadge.textContent = '🟢 LIVE ON WEBSITE';
+          toggleText.textContent = 'Offer Live';
+          toggleText.style.color = '#064e3b';
+          desc.textContent = 'Offer is currently ACTIVE on the website. Visitors can view the Diwali Glow Reset card and pay ₹799 directly.';
+          if (sidebarBadge) sidebarBadge.style.display = 'inline-flex';
+        } else {
+          card.className = 'offer-status-card inactive mb-xl';
+          liveBadge.className = 'badge';
+          liveBadge.style.background = '#e2e8f0';
+          liveBadge.style.color = '#475569';
+          liveBadge.textContent = '⏸️ CLOSED';
+          toggleText.textContent = 'Closed';
+          toggleText.style.color = '#64748b';
+          desc.textContent = 'Offer is currently CLOSED. Hidden from public website & payment pages. Normal pricing is restored.';
+          if (sidebarBadge) sidebarBadge.style.display = 'none';
+        }
+
+        // Metrics
+        document.getElementById('statClientsCount').textContent = stats.total_clients || 0;
+        document.getElementById('statRevenue').textContent = stats.total_revenue_formatted || '₹0';
+        document.getElementById('statSlots').textContent = `${stats.slots_taken || 0} / ${stats.total_slots || 20}`;
+        const pct = Math.min(100, Math.round(((stats.slots_taken || 0) / (stats.total_slots || 20)) * 100));
+        document.getElementById('slotsFillBar').style.width = pct + '%';
+
+        // Populate clients table
+        renderClientsTable(allDiwaliClients);
+
+        // Populate registered clients dropdown for assign modal
+        const clientSelect = document.getElementById('modalSelectUser');
+        if (data.all_clients && data.all_clients.length > 0) {
+          clientSelect.innerHTML = '<option value="" disabled selected>Select a client...</option>' +
+            data.all_clients.map(c => `<option value="${c.id}">${c.name} (${c.email || c.phone || 'No contact'})</option>`).join('');
+        } else {
+          clientSelect.innerHTML = '<option value="" disabled>No registered clients found</option>';
+        }
+
+      } catch (err) {
+        console.error('Failed to load offer data:', err);
+        BeyondKilos.showToast('Failed to load offer data', 'error');
+      }
+    }
+
+    function renderClientsTable(clients) {
+      const tbody = document.getElementById('clientsTableBody');
+      if (!clients || clients.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="padding:40px; text-align:center; color:var(--text-muted);">
+              <span class="material-symbols-outlined" style="font-size:36px; color:#d4a853; display:block; margin-bottom:8px;">stars</span>
+              <strong>No clients enrolled in the Diwali Offer yet</strong>
+              <p class="text-caption" style="margin-top:4px;">When clients purchase online or you manually assign the offer, they will appear here.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = clients.map(c => {
+        const initials = (c.client_name || 'U').substring(0, 2).toUpperCase();
+        const enrolledDate = BeyondKilos.formatDate(c.enrolled_at);
+        const expiresAt = c.expires_at ? new Date(c.expires_at) : null;
+        const now = new Date();
+        const daysLeft = expiresAt ? Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24)) : null;
+        
+        let statusBadge = '<span class="badge badge-success">Active</span>';
+        if (daysLeft !== null && daysLeft <= 0) {
+          statusBadge = '<span class="badge" style="background:#fee2e2; color:#991b1b;">Expired</span>';
+        } else if (daysLeft !== null) {
+          statusBadge = `<span class="badge badge-success">${daysLeft} day${daysLeft > 1 ? 's' : ''} left</span>`;
+        }
+
+        const phoneClean = (c.client_phone || '').replace(/[^0-9]/g, '');
+        const waLink = phoneClean 
+          ? `https://api.whatsapp.com/send?phone=${phoneClean.length === 10 ? '91' + phoneClean : phoneClean}&text=Hi%20${encodeURIComponent(c.client_name || 'there')}!%20Warm%20welcome%20to%20the%20Diwali%20Glow%20Reset%20program%20with%20Dt.%20Disha.%20Are%20you%20ready%20for%20your%20consultation?`
+          : null;
+
+        return `
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:14px 16px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div class="client-avatar" style="width:34px; height:34px; font-size:0.75rem;">${initials}</div>
+                <div>
+                  <div style="font-weight:600; font-size:0.9rem;">${c.client_name || 'Client'}</div>
+                  <span class="badge-festive" style="font-size:0.6rem; padding:1px 6px;">🪔 Diwali Glow Reset</span>
+                </div>
+              </div>
+            </td>
+            <td style="padding:14px 16px;">
+              <div style="font-size:0.85rem;">${c.client_phone || '—'}</div>
+              <div class="text-caption" style="font-size:0.75rem;">${c.client_email || '—'}</div>
+            </td>
+            <td style="padding:14px 16px; font-size:0.85rem;">
+              ${enrolledDate}
+            </td>
+            <td style="padding:14px 16px;">
+              ${statusBadge}
+            </td>
+            <td style="padding:14px 16px; font-weight:700; color:#064e3b; font-size:0.9rem;">
+              ₹${((c.amount || 79900) / 100).toLocaleString('en-IN')}
+            </td>
+            <td style="padding:14px 16px; text-align:right;">
+              <div style="display:inline-flex; gap:6px;">
+                ${waLink ? `
+                  <a href="${waLink}" target="_blank" class="btn btn-ghost btn-sm" title="Chat on WhatsApp" style="color:#059669; padding:6px;">
+                    <span class="material-symbols-outlined" style="font-size:18px;">chat</span>
+                  </a>
+                ` : ''}
+                ${c.user_id ? `
+                  <a href="client-detail.html?id=${c.user_id}" class="btn btn-ghost btn-sm" title="View Client Detail" style="padding:6px;">
+                    <span class="material-symbols-outlined" style="font-size:18px;">visibility</span>
+                  </a>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterClientsTable(query) {
+      if (!query) {
+        renderClientsTable(allDiwaliClients);
+        return;
+      }
+      const q = query.toLowerCase();
+      const filtered = allDiwaliClients.filter(c => 
+        (c.client_name || '').toLowerCase().includes(q) ||
+        (c.client_email || '').toLowerCase().includes(q) ||
+        (c.client_phone || '').includes(q)
+      );
+      renderClientsTable(filtered);
+    }
+
+    async function toggleOfferStatus(checked) {
+      try {
+        const result = await BeyondKilos.apiRequest('/api/offers/admin/toggle', {
+          method: 'PUT',
+          body: JSON.stringify({ is_active: checked })
+        });
+        BeyondKilos.showToast(result.message, checked ? 'success' : 'info');
+        loadOfferData();
+      } catch (err) {
+        console.error(err);
+        BeyondKilos.showToast(err.message || 'Failed to toggle offer', 'error');
+        // revert checkbox
+        document.getElementById('offerToggle').checked = !checked;
+      }
+    }
+
+    function copyShareLink() {
+      const url = document.getElementById('shareUrlBox').textContent.trim();
+      navigator.clipboard.writeText(url).then(() => {
+        BeyondKilos.showToast('Direct offer link copied to clipboard!', 'success');
+      }).catch(() => {
+        BeyondKilos.showToast('Copied: ' + url, 'info');
+      });
+    }
+
+    // Assign modal
+    function openAssignModal() {
+      document.getElementById('modalStartDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('assignOfferModal').classList.add('active');
+    }
+
+    function closeAssignModal() {
+      document.getElementById('assignOfferModal').classList.remove('active');
+    }
+
+    document.getElementById('assignOfferForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById('modalSelectUser').value;
+      const paymentMethod = document.getElementById('modalPaymentMethod').value;
+      const startDate = document.getElementById('modalStartDate').value;
+      const btn = document.getElementById('btnSubmitAssign');
+
+      if (!userId) {
+        BeyondKilos.showToast('Please select a client', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Assigning...';
+
+      try {
+        const result = await BeyondKilos.apiRequest('/api/offers/admin/assign', {
+          method: 'POST',
+          body: JSON.stringify({
+            user_id: parseInt(userId),
+            payment_method: paymentMethod,
+            start_date: startDate
+          })
+        });
+
+        BeyondKilos.showToast(result.message || 'Diwali offer assigned!', 'success');
+        closeAssignModal();
+        loadOfferData();
+      } catch (err) {
+        BeyondKilos.showToast(err.message || 'Failed to assign offer', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">check_circle</span> Confirm & Assign Offer';
+      }
+    });
+
+    loadOfferData();
+  </script>
+</body>
+</html>

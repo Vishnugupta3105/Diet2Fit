@@ -134,6 +134,31 @@ const initializeDB = async () => {
 
       CREATE INDEX IF NOT EXISTS idx_plan_orders_user ON plan_orders(user_id);
       CREATE INDEX IF NOT EXISTS idx_plan_orders_status ON plan_orders(status);
+      CREATE TABLE IF NOT EXISTS offers (
+        id SERIAL PRIMARY KEY,
+        code TEXT UNIQUE NOT NULL,
+        title TEXT NOT NULL,
+        subtitle TEXT,
+        tagline TEXT,
+        badge TEXT DEFAULT 'DIWALI SPECIAL OFFER',
+        price INTEGER NOT NULL,
+        original_price INTEGER NOT NULL,
+        display_price TEXT NOT NULL,
+        display_original_price TEXT NOT NULL,
+        currency TEXT DEFAULT 'INR',
+        duration_days INTEGER DEFAULT 30,
+        duration_label TEXT DEFAULT '30 Days (1 Month)',
+        total_slots INTEGER DEFAULT 20,
+        banner_text TEXT,
+        cta_text TEXT DEFAULT 'Claim Diwali Offer — ₹799',
+        features JSONB NOT NULL DEFAULT '[]',
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_offers_code ON offers(code);
+      CREATE INDEX IF NOT EXISTS idx_offers_active ON offers(is_active);
     `);
 
     // Run migrations for existing databases
@@ -154,6 +179,72 @@ const initializeDB = async () => {
       await pool.query("UPDATE subscription_plans SET price_monthly_usd = 19900, display_price_usd = '$199' WHERE slug = 'signature' AND price_monthly_usd IS NULL");
       await pool.query("UPDATE subscription_plans SET price_monthly_usd = 34900, display_price_usd = '$349' WHERE slug = 'complete-care' AND price_monthly_usd IS NULL");
     } catch(e) { console.error('Error backfilling USD prices:', e); }
+
+    // Seed or sync Diwali Glow Reset in subscription_plans
+    try {
+      const diwaliPlanRes = await pool.query("SELECT id FROM subscription_plans WHERE slug = 'diwali-glow-reset'");
+      if (diwaliPlanRes.rows.length === 0) {
+        await pool.query(`
+          INSERT INTO subscription_plans (name, slug, price_monthly, display_price, price_monthly_usd, display_price_usd, tagline, features, is_popular, sort_order, is_active)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        `, [
+          'Diwali Glow Reset',
+          'diwali-glow-reset',
+          79900,
+          '₹799',
+          7900,
+          '$79',
+          'Glow from within. Diwali-ready. Transform in 30 days.',
+          JSON.stringify({
+            duration: '30-Day Personalized Plan',
+            consultations: '2 One-on-One Consultations',
+            glow_guide: 'DIY Glow Guide (PDF)',
+            whatsapp_support: 'WhatsApp check-ins & festive guidance',
+            slots: 'Limited 20 slots'
+          }),
+          false,
+          99,
+          true
+        ]);
+        console.log('✅ Diwali Glow Reset seeded into subscription_plans');
+      }
+    } catch(e) { console.error('Error seeding diwali plan in subscription_plans:', e); }
+
+    // Seed Diwali Glow Reset offer
+    try {
+      const offerRes = await pool.query("SELECT id FROM offers WHERE code = 'diwali-glow-reset'");
+      if (offerRes.rows.length === 0) {
+        const diwaliFeatures = [
+          { title: '30-Day Personalized Plan', desc: 'Made around your body & lifestyle' },
+          { title: '2 One-on-One Consultations', desc: 'Start strong, stay on track' },
+          { title: 'DIY Glow Guide (PDF)', desc: 'Face-pack & hair remedies for festive glow' },
+          { title: 'WhatsApp Check-ins', desc: 'Festive sweet management & guidance' }
+        ];
+        await pool.query(`
+          INSERT INTO offers (
+            code, title, subtitle, tagline, badge, price, original_price, display_price, display_original_price, duration_days, duration_label, total_slots, banner_text, cta_text, features, is_active
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+        `, [
+          'diwali-glow-reset',
+          'Diwali Glow Reset',
+          'Start today • Glow by Diwali • Transform in 30 days',
+          'Glow from within. Diwali-ready.',
+          'DIWALI SPECIAL OFFER',
+          79900,
+          350000,
+          '₹799',
+          '₹3,500+',
+          30,
+          '30 Days (1 Month)',
+          20,
+          '🪔 Diwali Glow Reset — 30-Day Personalized Plan + 2 Consultations + DIY Glow Guide for ₹799 (Worth ₹3,500+). Limited 20 slots!',
+          'Claim Diwali Offer — ₹799',
+          JSON.stringify(diwaliFeatures),
+          true
+        ]);
+        console.log('✅ Diwali Glow Reset offer seeded into offers table');
+      }
+    } catch(e) { console.error('Error seeding diwali offer:', e); }
 
 
     // Seed Admin Account

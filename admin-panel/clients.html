@@ -35,10 +35,10 @@
         </div>
       </div><div class="sidebar-subtitle">Admin Panel <span class="admin-badge">ADMIN</span></div>
       <div class="sidebar-nav">
-        <a href="dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
-        <a href="clients.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">group</span>Clients</a>
-        <a href="appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
-
+        <a href="/admin/dashboard.html" class="sidebar-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="/admin/clients.html" class="sidebar-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">group</span>Clients</a>
+        <a href="/admin/appointments.html" class="sidebar-link"><span class="material-symbols-outlined">calendar_month</span>Appointments</a>
+        <a href="/admin/offers.html" class="sidebar-link"><span class="material-symbols-outlined">local_offer</span>Offers & Campaigns <span class="badge-festive" style="font-size:0.6rem; padding:1px 5px; margin-left:auto;">🪔</span></a>
       </div>
       <div class="sidebar-user"><div class="sidebar-user-avatar">DD</div><div class="sidebar-user-info"><div class="sidebar-user-name">Dt. Disha</div><div class="sidebar-user-role">Admin</div></div><button onclick="logout()" style="color:var(--text-muted);padding:8px;"><span class="material-symbols-outlined" style="font-size:20px;">logout</span></button></div>
     </nav>
@@ -55,10 +55,20 @@
         </button>
       </div>
 
-      <!-- Search -->
-      <div class="search-bar mb-xl">
-        <span class="material-symbols-outlined">search</span>
-        <input type="text" id="searchInput" placeholder="Search clients by name, email, or phone..." oninput="handleSearch()" />
+      <!-- Search & Filters -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-md); margin-bottom:var(--space-xl);">
+        <div class="search-bar" style="margin-bottom:0; flex:1; max-width:400px;">
+          <span class="material-symbols-outlined">search</span>
+          <input type="text" id="searchInput" placeholder="Search clients by name, email, or phone..." oninput="handleSearch()" />
+        </div>
+        <div class="flex gap-sm" style="flex-wrap:wrap;">
+          <button class="btn btn-sm btn-outline active-filter" id="filterAll" onclick="setClientFilter('all')">All Clients</button>
+          <button class="btn btn-sm btn-outline" id="filterDiwali" onclick="setClientFilter('diwali')" style="border-color:#f59e0b; color:#92400e;">
+            🪔 Diwali Offer <span id="diwaliFilterCount" style="background:#fef3c7; padding:2px 6px; border-radius:10px; font-weight:700; font-size:0.75rem; margin-left:4px;">0</span>
+          </button>
+          <button class="btn btn-sm btn-outline" id="filterActive" onclick="setClientFilter('active')">Active Plans</button>
+          <button class="btn btn-sm btn-outline" id="filterNoPlan" onclick="setClientFilter('noplan')">No Active Plan</button>
+        </div>
       </div>
 
       <!-- Client Grid -->
@@ -271,7 +281,17 @@
                 ${c.name}
               </div>
               <div class="text-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.email}</div>
-              ${c.active_plan ? `<div style="margin-top:6px;"><span class="badge badge-success" style="font-size:0.65rem;padding:3px 8px;">${c.active_plan} · ${c.plan_days_left} days left</span></div>` : ''}
+              ${c.active_plan ? `
+                <div style="margin-top:6px;">
+                  <span class="badge ${c.active_plan.toLowerCase().includes('diwali') ? 'badge-festive' : 'badge-success'}" style="font-size:0.65rem;padding:3px 8px;">
+                    ${c.active_plan.toLowerCase().includes('diwali') ? '🪔 ' : ''}${c.active_plan} · ${c.plan_days_left} days left
+                  </span>
+                </div>
+              ` : (c.is_diwali_client ? `
+                <div style="margin-top:6px;">
+                  <span class="badge-festive" style="font-size:0.65rem;padding:3px 8px;">🪔 Diwali Offer Client</span>
+                </div>
+              ` : '')}
             </div>
             <button class="btn-delete-client" onclick="event.stopPropagation(); openEditClient(${c.id})"
               title="Edit client" 
@@ -320,22 +340,68 @@
       });
     }
 
+    let currentFilter = 'all';
+
+    function setClientFilter(filter) {
+      currentFilter = filter;
+      ['filterAll', 'filterDiwali', 'filterActive', 'filterNoPlan'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.style.background = 'transparent';
+          btn.style.fontWeight = '500';
+        }
+      });
+
+      const activeBtnId = 
+        filter === 'all' ? 'filterAll' :
+        filter === 'diwali' ? 'filterDiwali' :
+        filter === 'active' ? 'filterActive' : 'filterNoPlan';
+
+      const activeBtn = document.getElementById(activeBtnId);
+      if (activeBtn) {
+        activeBtn.style.background = filter === 'diwali' ? '#fef3c7' : 'var(--primary-surface)';
+        activeBtn.style.fontWeight = '700';
+      }
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const q = (document.getElementById('searchInput').value || '').toLowerCase();
+      let list = allClients;
+
+      if (currentFilter === 'diwali') {
+        list = list.filter(c => c.is_diwali_client || (c.active_plan && c.active_plan.toLowerCase().includes('diwali')));
+      } else if (currentFilter === 'active') {
+        list = list.filter(c => Boolean(c.active_plan));
+      } else if (currentFilter === 'noplan') {
+        list = list.filter(c => !c.active_plan);
+      }
+
+      if (q) {
+        list = list.filter(c =>
+          (c.name || '').toLowerCase().includes(q) ||
+          (c.email || '').toLowerCase().includes(q) ||
+          (c.phone && c.phone.includes(q))
+        );
+      }
+
+      renderClients(list);
+    }
+
     function handleSearch() {
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allClients.filter(c =>
-        c.name.toLowerCase().includes(q) ||
-        c.email.toLowerCase().includes(q) ||
-        (c.phone && c.phone.includes(q))
-      );
-      renderClients(filtered);
+      applyFilters();
     }
 
     async function loadClients() {
       try {
         const data = await BeyondKilos.apiRequest('/api/clients');
-        allClients = data.clients;
-        renderClients(allClients);
+        allClients = data.clients || [];
+        const diwaliCount = allClients.filter(c => c.is_diwali_client || (c.active_plan && c.active_plan.toLowerCase().includes('diwali'))).length;
+        const countEl = document.getElementById('diwaliFilterCount');
+        if (countEl) countEl.textContent = diwaliCount;
+        applyFilters();
       } catch (err) {
+        console.error(err);
         BeyondKilos.showToast('Failed to load clients', 'error');
       }
     }
@@ -392,11 +458,16 @@
 
     async function loadAvailablePlans() {
       try {
-        const data = await BeyondKilos.apiRequest('/api/plans');
+        const data = await BeyondKilos.apiRequest('/api/plans?all=true');
         availablePlans = data.plans || [];
         const select = document.getElementById('assignPlanId');
         select.innerHTML = '<option value="" disabled selected>Select a plan</option>' +
-          availablePlans.map(p => `<option value="${p.id}" data-price="${p.price_monthly}" data-display="${p.display_price}">${p.name} — ${p.display_price}/month</option>`).join('');
+          availablePlans.map(p => {
+            const isDiwali = p.slug === 'diwali-glow-reset' || (p.name || '').toLowerCase().includes('diwali');
+            return `<option value="${p.id}" data-price="${p.price_monthly}" data-display="${p.display_price}" data-diwali="${isDiwali}">
+              ${isDiwali ? '🪔 ' : ''}${p.name} — ${p.display_price}${isDiwali ? ' (30-Day Offer)' : '/month'}
+            </option>`;
+          }).join('');
       } catch (err) {
         console.error('Failed to load plans:', err);
       }
@@ -408,7 +479,9 @@
       document.getElementById('assignClientEmail').textContent = email;
       document.getElementById('assignClientAvatar').textContent = (name || '').substring(0, 2).toUpperCase();
       document.getElementById('assignPlanId').selectedIndex = 0;
-      document.getElementById('assignDuration').value = '1';
+      const durationSelect = document.getElementById('assignDuration');
+      durationSelect.value = '1';
+      durationSelect.disabled = false;
       document.getElementById('assignPaymentMethod').value = 'cash';
       document.getElementById('assignStartDate').value = new Date().toISOString().split('T')[0];
       document.getElementById('assignPlanSummary').textContent = 'Select a plan above';
@@ -426,11 +499,22 @@
     function updatePlanSummary() {
       const select = document.getElementById('assignPlanId');
       const option = select.options[select.selectedIndex];
-      const months = parseInt(document.getElementById('assignDuration').value) || 1;
+      const durationSelect = document.getElementById('assignDuration');
       if (!option || !option.value) {
         document.getElementById('assignPlanSummary').textContent = 'Select a plan above';
         return;
       }
+      const isDiwali = option.dataset.diwali === 'true';
+      if (isDiwali) {
+        durationSelect.value = '1';
+        durationSelect.disabled = true;
+        document.getElementById('assignPlanSummary').innerHTML = 
+          `<span>🪔 Diwali Glow Reset</span> (30 Days / 1 Month) = <strong>₹799</strong>`;
+        return;
+      } else {
+        durationSelect.disabled = false;
+      }
+      const months = parseInt(durationSelect.value) || 1;
       const displayPrice = option.dataset.display;
       const planName = option.text.split(' — ')[0];
       const priceNum = parseInt(option.dataset.price) / 100;
