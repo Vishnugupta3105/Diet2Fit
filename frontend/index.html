@@ -924,59 +924,6 @@
     </svg>
   </a>
 
-  <!-- Diwali Quick Checkout Modal (For Guests & Direct Pay) -->
-  <div class="diwali-modal-overlay" id="diwaliCheckoutModal">
-    <div class="diwali-modal">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:24px;">🪔</span>
-          <h3 style="font-size:1.25rem; font-weight:700; margin:0; color:#064e3b;">Diwali Glow Reset</h3>
-        </div>
-        <button onclick="closeDiwaliModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-
-      <div style="background:#fdfbf7; border:1px solid #e7dfd3; border-radius:12px; padding:12px 16px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <div style="font-weight:700; color:#064e3b; font-size:0.9rem;">30-Day Personalized Plan + 2 Consultations</div>
-          <div class="text-caption" style="font-size:0.75rem;">Includes DIY Glow Guide (PDF) & WhatsApp Check-ins</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:1.25rem; font-weight:800; color:#064e3b;" id="modalDiwaliPrice">₹799</div>
-          <div style="font-size:0.7rem; color:#92400e; text-decoration:line-through;">Worth ₹3,500+</div>
-        </div>
-      </div>
-
-      <form id="diwaliCheckoutForm" class="flex flex-col gap-md">
-        <div class="form-group">
-          <label class="form-label" style="font-weight:600;">Your Full Name *</label>
-          <input type="text" id="diwaliBuyerName" class="form-input" placeholder="e.g. Priya Sharma" required />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" style="font-weight:600;">WhatsApp Mobile Number *</label>
-          <input type="tel" id="diwaliBuyerPhone" class="form-input" placeholder="e.g. 9876543210" required />
-          <div class="text-caption" style="margin-top:3px;">Dt. Disha will connect with you here for consultations</div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" style="font-weight:600;">Email Address *</label>
-          <input type="email" id="diwaliBuyerEmail" class="form-input" placeholder="e.g. priya@gmail.com" required />
-          <div class="text-caption" style="margin-top:3px;">Your login credentials and plan receipt will be sent here</div>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-lg w-full" id="btnDiwaliPaySubmit" style="background:#064e3b; margin-top:8px;">
-          <span class="material-symbols-outlined" style="font-size:20px;">lock</span>
-          Proceed to Pay ₹799
-        </button>
-
-        <p class="text-center text-caption" style="margin:0; font-size:0.75rem; color:var(--text-muted);">
-          🔒 Secured by Razorpay • UPI, GPay, PhonePe, Cards, NetBanking accepted
-        </p>
-      </form>
-    </div>
-  </div>
 
   <!-- ═══ Toast Container ═══ -->
   <div class="toast-container" id="toastContainer"></div>
@@ -1283,32 +1230,9 @@
       }
     }
 
-    function openDiwaliModal() {
-      const modal = document.getElementById('diwaliCheckoutModal');
-      if (modal) {
-        modal.classList.add('active');
-        setTimeout(() => {
-          const input = document.getElementById('diwaliBuyerName');
-          if (input) input.focus();
-        }, 150);
-      }
-    }
-
-    function closeDiwaliModal() {
-      document.getElementById('diwaliCheckoutModal')?.classList.remove('active');
-    }
-
-    async function claimDiwaliOffer() {
-      if (BeyondKilos.isLoggedIn()) {
-        const user = BeyondKilos.getUser();
-        launchDiwaliCheckout({
-          name: user.name,
-          email: user.email,
-          phone: user.phone
-        });
-      } else {
-        openDiwaliModal();
-      }
+    function claimDiwaliOffer() {
+      const planId = (activeHomeDiwaliOffer && activeHomeDiwaliOffer.plan_id) || 4;
+      choosePlan(planId, 'diwali-glow-reset');
     }
 
     function goToDiwaliOffer(e) {
@@ -1321,115 +1245,6 @@
         }, 400);
       } else {
         window.location.href = '/pricing.html?offer=diwali';
-      }
-    }
-
-    // Modal submit handler
-    document.getElementById('diwaliCheckoutForm')?.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('diwaliBuyerName').value.trim();
-      const phone = document.getElementById('diwaliBuyerPhone').value.trim();
-      const email = document.getElementById('diwaliBuyerEmail').value.trim();
-
-      if (!name || !phone || !email) {
-        BeyondKilos.showToast('Please fill all fields', 'error');
-        return;
-      }
-
-      closeDiwaliModal();
-      launchDiwaliCheckout({ name, email, phone });
-    });
-
-    async function launchDiwaliCheckout(buyerData) {
-      const btn = document.getElementById('btnClaimDiwaliHome');
-      if (btn) btn.disabled = true;
-
-      try {
-        BeyondKilos.showToast('Preparing Diwali Offer Checkout...', 'info');
-
-        if (typeof gtag === 'function') {
-          gtag('event', 'begin_checkout', {
-            items: [{ item_name: 'Diwali Glow Reset' }],
-            value: 799,
-            currency: 'INR'
-          });
-        }
-
-        const orderData = await BeyondKilos.apiRequest('/api/offers/create-order', {
-          method: 'POST',
-          body: JSON.stringify(buyerData)
-        });
-
-        let tempAuthToken = orderData.token;
-        let tempUser = orderData.user;
-
-        const options = {
-          key: orderData.key,
-          amount: orderData.amount,
-          currency: orderData.currency,
-          name: 'Beyond Kilos',
-          description: '🪔 Diwali Glow Reset — 30-Day Plan',
-          order_id: orderData.order_id,
-          prefill: {
-            name: orderData.user.name,
-            email: orderData.user.email,
-            contact: orderData.user.phone
-          },
-          theme: { color: '#064e3b' },
-          method: {
-            upi: true,
-            card: true,
-            netbanking: true,
-            wallet: true
-          },
-          handler: async function (response) {
-            try {
-              const verifyData = await BeyondKilos.apiRequest('/api/offers/verify-payment', {
-                method: 'POST',
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature
-                })
-              });
-
-              if (verifyData.success) {
-                if (verifyData.token && verifyData.user) {
-                  BeyondKilos.setAuth(verifyData.token, verifyData.user);
-                } else if (tempAuthToken && tempUser) {
-                  BeyondKilos.setAuth(tempAuthToken, tempUser);
-                }
-
-                if (typeof gtag === 'function') {
-                  gtag('event', 'purchase', {
-                    transaction_id: response.razorpay_payment_id,
-                    value: 799,
-                    currency: 'INR',
-                    items: [{ item_name: 'Diwali Glow Reset' }]
-                  });
-                }
-
-                BeyondKilos.showToast('🎉 Payment Successful! Welcome to Diwali Glow Reset!', 'success', 5000);
-                setTimeout(() => {
-                  window.location.href = '/portal/dashboard.html';
-                }, 2000);
-              }
-            } catch (err) {
-              BeyondKilos.showToast('Payment verification failed: ' + (err.message || 'Please contact support'), 'error');
-            }
-          },
-          modal: {
-            ondismiss: function () {
-              if (btn) btn.disabled = false;
-            }
-          }
-        };
-
-        const rzp = new Razorpay(options);
-        rzp.open();
-      } catch (err) {
-        if (btn) btn.disabled = false;
-        BeyondKilos.showToast(err.message || 'Failed to start checkout. Please try again.', 'error');
       }
     }
 

@@ -45,10 +45,17 @@ router.get('/active', async (req, res) => {
     const slotsTaken = parseInt(slotsRes.rows[0].count) || 0;
     const slotsRemaining = Math.max(0, (offer.total_slots || 20) - slotsTaken);
 
+    // Get linked subscription_plan ID
+    const planRes = await db.query(
+      "SELECT id FROM subscription_plans WHERE slug = 'diwali-glow-reset' LIMIT 1"
+    );
+    const planId = planRes.rows.length > 0 ? planRes.rows[0].id : 4;
+
     res.json({
       active: true,
       offer: {
         id: offer.id,
+        plan_id: planId,
         code: offer.code,
         title: offer.title,
         subtitle: offer.subtitle,
