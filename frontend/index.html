@@ -254,19 +254,6 @@
 
 <body>
 
-  <!-- ═══ Diwali Festive Top Announcement Bar (Dynamic) ═══ -->
-  <div id="diwaliTopBar" class="diwali-top-banner" style="display:none;">
-    <div class="container" style="display:flex; justify-content:center; align-items:center; gap:14px; flex-wrap:wrap; font-size:0.9rem;">
-      <span style="display:flex; align-items:center; gap:6px;">
-        <span style="font-size:20px;">🪔</span>
-        <strong id="diwaliTopBarText">Diwali Glow Reset is Live! 30-Day Transformation Plan for ₹799 (Worth ₹3,500+)</strong>
-      </span>
-      <a href="/pricing.html?offer=diwali" onclick="goToDiwaliOffer(event)" class="btn btn-sm" style="background:#064e3b; color:#ffffff; font-weight:700; border:none; padding:4px 14px; border-radius:20px; text-decoration:none; box-shadow:0 2px 8px rgba(6,78,59,0.2); cursor:pointer; font-size:0.8rem;">
-        Claim Offer (₹799) →
-      </a>
-    </div>
-  </div>
-
   <!-- ═══ Navbar ═══ -->
   <nav class="navbar" id="navbar">
     <div class="navbar-inner">
@@ -294,6 +281,48 @@
       <button class="navbar-toggle" id="navToggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
       </button>
+    </div>
+
+    <!-- ═══ Auto-Moving Glossy Diwali Strip (Positioned Directly Below Main Header) ═══ -->
+    <div id="diwaliTopBar" class="diwali-strip-banner" style="display:none;" onclick="goToDiwaliOffer(event)" title="Click to claim Diwali offer">
+      <div class="diwali-marquee-track">
+        <div class="diwali-marquee-content">
+          <div class="diwali-marquee-item">
+            <span class="diwali-marquee-diya">🪔</span>
+            <span class="diwali-marquee-pill">DIWALI SPECIAL</span>
+            <strong class="diwali-marquee-headline">Diwali Glow Reset is Live! 30-Day Personalized Transformation Plan for ₹799 (Worth ₹3,500+)</strong>
+            <span class="diwali-marquee-bullets">✦ 2 Consultations (1-on-1) ✦ DIY Glow Guide (PDF) ✦ Limited 20 Slots</span>
+            <span class="diwali-marquee-btn">Claim Offer (₹799) →</span>
+          </div>
+          <span class="diwali-marquee-sep">✦</span>
+          <div class="diwali-marquee-item">
+            <span class="diwali-marquee-diya">✨</span>
+            <span class="diwali-marquee-pill">FESTIVE GLOW</span>
+            <strong class="diwali-marquee-headline">Diwali Glow Reset is Live! 30-Day Personalized Transformation Plan for ₹799 (Worth ₹3,500+)</strong>
+            <span class="diwali-marquee-bullets">✦ Clinically Proven ✦ 24-hr Support ✦ Limited Slots</span>
+            <span class="diwali-marquee-btn">Claim Offer (₹799) →</span>
+          </div>
+          <span class="diwali-marquee-sep">✦</span>
+        </div>
+        <div class="diwali-marquee-content" aria-hidden="true">
+          <div class="diwali-marquee-item">
+            <span class="diwali-marquee-diya">🪔</span>
+            <span class="diwali-marquee-pill">DIWALI SPECIAL</span>
+            <strong class="diwali-marquee-headline">Diwali Glow Reset is Live! 30-Day Personalized Transformation Plan for ₹799 (Worth ₹3,500+)</strong>
+            <span class="diwali-marquee-bullets">✦ 2 Consultations (1-on-1) ✦ DIY Glow Guide (PDF) ✦ Limited 20 Slots</span>
+            <span class="diwali-marquee-btn">Claim Offer (₹799) →</span>
+          </div>
+          <span class="diwali-marquee-sep">✦</span>
+          <div class="diwali-marquee-item">
+            <span class="diwali-marquee-diya">✨</span>
+            <span class="diwali-marquee-pill">FESTIVE GLOW</span>
+            <strong class="diwali-marquee-headline">Diwali Glow Reset is Live! 30-Day Personalized Transformation Plan for ₹799 (Worth ₹3,500+)</strong>
+            <span class="diwali-marquee-bullets">✦ Clinically Proven ✦ 24-hr Support ✦ Limited Slots</span>
+            <span class="diwali-marquee-btn">Claim Offer (₹799) →</span>
+          </div>
+          <span class="diwali-marquee-sep">✦</span>
+        </div>
+      </div>
     </div>
   </nav>
 
@@ -340,26 +369,9 @@
 
           <!-- Desktop Specific Title -->
           <h1 class="hero-title desktop-only"
-            style="font-size: clamp(1.8rem, 3.5vw, 2.8rem); line-height: 1.15; margin-bottom: var(--space-md); color: var(--primary);">
+            style="font-size: clamp(1.8rem, 3.5vw, 2.8rem); line-height: 1.15; margin-bottom: var(--space-lg); color: var(--primary);">
             Meet the Dietitian Who <br class="hidden sm:block" /><span class="highlight">Won’t Put You on a Diet.</span>
           </h1>
-
-          <!-- 🪔 Diwali Festive Spotlight Header (Transparent Glassmorphic) -->
-          <div id="diwaliHeroBar" class="diwali-hero-banner" style="display:none;">
-            <div class="diwali-hero-banner-inner">
-              <div class="diwali-hero-badge-wrap">
-                <span class="diwali-hero-diya">🪔</span>
-                <span class="diwali-hero-badge-text">FESTIVE SPECIAL</span>
-              </div>
-              <div class="diwali-hero-banner-content">
-                <span class="diwali-hero-banner-title">Diwali Glow Reset (30-Day Plan) — <strong id="diwaliHeroPrice">₹799</strong></span>
-                <span class="diwali-hero-banner-sub"><span class="desktop-only">•</span> 2 Consultations + DIY Glow Guide</span>
-              </div>
-              <button onclick="claimDiwaliOffer()" class="diwali-hero-banner-cta">
-                Claim for ₹799 →
-              </button>
-            </div>
-          </div>
 
           <p class="text-body-lg mb-md" style="color: var(--text-secondary); line-height: 1.6;">
             Hi, I’m <strong>Dt. Disha</strong>. I help you take back control of your health by connecting the dots
@@ -1232,17 +1244,22 @@
       try {
         const data = await BeyondKilos.apiRequest('/api/offers/active');
         const topBar = document.getElementById('diwaliTopBar');
-        const heroBar = document.getElementById('diwaliHeroBar');
         const homeCard = document.getElementById('diwaliHomeOfferCard');
         if (data && data.active && data.offer) {
           activeHomeDiwaliOffer = data.offer;
           if (topBar) topBar.style.display = 'block';
-          if (heroBar) heroBar.style.display = 'block';
           if (homeCard) homeCard.style.display = 'block';
-          document.getElementById('diwaliTopBarText').textContent = data.offer.banner_text || 'Diwali Glow Reset is Live! 30-Day Plan for ₹799 (Worth ₹3,500+)';
-          document.getElementById('diwaliHomePrice').textContent = data.offer.display_price || '₹799';
-          const heroPrice = document.getElementById('diwaliHeroPrice');
-          if (heroPrice) heroPrice.textContent = data.offer.display_price || '₹799';
+
+          const bannerText = data.offer.banner_text || 'Diwali Glow Reset is Live! 30-Day Plan for ₹799 (Worth ₹3,500+)';
+          document.querySelectorAll('.diwali-marquee-headline').forEach(el => {
+            el.textContent = bannerText;
+          });
+          const displayPrice = data.offer.display_price || '₹799';
+          document.querySelectorAll('.diwali-marquee-btn').forEach(el => {
+            el.textContent = `Claim for ${displayPrice} →`;
+          });
+          const homePrice = document.getElementById('diwaliHomePrice');
+          if (homePrice) homePrice.textContent = displayPrice;
           const slotsBadge = document.getElementById('diwaliHomeSlotsBadge');
           if (slotsBadge) {
             slotsBadge.textContent = `🔥 Only ${data.offer.slots_remaining} slots left • Offer ends before Diwali`;
@@ -1259,7 +1276,6 @@
           }
         } else {
           if (topBar) topBar.style.display = 'none';
-          if (heroBar) heroBar.style.display = 'none';
           if (homeCard) homeCard.style.display = 'none';
         }
       } catch (e) {
