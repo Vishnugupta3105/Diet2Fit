@@ -1212,13 +1212,12 @@
             slotsBadge.textContent = `🔥 Only ${data.offer.slots_remaining} slots left • Offer ends before Diwali`;
           }
 
-          // If URL has ?offer=diwali or ?plan=diwali, auto-scroll and pop open ₹799 checkout form!
+          // If URL has ?offer=diwali or ?plan=diwali, auto-scroll to the ₹799 Diwali card!
           const urlParams = new URLSearchParams(window.location.search);
           const offerParam = (urlParams.get('offer') || urlParams.get('plan') || '').toLowerCase();
           if (offerParam === 'diwali' || offerParam === '799' || offerParam === 'glow') {
             setTimeout(() => {
               homeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              claimDiwaliOffer();
             }, 400);
           }
         } else {
@@ -1240,11 +1239,8 @@
       const card = document.getElementById('diwaliHomeOfferCard');
       if (card && card.style.display !== 'none') {
         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => {
-          claimDiwaliOffer();
-        }, 400);
       } else {
-        window.location.href = '/pricing.html?offer=diwali';
+        document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
       }
     }
 
