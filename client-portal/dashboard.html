@@ -366,6 +366,9 @@
           if (plan.plan_name.toLowerCase().includes('diwali')) {
             document.getElementById('planBadge').className = 'badge-festive';
             document.getElementById('planBadge').textContent = '🪔 Diwali Special';
+          } else if (plan.plan_name.toLowerCase().includes('barter')) {
+            document.getElementById('planBadge').className = 'badge badge-primary';
+            document.getElementById('planBadge').textContent = '🤝 Creator Collab';
           } else if (plan.days_remaining <= 5) {
             document.getElementById('planBadge').className = 'badge badge-warning';
             document.getElementById('planBadge').textContent = 'Expiring Soon';

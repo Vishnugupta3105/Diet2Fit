@@ -185,7 +185,7 @@
               <div style="flex:1;">
                 <div style="font-weight:600;font-size:0.9rem;display:flex;align-items:center;gap:8px;">
                   ${c.name}
-                  ${c.active_plan ? `<span class="badge badge-success" style="font-size:0.6rem;padding:2px 6px;">${c.active_plan}</span>` : ''}
+                  ${c.active_plan ? `<span class="badge ${c.active_plan.toLowerCase().includes('diwali') ? 'badge-festive' : (c.active_plan.toLowerCase().includes('barter') ? 'badge-primary' : 'badge-success')}" style="font-size:0.6rem;padding:2px 6px;">${c.active_plan.toLowerCase().includes('diwali') ? '🪔 ' : (c.active_plan.toLowerCase().includes('barter') ? '🤝 ' : '')}${c.active_plan}</span>` : ''}
                 </div>
                 <div class="text-caption">${c.email}</div>
               </div>

@@ -210,6 +210,41 @@ const initializeDB = async () => {
       }
     } catch(e) { console.error('Error seeding diwali plan in subscription_plans:', e); }
 
+    // Seed Barter plan in subscription_plans (Internal Admin / Content Creator Barter)
+    try {
+      const barterPlanRes = await pool.query("SELECT id FROM subscription_plans WHERE slug = 'barter'");
+      if (barterPlanRes.rows.length === 0) {
+        const signatureFeatures = {
+          lab_report: true,
+          travel_plan: true,
+          fasting_plan: true,
+          plan_revisions: '4/month',
+          recipe_library: 'Full (100+ recipes)',
+          family_meal_plan: false,
+          whatsapp_support: '24-hour',
+          education_modules: true,
+          video_consultations: '4/month (weekly)'
+        };
+        await pool.query(`
+          INSERT INTO subscription_plans (name, slug, price_monthly, display_price, price_monthly_usd, display_price_usd, tagline, features, is_popular, sort_order, is_active)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        `, [
+          'Barter',
+          'barter',
+          0,
+          '₹0',
+          0,
+          '$0',
+          'Content Creator / Influencer Barter Collaboration (Signature Tier)',
+          JSON.stringify(signatureFeatures),
+          false,
+          50,
+          true
+        ]);
+        console.log('✅ Barter plan seeded into subscription_plans');
+      }
+    } catch(e) { console.error('Error seeding barter plan in subscription_plans:', e); }
+
     // Seed Diwali Glow Reset offer
     try {
       const offerRes = await pool.query("SELECT id FROM offers WHERE code = 'diwali-glow-reset'");

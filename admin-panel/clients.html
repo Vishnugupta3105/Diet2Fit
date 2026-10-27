@@ -66,6 +66,9 @@
           <button class="btn btn-sm btn-outline" id="filterDiwali" onclick="setClientFilter('diwali')" style="border-color:#f59e0b; color:#92400e;">
             🪔 Diwali Offer <span id="diwaliFilterCount" style="background:#fef3c7; padding:2px 6px; border-radius:10px; font-weight:700; font-size:0.75rem; margin-left:4px;">0</span>
           </button>
+          <button class="btn btn-sm btn-outline" id="filterBarter" onclick="setClientFilter('barter')" style="border-color:#6366f1; color:#3730a3;">
+            🤝 Barter <span id="barterFilterCount" style="background:#e0e7ff; padding:2px 6px; border-radius:10px; font-weight:700; font-size:0.75rem; margin-left:4px;">0</span>
+          </button>
           <button class="btn btn-sm btn-outline" id="filterActive" onclick="setClientFilter('active')">Active Plans</button>
           <button class="btn btn-sm btn-outline" id="filterNoPlan" onclick="setClientFilter('noplan')">No Active Plan</button>
         </div>
@@ -120,7 +123,7 @@
   <div class="admin-modal-overlay" id="assignPlanModal">
     <div class="admin-modal">
       <div class="flex justify-between items-center mb-lg">
-        <h3 style="margin:0;">Assign Plan (Offline Payment)</h3>
+        <h3 style="margin:0;">Assign Plan</h3>
         <button onclick="closeAssignModal()" style="color:var(--text-muted);padding:4px;"><span class="material-symbols-outlined">close</span></button>
       </div>
       <div style="background:var(--bg-alt); padding:var(--space-md); border-radius:var(--radius-md); margin-bottom:var(--space-lg); display:flex; align-items:center; gap:var(--space-md);">
@@ -152,6 +155,7 @@
           <div class="form-group">
             <label class="form-label">Payment Method *</label>
             <select id="assignPaymentMethod" class="form-input">
+              <option value="barter">Barter / Collaboration (₹0)</option>
               <option value="cash">Cash</option>
               <option value="upi_personal">UPI (Personal)</option>
               <option value="bank_transfer">Bank Transfer</option>
@@ -283,8 +287,8 @@
               <div class="text-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.email}</div>
               ${c.active_plan ? `
                 <div style="margin-top:6px;">
-                  <span class="badge ${c.active_plan.toLowerCase().includes('diwali') ? 'badge-festive' : 'badge-success'}" style="font-size:0.65rem;padding:3px 8px;">
-                    ${c.active_plan.toLowerCase().includes('diwali') ? '🪔 ' : ''}${c.active_plan} · ${c.plan_days_left} days left
+                  <span class="badge ${c.active_plan.toLowerCase().includes('diwali') ? 'badge-festive' : (c.active_plan.toLowerCase().includes('barter') ? 'badge-primary' : 'badge-success')}" style="font-size:0.65rem;padding:3px 8px;">
+                    ${c.active_plan.toLowerCase().includes('diwali') ? '🪔 ' : (c.active_plan.toLowerCase().includes('barter') ? '🤝 ' : '')}${c.active_plan} · ${c.plan_days_left} days left
                   </span>
                 </div>
               ` : (c.is_diwali_client ? `
@@ -326,15 +330,14 @@
               <div class="client-stat-value" style="font-size:0.8rem;">${BeyondKilos.formatDate(c.created_at)}</div>
             </div>
           </div>
-          ${!c.active_plan ? `
           <div style="margin-top:var(--space-md); padding-top:var(--space-md); border-top:1px solid var(--border);">
-            <button class="btn btn-outline btn-sm w-full" 
+            <button class="btn ${c.active_plan ? 'btn-ghost' : 'btn-outline'} btn-sm w-full" 
               onclick="event.stopPropagation(); openAssignPlan(${c.id}, '${(c.name||'').replace(/'/g, "\\\'")}', '${(c.email||'').replace(/'/g, "\\\'")}')" 
-              style="gap:6px;">
-              <span class="material-symbols-outlined" style="font-size:16px;">card_membership</span>
-              Assign Plan
+              style="gap:6px; ${c.active_plan ? 'font-size:0.8rem; color:var(--primary);' : ''}">
+              <span class="material-symbols-outlined" style="font-size:16px;">${c.active_plan ? 'swap_horiz' : 'card_membership'}</span>
+              ${c.active_plan ? 'Change / Reassign Plan' : 'Assign Plan'}
             </button>
-          </div>` : ''}
+          </div>
         `;
         grid.appendChild(card);
       });
@@ -344,7 +347,7 @@
 
     function setClientFilter(filter) {
       currentFilter = filter;
-      ['filterAll', 'filterDiwali', 'filterActive', 'filterNoPlan'].forEach(id => {
+      ['filterAll', 'filterDiwali', 'filterBarter', 'filterActive', 'filterNoPlan'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
           btn.style.background = 'transparent';
@@ -355,11 +358,12 @@
       const activeBtnId = 
         filter === 'all' ? 'filterAll' :
         filter === 'diwali' ? 'filterDiwali' :
+        filter === 'barter' ? 'filterBarter' :
         filter === 'active' ? 'filterActive' : 'filterNoPlan';
 
       const activeBtn = document.getElementById(activeBtnId);
       if (activeBtn) {
-        activeBtn.style.background = filter === 'diwali' ? '#fef3c7' : 'var(--primary-surface)';
+        activeBtn.style.background = filter === 'diwali' ? '#fef3c7' : (filter === 'barter' ? '#e0e7ff' : 'var(--primary-surface)');
         activeBtn.style.fontWeight = '700';
       }
       applyFilters();
@@ -371,6 +375,8 @@
 
       if (currentFilter === 'diwali') {
         list = list.filter(c => c.is_diwali_client || (c.active_plan && c.active_plan.toLowerCase().includes('diwali')));
+      } else if (currentFilter === 'barter') {
+        list = list.filter(c => c.active_plan && c.active_plan.toLowerCase().includes('barter'));
       } else if (currentFilter === 'active') {
         list = list.filter(c => Boolean(c.active_plan));
       } else if (currentFilter === 'noplan') {
@@ -399,6 +405,9 @@
         const diwaliCount = allClients.filter(c => c.is_diwali_client || (c.active_plan && c.active_plan.toLowerCase().includes('diwali'))).length;
         const countEl = document.getElementById('diwaliFilterCount');
         if (countEl) countEl.textContent = diwaliCount;
+        const barterCount = allClients.filter(c => c.active_plan && c.active_plan.toLowerCase().includes('barter')).length;
+        const barterCountEl = document.getElementById('barterFilterCount');
+        if (barterCountEl) barterCountEl.textContent = barterCount;
         applyFilters();
       } catch (err) {
         console.error(err);
@@ -464,8 +473,17 @@
         select.innerHTML = '<option value="" disabled selected>Select a plan</option>' +
           availablePlans.map(p => {
             const isDiwali = p.slug === 'diwali-glow-reset' || (p.name || '').toLowerCase().includes('diwali');
-            return `<option value="${p.id}" data-price="${p.price_monthly}" data-display="${p.display_price}" data-diwali="${isDiwali}">
-              ${isDiwali ? '🪔 ' : ''}${p.name} — ${p.display_price}${isDiwali ? ' (30-Day Offer)' : '/month'}
+            const isBarter = p.slug === 'barter' || (p.name || '').toLowerCase().includes('barter');
+            let label = '';
+            if (isDiwali) {
+              label = `🪔 ${p.name} — ${p.display_price} (30-Day Offer)`;
+            } else if (isBarter) {
+              label = `🤝 ${p.name} — FREE (₹0 · 1 Month Creator Collaboration)`;
+            } else {
+              label = `${p.name} — ${p.display_price}/month`;
+            }
+            return `<option value="${p.id}" data-price="${p.price_monthly}" data-display="${p.display_price}" data-diwali="${isDiwali}" data-barter="${isBarter}">
+              ${label}
             </option>`;
           }).join('');
       } catch (err) {
@@ -500,19 +518,31 @@
       const select = document.getElementById('assignPlanId');
       const option = select.options[select.selectedIndex];
       const durationSelect = document.getElementById('assignDuration');
+      const paymentSelect = document.getElementById('assignPaymentMethod');
       if (!option || !option.value) {
         document.getElementById('assignPlanSummary').textContent = 'Select a plan above';
         return;
       }
       const isDiwali = option.dataset.diwali === 'true';
+      const isBarter = option.dataset.barter === 'true';
       if (isDiwali) {
         durationSelect.value = '1';
         durationSelect.disabled = true;
         document.getElementById('assignPlanSummary').innerHTML = 
           `<span>🪔 Diwali Glow Reset</span> (30 Days / 1 Month) = <strong>₹799</strong>`;
         return;
+      } else if (isBarter) {
+        durationSelect.value = '1';
+        durationSelect.disabled = true;
+        if (paymentSelect) paymentSelect.value = 'barter';
+        document.getElementById('assignPlanSummary').innerHTML = 
+          `<span>🤝 Barter Collaboration (Signature Tier)</span> (1 Month) = <strong style="color:#059669;">FREE (₹0 — Creator Collab)</strong>`;
+        return;
       } else {
         durationSelect.disabled = false;
+        if (paymentSelect && paymentSelect.value === 'barter') {
+          paymentSelect.value = 'cash';
+        }
       }
       const months = parseInt(durationSelect.value) || 1;
       const displayPrice = option.dataset.display;

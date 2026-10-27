@@ -62,9 +62,34 @@
           </div>
         </div>
         <div class="flex gap-sm">
+          <button class="btn btn-outline btn-sm" onclick="openAssignPlanFromDetail()" style="gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:18px;">card_membership</span>
+            Assign Plan
+          </button>
           <button class="btn btn-ghost btn-sm" style="color:var(--error);" onclick="deleteClient()">
             <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
           </button>
+        </div>
+      </div>
+
+      <!-- Barter Collaboration Callout -->
+      <div id="clientBarterBanner" class="mb-lg" style="display:none; background:linear-gradient(135deg, #eff6ff 0%, #f3e8ff 100%); border:1px solid #6366f1; border-radius:var(--radius-lg); padding:14px 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size:24px;">🤝</span>
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <strong style="color:#312e81; font-size:0.95rem;">Enrolled in Barter Plan (Creator Collaboration)</strong>
+                <span id="barterStatusBadge" class="badge badge-primary">Active</span>
+              </div>
+              <div class="text-caption" style="color:#4338ca; font-size:0.8rem;" id="barterPackageDetails">
+                ✦ Signature-Tier Access (4 Consultations, 24h WhatsApp Support, 100+ Recipes) • Free Collaboration (₹0)
+              </div>
+            </div>
+          </div>
+          <div id="barterExpiryInfo" style="font-size:0.82rem; font-weight:700; color:#312e81;">
+            Expires: —
+          </div>
         </div>
       </div>
 
@@ -84,6 +109,25 @@
             </div>
           </div>
           <div id="diwaliExpiryInfo" style="font-size:0.82rem; font-weight:700; color:#064e3b;">
+            Expires: —
+          </div>
+        </div>
+      </div>
+
+      <!-- Standard Plan Callout -->
+      <div id="clientStandardPlanBanner" class="mb-lg" style="display:none; background:#ecfdf5; border:1px solid #10b981; border-radius:var(--radius-lg); padding:14px 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="material-symbols-outlined" style="color:#059669; font-size:26px;">card_membership</span>
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <strong style="color:#064e3b; font-size:0.95rem;" id="standardPlanName">Active Membership</strong>
+                <span id="standardPlanStatusBadge" class="badge badge-success">Active</span>
+              </div>
+              <div class="text-caption" style="color:#065f46; font-size:0.8rem;" id="standardPlanDetails">✦ Active Paid Plan</div>
+            </div>
+          </div>
+          <div id="standardPlanExpiryInfo" style="font-size:0.82rem; font-weight:700; color:#064e3b;">
             Expires: —
           </div>
         </div>
@@ -195,6 +239,65 @@
         </div>
       </div>
     </main>
+  <!-- Assign Plan Modal -->
+  <div class="admin-modal-overlay" id="assignPlanModal">
+    <div class="admin-modal">
+      <div class="flex justify-between items-center mb-lg">
+        <h3 style="margin:0;">Assign Plan</h3>
+        <button onclick="closeAssignModal()" style="color:var(--text-muted);padding:4px;"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div style="background:var(--bg-alt); padding:var(--space-md); border-radius:var(--radius-md); margin-bottom:var(--space-lg); display:flex; align-items:center; gap:var(--space-md);">
+        <div class="client-avatar" style="width:40px;height:40px;font-size:0.8rem;" id="assignClientAvatar">--</div>
+        <div>
+          <div style="font-weight:600;" id="assignClientName">Client Name</div>
+          <div class="text-caption" id="assignClientEmail">email@example.com</div>
+        </div>
+      </div>
+      <form id="assignPlanForm" class="flex flex-col gap-md">
+        <input type="hidden" id="assignUserId" />
+        <div class="form-group">
+          <label class="form-label">Select Plan *</label>
+          <select id="assignPlanId" class="form-input" required>
+            <option value="" disabled selected>Loading plans...</option>
+          </select>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">Duration *</label>
+            <select id="assignDuration" class="form-input">
+              <option value="1">1 Month</option>
+              <option value="2">2 Months</option>
+              <option value="3">3 Months</option>
+              <option value="6">6 Months</option>
+              <option value="12">12 Months</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Method *</label>
+            <select id="assignPaymentMethod" class="form-input">
+              <option value="barter">Barter / Collaboration (₹0)</option>
+              <option value="cash">Cash</option>
+              <option value="upi_personal">UPI (Personal)</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Date *</label>
+          <input type="date" id="assignStartDate" class="form-input" required />
+          <div class="text-caption" style="margin-top:4px;">The plan period will start from this date</div>
+        </div>
+        <div style="background:#ecfdf5; padding:var(--space-md); border-radius:var(--radius-md); border:1px solid #a7f3d0;">
+          <div class="text-caption" style="color:#059669; font-weight:600;">PLAN SUMMARY</div>
+          <div style="font-size:1.2rem; font-weight:700; color:#064e3b; margin-top:4px;" id="assignPlanSummary">Select a plan above</div>
+        </div>
+        <button type="submit" class="btn btn-primary w-full" id="btnAssignPlan">
+          <span class="material-symbols-outlined" style="font-size:20px;">card_membership</span>
+          Assign Plan
+        </button>
+      </form>
+    </div>
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
@@ -260,6 +363,7 @@
       try {
         const data = await BeyondKilos.apiRequest(`/api/clients/${clientId}`);
         const { client, weights, appointments } = data;
+        clientObj = client;
 
         // Header
         document.getElementById('clientName').textContent = client.name;
@@ -295,10 +399,31 @@
         document.getElementById('cGoal').innerHTML = client.goal_weight ? `${client.goal_weight}<span class="metric-unit"> kg</span>` : '—';
         document.getElementById('cAppts').textContent = appointments.length;
 
-        // Check if client has a Diwali offer order
+        // Check plan orders (Barter, Diwali, or Standard)
         const orders = data.orders || [];
-        const diwaliOrder = orders.find(o => (o.plan_name || '').toLowerCase().includes('diwali'));
-        if (diwaliOrder) {
+        const barterOrder = orders.find(o => (o.plan_name || '').toLowerCase().includes('barter') && o.status === 'paid');
+        const diwaliOrder = orders.find(o => (o.plan_name || '').toLowerCase().includes('diwali') && o.status === 'paid');
+        const standardOrder = orders.find(o => !(o.plan_name || '').toLowerCase().includes('barter') && !(o.plan_name || '').toLowerCase().includes('diwali') && o.status === 'paid');
+
+        if (barterOrder) {
+          const banner = document.getElementById('clientBarterBanner');
+          const expiryInfo = document.getElementById('barterExpiryInfo');
+          const badge = document.getElementById('barterStatusBadge');
+          banner.style.display = 'block';
+
+          if (barterOrder.expires_at) {
+            const exp = new Date(barterOrder.expires_at);
+            const daysLeft = Math.ceil((exp - new Date()) / (1000 * 60 * 60 * 24));
+            expiryInfo.textContent = `Valid until ${BeyondKilos.formatDate(barterOrder.expires_at)} (${daysLeft > 0 ? daysLeft + ' days left' : 'Expired'})`;
+            if (daysLeft <= 0) {
+              badge.textContent = 'Expired';
+              badge.style.background = '#fee2e2';
+              badge.style.color = '#991b1b';
+            } else {
+              badge.textContent = `${daysLeft} Days Left`;
+            }
+          }
+        } else if (diwaliOrder) {
           const banner = document.getElementById('clientDiwaliBanner');
           const expiryInfo = document.getElementById('diwaliExpiryInfo');
           const badge = document.getElementById('diwaliStatusBadge');
@@ -308,6 +433,26 @@
             const exp = new Date(diwaliOrder.expires_at);
             const daysLeft = Math.ceil((exp - new Date()) / (1000 * 60 * 60 * 24));
             expiryInfo.textContent = `Valid until ${BeyondKilos.formatDate(diwaliOrder.expires_at)} (${daysLeft > 0 ? daysLeft + ' days left' : 'Expired'})`;
+            if (daysLeft <= 0) {
+              badge.textContent = 'Expired';
+              badge.style.background = '#fee2e2';
+              badge.style.color = '#991b1b';
+            } else {
+              badge.textContent = `${daysLeft} Days Left`;
+            }
+          }
+        } else if (standardOrder) {
+          const banner = document.getElementById('clientStandardPlanBanner');
+          const expiryInfo = document.getElementById('standardPlanExpiryInfo');
+          const badge = document.getElementById('standardPlanStatusBadge');
+          const nameEl = document.getElementById('standardPlanName');
+          banner.style.display = 'block';
+          if (nameEl) nameEl.textContent = `Enrolled in ${standardOrder.plan_name}`;
+
+          if (standardOrder.expires_at) {
+            const exp = new Date(standardOrder.expires_at);
+            const daysLeft = Math.ceil((exp - new Date()) / (1000 * 60 * 60 * 24));
+            expiryInfo.textContent = `Valid until ${BeyondKilos.formatDate(standardOrder.expires_at)} (${daysLeft > 0 ? daysLeft + ' days left' : 'Expired'})`;
             if (daysLeft <= 0) {
               badge.textContent = 'Expired';
               badge.style.background = '#fee2e2';
@@ -473,10 +618,128 @@
         BeyondKilos.showToast('Client updated!', 'success');
         loadClient();
       } catch (err) { BeyondKilos.showToast(err.message, 'error'); }
-      btn.disabled = false;
+    // ── Assign Plan (Detail View) ──
+    let clientObj = null;
+    let availablePlans = [];
+
+    async function loadAvailablePlans() {
+      try {
+        const data = await BeyondKilos.apiRequest('/api/plans?all=true');
+        availablePlans = data.plans || [];
+        const select = document.getElementById('assignPlanId');
+        select.innerHTML = '<option value="" disabled selected>Select a plan</option>' +
+          availablePlans.map(p => {
+            const isDiwali = p.slug === 'diwali-glow-reset' || (p.name || '').toLowerCase().includes('diwali');
+            const isBarter = p.slug === 'barter' || (p.name || '').toLowerCase().includes('barter');
+            let label = '';
+            if (isDiwali) {
+              label = `🪔 ${p.name} — ${p.display_price} (30-Day Offer)`;
+            } else if (isBarter) {
+              label = `🤝 ${p.name} — FREE (₹0 · 1 Month Creator Collaboration)`;
+            } else {
+              label = `${p.name} — ${p.display_price}/month`;
+            }
+            return `<option value="${p.id}" data-price="${p.price_monthly}" data-display="${p.display_price}" data-diwali="${isDiwali}" data-barter="${isBarter}">
+              ${label}
+            </option>`;
+          }).join('');
+      } catch (err) {
+        console.error('Failed to load plans:', err);
+      }
+    }
+
+    function openAssignPlanFromDetail() {
+      if (!clientObj) return;
+      document.getElementById('assignUserId').value = clientObj.id;
+      document.getElementById('assignClientName').textContent = clientObj.name;
+      document.getElementById('assignClientEmail').textContent = clientObj.email;
+      document.getElementById('assignClientAvatar').textContent = (clientObj.name || '').substring(0, 2).toUpperCase();
+      document.getElementById('assignPlanId').selectedIndex = 0;
+      const durationSelect = document.getElementById('assignDuration');
+      durationSelect.value = '1';
+      durationSelect.disabled = false;
+      document.getElementById('assignPaymentMethod').value = 'barter';
+      document.getElementById('assignStartDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('assignPlanSummary').textContent = 'Select a plan above';
+      document.getElementById('assignPlanModal').classList.add('active');
+    }
+
+    function closeAssignModal() {
+      document.getElementById('assignPlanModal').classList.remove('active');
+    }
+
+    document.getElementById('assignPlanId').addEventListener('change', updatePlanSummary);
+    document.getElementById('assignDuration').addEventListener('change', updatePlanSummary);
+
+    function updatePlanSummary() {
+      const select = document.getElementById('assignPlanId');
+      const option = select.options[select.selectedIndex];
+      const durationSelect = document.getElementById('assignDuration');
+      const paymentSelect = document.getElementById('assignPaymentMethod');
+      if (!option || !option.value) {
+        document.getElementById('assignPlanSummary').textContent = 'Select a plan above';
+        return;
+      }
+      const isDiwali = option.dataset.diwali === 'true';
+      const isBarter = option.dataset.barter === 'true';
+      if (isDiwali) {
+        durationSelect.value = '1';
+        durationSelect.disabled = true;
+        document.getElementById('assignPlanSummary').innerHTML = 
+          `<span>🪔 Diwali Glow Reset</span> (30 Days / 1 Month) = <strong>₹799</strong>`;
+        return;
+      } else if (isBarter) {
+        durationSelect.value = '1';
+        durationSelect.disabled = true;
+        if (paymentSelect) paymentSelect.value = 'barter';
+        document.getElementById('assignPlanSummary').innerHTML = 
+          `<span>🤝 Barter Collaboration (Signature Tier)</span> (1 Month) = <strong style="color:#059669;">FREE (₹0 — Creator Collab)</strong>`;
+        return;
+      } else {
+        durationSelect.disabled = false;
+        if (paymentSelect && paymentSelect.value === 'barter') {
+          paymentSelect.value = 'cash';
+        }
+      }
+      const months = parseInt(durationSelect.value) || 1;
+      const displayPrice = option.dataset.display;
+      const planName = option.text.split(' — ')[0];
+      const priceNum = parseInt(option.dataset.price) / 100;
+      const total = priceNum * months;
+      document.getElementById('assignPlanSummary').innerHTML = 
+        `<span>${planName}</span> × ${months} month${months > 1 ? 's' : ''} = <strong>₹${total.toLocaleString('en-IN')}</strong>`;
+    }
+
+    document.getElementById('assignPlanForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnAssignPlan');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Assigning...';
+
+      try {
+        const result = await BeyondKilos.apiRequest('/api/plans/assign', {
+          method: 'POST',
+          body: JSON.stringify({
+            user_id: parseInt(document.getElementById('assignUserId').value),
+            plan_id: parseInt(document.getElementById('assignPlanId').value),
+            duration_months: parseInt(document.getElementById('assignDuration').value),
+            payment_method: document.getElementById('assignPaymentMethod').value,
+            start_date: document.getElementById('assignStartDate').value
+          })
+        });
+        BeyondKilos.showToast(result.message || 'Plan assigned successfully!', 'success');
+        closeAssignModal();
+        await loadClient();
+      } catch (err) {
+        BeyondKilos.showToast(err.message || 'Failed to assign plan', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">card_membership</span> Assign Plan';
+      }
     });
 
     loadClient();
+    loadAvailablePlans();
   </script>
 </body>
 </html>

@@ -52,7 +52,7 @@ router.get('/', async (req, res) => {
     const { all } = req.query;
     let query = 'SELECT id, name, slug, price_monthly, display_price, price_monthly_usd, display_price_usd, tagline, features, is_popular, sort_order FROM subscription_plans WHERE is_active = true';
     if (!all) {
-      query += " AND slug != 'diwali-glow-reset'";
+      query += " AND slug NOT IN ('diwali-glow-reset', 'barter')";
     }
     query += ' ORDER BY sort_order ASC';
     const result = await db.query(query);
@@ -328,17 +328,18 @@ router.post('/assign', authMiddleware, adminOnly, async (req, res) => {
     const plan = planRes.rows[0];
 
     const isDiwali = plan.slug === 'diwali-glow-reset' || plan.name.toLowerCase().includes('diwali');
-    const months = isDiwali ? 1 : (parseInt(duration_months) || 1);
+    const isBarter = plan.slug === 'barter' || plan.name.toLowerCase().includes('barter');
+    const months = (isDiwali || isBarter) ? 1 : (parseInt(duration_months) || 1);
     const startsAt = start_date ? new Date(start_date) : new Date();
     const expiresAt = new Date(startsAt);
-    if (isDiwali) {
+    if (isDiwali || isBarter) {
       expiresAt.setDate(expiresAt.getDate() + 30); // 30-day validity
     } else {
       expiresAt.setMonth(expiresAt.getMonth() + months);
     }
-    const totalAmount = isDiwali ? plan.price_monthly : (plan.price_monthly * months);
+    const totalAmount = isBarter ? 0 : (isDiwali ? plan.price_monthly : (plan.price_monthly * months));
 
-    // Create a paid order entry (manual/offline)
+    // Create a paid order entry (manual/offline/barter)
     const orderRes = await db.query(`
       INSERT INTO plan_orders (user_id, plan_id, plan_name, razorpay_order_id, razorpay_payment_id, amount, currency, status, starts_at, expires_at, buyer_name, buyer_email, buyer_phone)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
@@ -347,8 +348,8 @@ router.post('/assign', authMiddleware, adminOnly, async (req, res) => {
       user_id,
       plan.id,
       plan.name,
-      `manual_${Date.now()}`,
-      `offline_${payment_method || 'cash'}_${Date.now()}`,
+      `manual_${isBarter ? 'barter_' : ''}${Date.now()}`,
+      `offline_${payment_method || (isBarter ? 'barter' : 'cash')}_${Date.now()}`,
       totalAmount,
       'INR',
       'paid',
@@ -361,7 +362,7 @@ router.post('/assign', authMiddleware, adminOnly, async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: `${plan.name} plan assigned to ${user.name} for ${months} month(s).`,
+      message: `${plan.name} plan assigned to ${user.name} for ${months} month(s)${isBarter ? ' (Free Barter Collaboration)' : ''}.`,
       order: orderRes.rows[0]
     });
   } catch (err) {
