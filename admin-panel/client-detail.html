@@ -311,6 +311,8 @@
     if (!clientId) { window.location.href = 'clients.html'; }
 
     let weightChart = null;
+    let clientObj = null;
+    let availablePlans = [];
 
     function switchTab(tab, el) {
       document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
@@ -618,10 +620,10 @@
         BeyondKilos.showToast('Client updated!', 'success');
         loadClient();
       } catch (err) { BeyondKilos.showToast(err.message, 'error'); }
-    // ── Assign Plan (Detail View) ──
-    let clientObj = null;
-    let availablePlans = [];
+      btn.disabled = false;
+    });
 
+    // ── Assign Plan (Detail View) ──
     async function loadAvailablePlans() {
       try {
         const data = await BeyondKilos.apiRequest('/api/plans?all=true');
