@@ -237,21 +237,6 @@
         </p>
       </div>
 
-      <!-- Currency Toggle -->
-      <div id="currencyToggleWrapper" style="display: flex; justify-content: center; margin-bottom: var(--space-xl);">
-        <div style="display: inline-flex; background: var(--bg-alt); padding: 4px; border-radius: var(--radius-full); border: 1px solid var(--border);">
-          <button id="btnToggleINR" onclick="setCurrency('INR')" class="btn btn-sm" style="border-radius: var(--radius-full); border: none; background: var(--primary); color: white; padding: 6px 20px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            🇮🇳 INR (₹)
-          </button>
-          <button id="btnToggleUSD" onclick="setCurrency('USD')" class="btn btn-sm" style="border-radius: var(--radius-full); border: none; background: transparent; color: var(--text-secondary); padding: 6px 20px; font-weight: 600;">
-            🌎 USD ($)
-          </button>
-        </div>
-      </div>
-      <p class="text-caption text-center" style="margin-top: -16px; margin-bottom: var(--space-xl); color: var(--text-secondary);">
-        Living abroad in the USA, Canada, UK, or UAE? See our <a href="/nri-dietitian/" style="color:var(--primary); font-weight:600;">Online Dietitian Consultation for NRIs</a>.
-      </p>
-
       <div class="pricing-grid" id="pricingCards">
         <!-- Loaded dynamically -->
       </div>
@@ -488,29 +473,6 @@
 
     function setCurrency(currency) {
       activeCurrency = currency;
-      
-      // Update toggle UI
-      const btnINR = document.getElementById('btnToggleINR');
-      const btnUSD = document.getElementById('btnToggleUSD');
-      
-      if (btnINR && btnUSD) {
-        if (currency === 'INR') {
-          btnINR.style.background = 'var(--primary)';
-          btnINR.style.color = 'white';
-          btnINR.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-          btnUSD.style.background = 'transparent';
-          btnUSD.style.color = 'var(--text-secondary)';
-          btnUSD.style.boxShadow = 'none';
-        } else {
-          btnUSD.style.background = 'var(--primary)';
-          btnUSD.style.color = 'white';
-          btnUSD.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-          btnINR.style.background = 'transparent';
-          btnINR.style.color = 'var(--text-secondary)';
-          btnINR.style.boxShadow = 'none';
-        }
-      }
-
       updateComparisonTable(currency);
 
       // Re-render cards
@@ -522,20 +484,17 @@
     function applyGeoPricing() {
       const isIntl = BeyondKilos.isInternational();
       const country = BeyondKilos.getCachedCountry();
-      const toggleWrapper = document.getElementById('currencyToggleWrapper');
       const intlHeader = document.getElementById('pricingIntlHeader');
       const canadaNote = document.getElementById('pricingCanadaNote');
       const diwaliSec = document.getElementById('diwaliOfferSection');
 
       if (isIntl) {
-        // Outside India: Completely hide INR toggle so Indian prices are never revealed!
-        if (toggleWrapper) toggleWrapper.style.display = 'none';
+        // Outside India: Strictly USD, never reveal Indian prices
         if (intlHeader) intlHeader.style.display = 'block';
         if (country === 'CA' && canadaNote) canadaNote.style.display = 'block';
         if (diwaliSec) diwaliSec.style.display = 'none';
         setCurrency('USD');
       } else {
-        if (toggleWrapper) toggleWrapper.style.display = 'flex';
         if (intlHeader) intlHeader.style.display = 'none';
         setCurrency('INR');
       }
