@@ -434,13 +434,14 @@
     function renderDashboardPricingCards(plans) {
       const container = document.getElementById('dashboardPricingCards');
       if (!container) return;
+      const isIntl = (window.BeyondKilos && BeyondKilos.isInternational) ? BeyondKilos.isInternational() : false;
 
       container.innerHTML = plans.map(plan => `
         <div class="pricing-card ${plan.is_popular ? 'pricing-popular' : ''}">
           ${plan.is_popular ? '<div class="pricing-popular-badge">Most Popular</div>' : ''}
           <div class="pricing-plan-name">${plan.name}</div>
           <div class="pricing-price" style="margin: 16px 0;">
-            <span class="pricing-amount">${plan.display_price}</span>
+            <span class="pricing-amount">${(isIntl && plan.display_price_usd) ? plan.display_price_usd : plan.display_price}</span>
             <span class="pricing-period">/mo</span>
           </div>
           <div class="pricing-divider"></div>
@@ -464,10 +465,18 @@
         btn.innerHTML = 'Processing...';
         btn.disabled = true;
 
+        const isIntl = (window.BeyondKilos && BeyondKilos.isInternational) ? BeyondKilos.isInternational() : false;
+        const activeCurrency = isIntl ? 'USD' : 'INR';
+
         const orderData = await BeyondKilos.apiRequest('/api/plans/create-order', {
           method: 'POST',
-          body: JSON.stringify({ plan_id: planId })
+          body: JSON.stringify({ 
+            plan_id: planId,
+            currency: activeCurrency 
+          })
         });
+
+        const isUSD = orderData.currency === 'USD';
 
         const options = {
           key: orderData.key,
@@ -482,30 +491,41 @@
             contact: orderData.user.phone
           },
           theme: { color: '#064e3b' },
-          method: {
-            upi: true,
-            card: true,
-            netbanking: true,
-            wallet: true,
-            emi: false,
-            paylater: false
-          },
-          config: {
-            display: {
-              blocks: {
-                upi: {
-                  name: 'Pay using UPI',
-                  instruments: [
-                    { method: 'upi', flows: ['intent', 'qr', 'collect'], apps: ['google_pay', 'phonepe', 'paytm'] }
-                  ]
+          ...(isUSD ? {
+            method: {
+              card: true,
+              upi: false,
+              netbanking: false,
+              wallet: false,
+              emi: false,
+              paylater: false
+            }
+          } : {
+            method: {
+              upi: true,
+              card: true,
+              netbanking: true,
+              wallet: true,
+              emi: false,
+              paylater: false
+            },
+            config: {
+              display: {
+                blocks: {
+                  upi: {
+                    name: 'Pay using UPI',
+                    instruments: [
+                      { method: 'upi', flows: ['intent', 'qr', 'collect'], apps: ['google_pay', 'phonepe', 'paytm'] }
+                    ]
+                  }
+                },
+                sequence: ['block.upi'],
+                preferences: {
+                  show_default_blocks: true
                 }
-              },
-              sequence: ['block.upi'],
-              preferences: {
-                show_default_blocks: true
               }
             }
-          },
+          }),
           handler: async function (response) {
             try {
               const verifyData = await BeyondKilos.apiRequest('/api/plans/verify-payment', {

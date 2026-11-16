@@ -573,6 +573,8 @@
           })
         });
 
+        const isUSD = orderData.currency === 'USD';
+
         const options = {
           key: orderData.key,
           amount: orderData.amount,
@@ -582,30 +584,41 @@
           order_id: orderData.order_id,
           prefill: { name: orderData.user.name, email: orderData.user.email, contact: orderData.user.phone },
           theme: { color: '#064e3b' },
-          method: {
-            upi: true,
-            card: true,
-            netbanking: true,
-            wallet: true,
-            emi: false,
-            paylater: false
-          },
-          config: {
-            display: {
-              blocks: {
-                upi: {
-                  name: 'Pay using UPI',
-                  instruments: [
-                    { method: 'upi', flows: ['intent', 'qr', 'collect'], apps: ['google_pay', 'phonepe', 'paytm'] }
-                  ]
+          ...(isUSD ? {
+            method: {
+              card: true,
+              upi: false,
+              netbanking: false,
+              wallet: false,
+              emi: false,
+              paylater: false
+            }
+          } : {
+            method: {
+              upi: true,
+              card: true,
+              netbanking: true,
+              wallet: true,
+              emi: false,
+              paylater: false
+            },
+            config: {
+              display: {
+                blocks: {
+                  upi: {
+                    name: 'Pay using UPI',
+                    instruments: [
+                      { method: 'upi', flows: ['intent', 'qr', 'collect'], apps: ['google_pay', 'phonepe', 'paytm'] }
+                    ]
+                  }
+                },
+                sequence: ['block.upi'],
+                preferences: {
+                  show_default_blocks: true
                 }
-              },
-              sequence: ['block.upi'],
-              preferences: {
-                show_default_blocks: true
               }
             }
-          },
+          }),
           handler: async function (response) {
             try {
               const verifyData = await BeyondKilos.apiRequest('/api/plans/verify-payment', {
