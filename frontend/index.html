@@ -753,6 +753,17 @@
         </div>
       </div>
 
+      <!-- International Region / Currency Indicator -->
+      <div id="homeIntlIndicator" style="display:none; text-align:center; margin-bottom:var(--space-xl);">
+        <div style="display:inline-flex; align-items:center; gap:8px; background:var(--primary-surface); color:var(--primary); padding:6px 16px; border-radius:var(--radius-full); font-size:0.85rem; font-weight:600; border:1px solid var(--primary-dim);">
+          <span class="material-symbols-outlined" style="font-size:18px;">public</span>
+          <span id="homeIntlLabel">International Consultation Plans (USD)</span>
+        </div>
+        <p id="homeCanadaNote" style="display:none; font-size:0.8rem; color:var(--text-secondary); margin-top:8px;">
+          🇨🇦 Canadian &amp; Overseas Clients: Charged in USD ($) • Your bank card automatically converts at the live exchange rate.
+        </p>
+      </div>
+
       <div class="pricing-grid animate-fade-up" id="pricingCards">
         <!-- Cards loaded dynamically -->
       </div>
@@ -1010,13 +1021,36 @@
         return;
       }
 
-      container.innerHTML = plans.map(plan => `
+      const isIntl = BeyondKilos.isInternational();
+      const country = BeyondKilos.getCachedCountry();
+
+      // Show or hide International badge
+      const indicator = document.getElementById('homeIntlIndicator');
+      const canadaNote = document.getElementById('homeCanadaNote');
+      if (indicator) {
+        if (isIntl) {
+          indicator.style.display = 'block';
+          if (country === 'CA' && canadaNote) {
+            canadaNote.style.display = 'block';
+          }
+        } else {
+          indicator.style.display = 'none';
+        }
+      }
+
+      container.innerHTML = plans.map(plan => {
+        let displayPrice = plan.display_price;
+        if (isIntl) {
+          displayPrice = plan.display_price_usd || (plan.name === 'Starter' ? '$149' : plan.name === 'Signature' ? '$199' : '$349');
+        }
+
+        return `
         <div class="pricing-card ${plan.is_popular ? 'pricing-popular' : ''}">
           ${plan.is_popular ? '<div class="pricing-popular-badge">Most Popular</div>' : ''}
           <div class="pricing-plan-name">${plan.name}</div>
           <div class="pricing-tagline">${plan.tagline || ''}</div>
           <div class="pricing-price">
-            <span class="pricing-amount">${plan.display_price}</span>
+            <span class="pricing-amount">${displayPrice}</span>
             <span class="pricing-period">/month</span>
           </div>
           <div class="pricing-divider"></div>
@@ -1029,7 +1063,8 @@
             </button>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     // Load plans from API
@@ -1048,10 +1083,11 @@
     }
 
     function renderFallbackPlans() {
+      const isIntl = BeyondKilos.isInternational();
       const fallback = [
-        { id: 1, name: 'Starter', slug: 'starter', display_price: '₹1,499', tagline: 'Perfect to begin your health journey', is_popular: false, features: { video_consultations: '2/month', whatsapp_support: '9am–7pm, next-day reply', plan_revisions: '2/month', lab_report: true, travel_plan: false, fasting_plan: false, recipe_library: 'Core (30 recipes)', education_modules: true, family_meal_plan: false } },
-        { id: 2, name: 'Signature', slug: 'signature', display_price: '₹1,999', tagline: 'Our most popular — weekly guidance & full access', is_popular: true, features: { video_consultations: '4/month (weekly)', whatsapp_support: '24-hour', plan_revisions: '4/month', lab_report: true, travel_plan: true, fasting_plan: true, recipe_library: 'Full (100+ recipes)', education_modules: true, family_meal_plan: false } },
-        { id: 3, name: 'Complete Care', slug: 'complete-care', display_price: '₹3,499', tagline: 'Premium care with priority access & family plan', is_popular: false, features: { video_consultations: '4/month + on-demand calls', whatsapp_support: 'Priority, under 4hr reply', plan_revisions: 'Unlimited', lab_report: true, travel_plan: true, fasting_plan: true, recipe_library: 'Full (100+ recipes)', education_modules: true, family_meal_plan: '1 included' } }
+        { id: 1, name: 'Starter', slug: 'starter', display_price: isIntl ? '$149' : '₹1,499', display_price_usd: '$149', tagline: 'Perfect to begin your health journey', is_popular: false, features: { video_consultations: '2/month', whatsapp_support: '9am–7pm, next-day reply', plan_revisions: '2/month', lab_report: true, travel_plan: false, fasting_plan: false, recipe_library: 'Core (30 recipes)', education_modules: true, family_meal_plan: false } },
+        { id: 2, name: 'Signature', slug: 'signature', display_price: isIntl ? '$199' : '₹1,999', display_price_usd: '$199', tagline: 'Our most popular — weekly guidance & full access', is_popular: true, features: { video_consultations: '4/month (weekly)', whatsapp_support: '24-hour', plan_revisions: '4/month', lab_report: true, travel_plan: true, fasting_plan: true, recipe_library: 'Full (100+ recipes)', education_modules: true, family_meal_plan: false } },
+        { id: 3, name: 'Complete Care', slug: 'complete-care', display_price: isIntl ? '$349' : '₹3,499', display_price_usd: '$349', tagline: 'Premium care with priority access & family plan', is_popular: false, features: { video_consultations: '4/month + on-demand calls', whatsapp_support: 'Priority, under 4hr reply', plan_revisions: 'Unlimited', lab_report: true, travel_plan: true, fasting_plan: true, recipe_library: 'Full (100+ recipes)', education_modules: true, family_meal_plan: '1 included' } }
       ];
       renderPricingCards(fallback);
     }
@@ -1076,10 +1112,14 @@
           });
         }
 
-        // Create Razorpay order
+        // Create Razorpay order with currency detection
+        const activeCurrency = BeyondKilos.getCurrency();
         const orderData = await BeyondKilos.apiRequest('/api/plans/create-order', {
           method: 'POST',
-          body: JSON.stringify({ plan_id: planId })
+          body: JSON.stringify({ 
+            plan_id: planId,
+            currency: activeCurrency 
+          })
         });
 
         // Open Razorpay checkout
@@ -1188,6 +1228,15 @@
     // Check active Diwali offer for homepage
     let activeHomeDiwaliOffer = null;
     async function checkHomeDiwaliOffer() {
+      // If visitor is outside India, completely hide the domestic ₹799 offer to protect international pricing
+      if (BeyondKilos.isInternational()) {
+        const topBar = document.getElementById('diwaliTopBar');
+        const homeCard = document.getElementById('diwaliHomeOfferCard');
+        if (topBar) topBar.style.display = 'none';
+        if (homeCard) homeCard.style.display = 'none';
+        return;
+      }
+
       try {
         const data = await BeyondKilos.apiRequest('/api/offers/active');
         const topBar = document.getElementById('diwaliTopBar');
@@ -1246,6 +1295,10 @@
 
     loadPlans();
     checkHomeDiwaliOffer();
+    BeyondKilos.detectCountry().then(() => {
+      loadPlans();
+      checkHomeDiwaliOffer();
+    });
   </script>
 </body>
 

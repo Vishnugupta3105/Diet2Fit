@@ -195,6 +195,118 @@ async function validateSession() {
   }
 }
 
+// ── Geo-Location & Currency Management ───────────────────────
+let _detectedCountry = null;
+
+async function detectCountry() {
+  if (_detectedCountry) return _detectedCountry;
+  const cached = localStorage.getItem('bk_country');
+  if (cached) {
+    _detectedCountry = cached;
+    return cached;
+  }
+
+  // 1. Try IP Geolocation API 1 (geojs.io)
+  try {
+    const res = await fetch('https://get.geojs.io/v1/ip/country.json');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.country) {
+        _detectedCountry = data.country.toUpperCase();
+        localStorage.setItem('bk_country', _detectedCountry);
+        return _detectedCountry;
+      }
+    }
+  } catch (e) {}
+
+  // 2. Try IP Geolocation API 2 (country.is)
+  try {
+    const res2 = await fetch('https://api.country.is');
+    if (res2.ok) {
+      const data2 = await res2.json();
+      if (data2 && data2.country) {
+        _detectedCountry = data2.country.toUpperCase();
+        localStorage.setItem('bk_country', _detectedCountry);
+        return _detectedCountry;
+      }
+    }
+  } catch (e) {}
+
+  // 3. Fallback to timezone
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (tz.includes('Calcutta') || tz.includes('Kolkata')) {
+      _detectedCountry = 'IN';
+    } else {
+      _detectedCountry = 'US';
+    }
+  } catch (e) {
+    _detectedCountry = 'IN';
+  }
+
+  localStorage.setItem('bk_country', _detectedCountry);
+  return _detectedCountry;
+}
+
+function getCachedCountry() {
+  if (_detectedCountry) return _detectedCountry;
+  const cached = localStorage.getItem('bk_country');
+  if (cached) {
+    _detectedCountry = cached;
+    return cached;
+  }
+  // Synchronous preliminary check via browser timezone before fetch completes
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (tz && !tz.includes('Calcutta') && !tz.includes('Kolkata')) {
+      return 'INTL';
+    }
+  } catch (e) {}
+  return 'IN';
+}
+
+function isInternational() {
+  const c = getCachedCountry();
+  return c !== 'IN';
+}
+
+function getCurrency() {
+  return isInternational() ? 'USD' : 'INR';
+}
+
+function sanitizeInternationalUI() {
+  if (!isInternational()) return;
+  // Hide any domestic-only offers and elements from foreign visitors
+  document.querySelectorAll('.domestic-only, [data-domestic-only]').forEach(el => {
+    el.style.display = 'none';
+  });
+  const diwaliTop = document.getElementById('diwaliTopBar');
+  if (diwaliTop) diwaliTop.style.display = 'none';
+  const diwaliHome = document.getElementById('diwaliHomeOfferCard');
+  if (diwaliHome) diwaliHome.style.display = 'none';
+  const diwaliPricing = document.getElementById('diwaliOfferSection');
+  if (diwaliPricing) diwaliPricing.style.display = 'none';
+  // Redact any domestic rupee price tags on special pages
+  document.querySelectorAll('.domestic-price-badge').forEach(el => {
+    el.textContent = 'Personalized 1-on-1 plans';
+  });
+  document.querySelectorAll('.domestic-price-faq').forEach(el => {
+    el.textContent = 'All plans include 1-on-1 video consultations, dedicated WhatsApp support, personalized diet plans, and lab report review. Your initial consultation is free.';
+  });
+}
+
+// Automatically detect country & sanitize UI on load
+if (typeof window !== 'undefined') {
+  detectCountry().then(() => {
+    sanitizeInternationalUI();
+  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', sanitizeInternationalUI);
+  } else {
+    sanitizeInternationalUI();
+  }
+}
+
 // Make helpers available globally
 window.BeyondKilos = {
   showToast,
@@ -209,6 +321,11 @@ window.BeyondKilos = {
   formatDateTime,
   getTodayDate,
   API_BASE,
+  detectCountry,
+  getCachedCountry,
+  isInternational,
+  getCurrency,
+  sanitizeInternationalUI,
 };
 
 // ── GA4 WhatsApp Contact Click Tracking ──────────────────────
