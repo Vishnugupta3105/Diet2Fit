@@ -1000,11 +1000,18 @@
     };
 
     function buildFeatureHTML(features) {
+      if (!features) return '';
+      let feat = features;
+      if (typeof feat === 'string') {
+        try { feat = JSON.parse(feat); } catch (e) { feat = {}; }
+      }
+      if (!feat || typeof feat !== 'object' || Array.isArray(feat)) return '';
+
       const order = ['video_consultations', 'whatsapp_support', 'plan_revisions', 'lab_report', 'travel_plan', 'fasting_plan', 'recipe_library', 'education_modules', 'family_meal_plan'];
       return order.map(key => {
-        const val = features[key];
+        const val = feat[key];
         const meta = FEATURE_LABELS[key] || { label: key, icon: 'check' };
-        const isIncluded = val !== false;
+        const isIncluded = val !== false && val !== undefined && val !== null;
         const displayValue = typeof val === 'string' ? val : (val === true ? 'Included' : '');
 
         return `

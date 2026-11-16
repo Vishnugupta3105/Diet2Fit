@@ -144,7 +144,7 @@
       <div class="navbar-links" id="navLinks">
         <a href="/" class="navbar-link">Home</a>
         <a href="/about-dt-disha/" class="navbar-link">About</a>
-        <a href="/pricing.html" class="navbar-link">Pricing</a>
+        <a href="#pricing-plans" class="navbar-link">Pricing</a>
         <a href="/login.html" class="navbar-link">Client Login</a>
         <a href="/book.html" class="btn btn-primary btn-sm">Request Consultation</a>
       </div>
@@ -328,7 +328,7 @@
   </section>
 
   <!-- International Pricing Overview -->
-  <section class="section" style="background:var(--bg-alt);">
+  <section class="section" id="pricing-plans" style="background:var(--bg-alt);">
     <div class="container" style="max-width:920px;">
       <h2 class="text-headline mb-md text-center">Transparent International Consultation Plans</h2>
       <p class="text-body-lg text-center" style="color:var(--text-secondary); max-width:650px; margin:0 auto var(--space-2xl);">
@@ -349,7 +349,7 @@
               <li>WhatsApp Support (next-day reply)</li>
             </ul>
           </div>
-          <a href="/pricing.html" class="btn btn-ghost btn-sm" style="width:100%; text-align:center;">View Details</a>
+          <button onclick="choosePlan(1, 'starter')" class="btn btn-outline btn-sm" style="width:100%; text-align:center;">Choose Starter</button>
         </div>
 
         <!-- Signature -->
@@ -366,7 +366,7 @@
               <li>24-hour WhatsApp Guidance</li>
             </ul>
           </div>
-          <a href="/pricing.html" class="btn btn-primary btn-sm" style="width:100%; text-align:center;">Choose Signature</a>
+          <button onclick="choosePlan(2, 'signature')" class="btn btn-primary btn-sm" style="width:100%; text-align:center;">Choose Signature</button>
         </div>
 
         <!-- Complete Care -->
@@ -382,13 +382,97 @@
               <li>Priority WhatsApp Support (&lt;4hr reply)</li>
             </ul>
           </div>
-          <a href="/pricing.html" class="btn btn-ghost btn-sm" style="width:100%; text-align:center;">View Details</a>
+          <button onclick="choosePlan(3, 'complete-care')" class="btn btn-outline btn-sm" style="width:100%; text-align:center;">Choose Complete Care</button>
         </div>
       </div>
       
       <p class="text-center" style="font-size:0.85rem; color:var(--text-muted); margin-top:var(--space-xl);">
-        🇨🇦 🇺🇸 All international plans billed transparently in USD ($). Your local Canadian or US card converts automatically at live bank rates. <a href="/pricing.html" style="color:var(--primary); font-weight:600;">Explore Full Feature Comparison →</a>
+        🇨🇦 🇺🇸 All international plans billed transparently in USD ($). Your local Canadian or US card converts automatically at live bank rates.
       </p>
+
+      <!-- Toggle Button for Full Feature Comparison -->
+      <div style="text-align:center; margin-top:var(--space-lg);">
+        <button onclick="toggleFeatureComparison()" id="btnToggleComparison" class="btn btn-ghost" style="color:var(--primary); font-weight:600; font-size:0.95rem; display:inline-flex; align-items:center; gap:6px;">
+          <span>Full Feature Comparison</span>
+          <span class="material-symbols-outlined" id="comparisonToggleIcon" style="font-size:20px; transition:transform 0.3s;">expand_more</span>
+        </button>
+      </div>
+
+      <!-- Embedded Full Feature Comparison Table (Strictly USD) -->
+      <div id="nriComparisonTableSection" style="display:none; margin-top:var(--space-xl); overflow-x:auto; -webkit-overflow-scrolling:touch;">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th style="min-width:180px;">Feature</th>
+              <th>Starter — $149/mo</th>
+              <th class="popular-col">Signature — $199/mo<br><small>(Most Popular)</small></th>
+              <th>Complete Care — $349/mo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Video consultations</td>
+              <td>2/month</td>
+              <td>4/month (weekly)</td>
+              <td>4/month + on-demand calls</td>
+            </tr>
+            <tr>
+              <td>WhatsApp support</td>
+              <td>9am–7pm, next-day reply</td>
+              <td>24-hour</td>
+              <td>Priority, under 4hr reply</td>
+            </tr>
+            <tr>
+              <td>Plan revisions</td>
+              <td>2/month</td>
+              <td>4/month</td>
+              <td>Unlimited</td>
+            </tr>
+            <tr>
+              <td>Lab report interpretation</td>
+              <td>✅ Included</td>
+              <td>✅ Included</td>
+              <td>✅ Included</td>
+            </tr>
+            <tr>
+              <td>Travel plan</td>
+              <td>✕</td>
+              <td>✅ Included</td>
+              <td>✅ Included</td>
+            </tr>
+            <tr>
+              <td>Fasting plan</td>
+              <td>✕</td>
+              <td>✅ Included</td>
+              <td>✅ Included</td>
+            </tr>
+            <tr>
+              <td>Recipe library</td>
+              <td>Core (30 recipes)</td>
+              <td>Full (100+ recipes)</td>
+              <td>Full (100+ recipes)</td>
+            </tr>
+            <tr>
+              <td>Weekly education modules</td>
+              <td>✅ Included</td>
+              <td>✅ Included</td>
+              <td>✅ Included</td>
+            </tr>
+            <tr>
+              <td>Family/partner meal plan</td>
+              <td>✕</td>
+              <td>✕</td>
+              <td>✅ 1 included</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><button onclick="choosePlan(1, 'starter')" class="btn btn-outline btn-sm" style="width:100%;">Choose Starter</button></td>
+              <td><button onclick="choosePlan(2, 'signature')" class="btn btn-primary btn-sm" style="width:100%;">Choose Signature</button></td>
+              <td><button onclick="choosePlan(3, 'complete-care')" class="btn btn-outline btn-sm" style="width:100%;">Choose Complete Care</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -522,6 +606,13 @@
       <hr class="footer-divider" />
       <div class="footer-bottom">
         <span>© 2025 Beyond Kilos. All rights reserved.</span>
+        <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+          <a href="/privacy.html" style="color:rgba(255,255,255,0.7); font-size:0.85rem; text-decoration:none;">Privacy Policy</a>
+          <span style="color:rgba(255,255,255,0.3);">•</span>
+          <a href="/terms.html" style="color:rgba(255,255,255,0.7); font-size:0.85rem; text-decoration:none;">Terms &amp; Conditions</a>
+          <span style="color:rgba(255,255,255,0.3);">•</span>
+          <a href="/refund.html" style="color:rgba(255,255,255,0.7); font-size:0.85rem; text-decoration:none;">Refund Policy</a>
+        </div>
         <span>Made with 💚 by Beyond Kilos Team</span>
       </div>
     </div>
@@ -533,6 +624,136 @@
   </a>
 
   <div class="toast-container" id="toastContainer"></div>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="/js/main.js"></script>
+  <script>
+    // Choose Plan & Razorpay Checkout for NRI clients (Always USD)
+    async function choosePlan(planId, planSlug) {
+      if (!BeyondKilos.isLoggedIn()) {
+        sessionStorage.setItem('redirect_after_login', '/nri-dietitian/#pricing-plans');
+        sessionStorage.setItem('selected_plan_id', planId);
+        BeyondKilos.showToast('Please complete registration to purchase a plan', 'info');
+        setTimeout(() => {
+          window.location.href = '/book.html';
+        }, 1000);
+        return;
+      }
+
+      try {
+        BeyondKilos.showToast('Preparing secure international checkout...', 'info');
+
+        if (typeof gtag === 'function') {
+          gtag('event', 'begin_checkout', {
+            items: [{ item_name: planSlug || 'nri_plan_' + planId }]
+          });
+        }
+
+        // NRI plans are always billed in USD
+        const orderData = await BeyondKilos.apiRequest('/api/plans/create-order', {
+          method: 'POST',
+          body: JSON.stringify({ 
+            plan_id: planId,
+            currency: 'USD' 
+          })
+        });
+
+        // Open Razorpay checkout with Card-only international setup
+        const options = {
+          key: orderData.key,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'Beyond Kilos',
+          description: `${orderData.plan_name} — Monthly NRI Consultation`,
+          order_id: orderData.order_id,
+          prefill: {
+            name: orderData.user.name,
+            email: orderData.user.email,
+            contact: orderData.user.phone
+          },
+          theme: {
+            color: '#064e3b'
+          },
+          method: {
+            card: true,
+            upi: false,
+            netbanking: false,
+            wallet: false,
+            emi: false,
+            paylater: false
+          },
+          handler: async function (response) {
+            try {
+              const verifyData = await BeyondKilos.apiRequest('/api/plans/verify-payment', {
+                method: 'POST',
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature
+                })
+              });
+
+              if (verifyData.success) {
+                if (typeof gtag === 'function') {
+                  gtag('event', 'purchase', {
+                    transaction_id: response.razorpay_payment_id,
+                    value: orderData.amount ? (orderData.amount / 100) : 199,
+                    currency: orderData.currency || 'USD',
+                    items: [{ item_name: orderData.plan_name || 'NRI Nutrition Plan' }]
+                  });
+                }
+                BeyondKilos.showToast('🎉 Payment successful! Welcome to Beyond Kilos!', 'success', 5000);
+                setTimeout(() => {
+                  window.location.href = '/portal/dashboard.html';
+                }, 2000);
+              }
+            } catch (err) {
+              BeyondKilos.showToast('Payment verification failed. Please contact support.', 'error', 5000);
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              BeyondKilos.showToast('Payment cancelled', 'info');
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+          BeyondKilos.showToast('Payment failed: ' + response.error.description, 'error', 5000);
+        });
+        rzp.open();
+
+      } catch (err) {
+        console.error('Checkout error:', err);
+        BeyondKilos.showToast(err.message || 'Failed to start checkout', 'error');
+      }
+    }
+
+    // Check if redirected after login with a selected plan
+    (function checkPlanRedirect() {
+      const savedPlanId = sessionStorage.getItem('selected_plan_id');
+      if (savedPlanId && BeyondKilos.isLoggedIn()) {
+        sessionStorage.removeItem('selected_plan_id');
+        sessionStorage.removeItem('redirect_after_login');
+        setTimeout(() => {
+          document.getElementById('pricing-plans')?.scrollIntoView({ behavior: 'smooth' });
+          setTimeout(() => choosePlan(parseInt(savedPlanId)), 1000);
+        }, 500);
+      }
+    })();
+
+    function toggleFeatureComparison() {
+      const table = document.getElementById('nriComparisonTableSection');
+      const icon = document.getElementById('comparisonToggleIcon');
+      if (table) {
+        const isHidden = table.style.display === 'none';
+        table.style.display = isHidden ? 'block' : 'none';
+        if (icon) icon.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+        if (isHidden) {
+          table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }
+  </script>
 </body>
 </html>
