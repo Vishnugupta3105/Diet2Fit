@@ -176,86 +176,6 @@
   <section style="padding: 0 0 var(--space-3xl);">
     <div class="container">
       
-      <!-- ═══════════════════════════════════════════════════════════════
-           DIWALI GLOW RESET — FEATURED FESTIVE OFFER (DYNAMIC)
-           Shows only when active. Hides completely when closed by Admin.
-           ═══════════════════════════════════════════════════════════════ -->
-      <div id="diwaliOfferSection" style="display:none; margin-bottom: var(--space-3xl);">
-        <div class="diwali-featured-card">
-          <div class="diwali-featured-grid" style="display:grid; grid-template-columns: 1fr auto; gap: 40px; align-items:center;">
-            <div>
-              <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
-                <span class="diwali-badge-pill">🪔 DIWALI GLOW RESET</span>
-                <span style="font-size:0.8rem; font-weight:700; color:#b48535; letter-spacing:1px; text-transform:uppercase;">Limited Time Festive Offer</span>
-              </div>
-              <h2 style="font-family:'Playfair Display',serif; font-size:clamp(1.8rem, 3.5vw, 2.5rem); font-weight:800; color:#064e3b; line-height:1.2; margin-bottom:10px;">
-                Glow from within. <span style="background:linear-gradient(135deg, #b48535, #064e3b); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Diwali-ready.</span>
-              </h2>
-              <p style="color:var(--text-secondary); font-size:1.05rem; margin-bottom:24px; font-weight:500;">
-                Start today • Glow by Diwali • Transform in 30 days
-              </p>
-
-              <!-- Feature Bullets (matching poster) -->
-              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin-bottom:24px;">
-                <div style="background:rgba(255,255,255,0.7); padding:12px 16px; border-radius:12px; border:1px solid rgba(212,168,83,0.3);">
-                  <div style="font-weight:700; color:#064e3b; font-size:0.95rem; display:flex; align-items:center; gap:8px;">
-                    <span style="color:#b48535; font-size:16px;">✦</span> 30-Day Personalized Plan
-                  </div>
-                  <div class="text-caption" style="margin-top:2px;">Made around your body & lifestyle</div>
-                </div>
-
-                <div style="background:rgba(255,255,255,0.7); padding:12px 16px; border-radius:12px; border:1px solid rgba(212,168,83,0.3);">
-                  <div style="font-weight:700; color:#064e3b; font-size:0.95rem; display:flex; align-items:center; gap:8px;">
-                    <span style="color:#b48535; font-size:16px;">✦</span> 2 Consultations (1-on-1)
-                  </div>
-                  <div class="text-caption" style="margin-top:2px;">Start strong, stay on track with Dt. Disha</div>
-                </div>
-
-                <div style="background:rgba(255,255,255,0.7); padding:12px 16px; border-radius:12px; border:1px solid rgba(212,168,83,0.3);">
-                  <div style="font-weight:700; color:#064e3b; font-size:0.95rem; display:flex; align-items:center; gap:8px;">
-                    <span style="color:#b48535; font-size:16px;">✦</span> DIY Glow Guide (PDF)
-                  </div>
-                  <div class="text-caption" style="margin-top:2px;">Face-pack & hair remedies for festive glow</div>
-                </div>
-
-                <div style="background:rgba(255,255,255,0.7); padding:12px 16px; border-radius:12px; border:1px solid rgba(212,168,83,0.3);">
-                  <div style="font-weight:700; color:#064e3b; font-size:0.95rem; display:flex; align-items:center; gap:8px;">
-                    <span style="color:#b48535; font-size:16px;">✦</span> Festive Strategy Check-in
-                  </div>
-                  <div class="text-caption" style="margin-top:2px;">Enjoy Diwali feasts without guilt or weight gain</div>
-                </div>
-              </div>
-
-              <!-- Slots Urgency -->
-              <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-                <span class="badge" style="background:#fee2e2; color:#991b1b; font-weight:700; border:1px solid #fca5a5;" id="diwaliSlotsRemainingBadge">
-                  🔥 Limited slots available • Offer ends before Diwali
-                </span>
-                <span style="font-size:0.85rem; color:var(--text-secondary);">Direct Instant Activation via Razorpay</span>
-              </div>
-            </div>
-
-            <!-- Price Seal & Action Button -->
-            <div style="display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center;">
-              <div class="diwali-price-seal">
-                <span style="font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#d4a853;">DIWALI PRICE</span>
-                <span style="font-size:2rem; font-weight:800; line-height:1; color:#fff;" id="diwaliOfferPrice">₹799</span>
-                <span style="font-size:0.75rem; color:#a7f3d0; text-decoration:line-through; margin-top:2px;" id="diwaliOriginalPrice">Worth ₹3,500+</span>
-                <span style="font-size:0.55rem; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:0.5px;">All-inclusive</span>
-              </div>
-
-              <button onclick="claimDiwaliOffer()" class="btn btn-lg" style="background:#064e3b; color:#fff; border:none; padding:14px 28px; font-weight:700; box-shadow:0 6px 20px rgba(6,78,59,0.25); border-radius:var(--radius-full); width:100%;" id="btnClaimDiwali">
-                Claim Diwali Offer — ₹799
-              </button>
-
-              <a href="https://api.whatsapp.com/send?phone=918306404335&text=Hi%20Dt.%20Disha!%20I%20am%20interested%20in%20the%20Diwali%20Glow%20Reset%20offer%20(₹799).%20Can%20you%20help%20me%20book%20my%20slot?" target="_blank" style="color:var(--text-secondary); font-size:0.82rem; text-decoration:none; display:flex; align-items:center; gap:4px;">
-                <span class="material-symbols-outlined" style="font-size:16px; color:#25D366;">chat</span> Or DM "GLOW" on WhatsApp
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-      
       <!-- International Indicator (Shown only when outside India) -->
       <div id="pricingIntlHeader" style="display: none; text-align: center; margin-bottom: var(--space-xl);">
         <span class="badge badge-primary" style="font-size: 0.85rem; padding: 8px 18px; font-weight: 600; border-radius: var(--radius-full);">
@@ -729,67 +649,11 @@
       setTimeout(() => choosePlan(parseInt(savedPlanId)), 500);
     }
 
-    // ── Diwali Offer Logic ─────────────────────────────────────────
-    let activeDiwaliOffer = null;
-
-    async function loadActiveOffer() {
-      // If visitor is outside India, completely hide the domestic ₹799 offer to protect international pricing
-      if (BeyondKilos.isInternational()) {
-        const offerSection = document.getElementById('diwaliOfferSection');
-        if (offerSection) offerSection.style.display = 'none';
-        return;
-      }
-
-      try {
-        const data = await BeyondKilos.apiRequest('/api/offers/active');
-        const offerSection = document.getElementById('diwaliOfferSection');
-        if (data && data.active && data.offer) {
-          activeDiwaliOffer = data.offer;
-          offerSection.style.display = 'block';
-
-          // Update texts
-          document.getElementById('diwaliOfferPrice').textContent = data.offer.display_price || '₹799';
-          document.getElementById('diwaliOriginalPrice').textContent = 'Worth ' + (data.offer.display_original_price || '₹3,500+');
-          const remainingBadge = document.getElementById('diwaliSlotsRemainingBadge');
-          if (remainingBadge) {
-            remainingBadge.textContent = `🔥 Only ${data.offer.slots_remaining} slots left • Offer ends before Diwali`;
-          }
-
-          // If URL has ?offer=diwali or ?plan=diwali, auto-scroll and auto-open checkout selection form
-          const urlParams = new URLSearchParams(window.location.search);
-          const offerParam = (urlParams.get('offer') || urlParams.get('plan') || '').toLowerCase();
-          if (offerParam === 'diwali' || offerParam === '799' || offerParam === 'glow') {
-            setTimeout(() => {
-              offerSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              claimDiwaliOffer();
-            }, 400);
-          }
-        } else {
-          // Closed by admin — hide completely
-          offerSection.style.display = 'none';
-          const urlParams = new URLSearchParams(window.location.search);
-          const offerParam = (urlParams.get('offer') || urlParams.get('plan') || '').toLowerCase();
-          if (offerParam === 'diwali' || offerParam === '799' || offerParam === 'glow') {
-            BeyondKilos.showToast('The Diwali Glow Reset offer has ended. Explore our regular consultation plans below.', 'info', 6000);
-          }
-        }
-      } catch (e) {
-        console.log('Failed to check active offer:', e);
-      }
-    }
-
-    function claimDiwaliOffer() {
-      const planId = (activeDiwaliOffer && activeDiwaliOffer.plan_id) || 4;
-      choosePlan(planId, 'diwali-glow-reset');
-    }
-
     applyGeoPricing();
     loadPlans();
-    loadActiveOffer();
     BeyondKilos.detectCountry().then(() => {
       applyGeoPricing();
       loadPlans();
-      loadActiveOffer();
     });
   </script>
 </body>

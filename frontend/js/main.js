@@ -328,28 +328,45 @@ window.BeyondKilos = {
   sanitizeInternationalUI,
 };
 
-// ── GA4 WhatsApp Contact Click Tracking ──────────────────────
-(function initWhatsAppTracking() {
+// ── GA4 WhatsApp & Consultation CTA Click Tracking ──────────
+(function initConversionClickTracking() {
   if (typeof document === 'undefined') return;
 
-  let lastClickTime = 0;
+  let lastWaClickTime = 0;
+  let lastCtaClickTime = 0;
   document.addEventListener('click', function(e) {
     const waLink = e.target.closest('a[href*="wa.me"], a[href*="api.whatsapp.com"]');
-    if (!waLink) return;
+    if (waLink) {
+      const now = Date.now();
+      if (now - lastWaClickTime < 1000) return;
+      lastWaClickTime = now;
 
-    // Prevent duplicate event dispatch within 1 second
-    const now = Date.now();
-    if (now - lastClickTime < 1000) return;
-    lastClickTime = now;
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'contact_whatsapp', {
+          event_category: 'engagement',
+          event_label: 'WhatsApp Contact Click',
+          link_url: waLink.href,
+          page_location: window.location.href,
+          page_title: document.title
+        });
+      }
+      return;
+    }
 
-    if (typeof window.gtag === 'function') {
-      window.gtag('event', 'contact_whatsapp', {
-        event_category: 'engagement',
-        event_label: 'WhatsApp Contact Click',
-        link_url: waLink.href,
-        page_location: window.location.href,
-        page_title: document.title
-      });
+    const bookLink = e.target.closest('a[href*="book.html"]');
+    if (bookLink) {
+      const now = Date.now();
+      if (now - lastCtaClickTime < 1000) return;
+      lastCtaClickTime = now;
+
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'consultation_cta_click', {
+          event_category: 'engagement',
+          event_label: (bookLink.textContent || '').trim().slice(0, 80) || 'Book Consultation',
+          page_location: window.location.href,
+          page_title: document.title
+        });
+      }
     }
   }, { passive: true });
 })();

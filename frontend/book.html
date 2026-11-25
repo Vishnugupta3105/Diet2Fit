@@ -390,6 +390,19 @@
           </div>
           
           <div class="form-group">
+            <label class="form-label" for="leadSource">How did you find Beyond Kilos? <span style="color:var(--text-muted);font-weight:400;font-size:0.8rem;">(optional)</span></label>
+            <select id="leadSource" class="form-input">
+              <option value="">Select an option</option>
+              <option value="Google Search">Google Search</option>
+              <option value="ChatGPT / AI Assistant">ChatGPT / AI Assistant</option>
+              <option value="Perplexity / Gemini">Perplexity / Gemini</option>
+              <option value="Instagram">Instagram</option>
+              <option value="Friend / Family Referral">Friend / Family Referral</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label class="form-label" for="referralCode">Referral Code <span style="color:var(--text-muted);font-weight:400;font-size:0.8rem;">(if any)</span></label>
             <input type="text" id="referralCode" class="form-input" placeholder="e.g. Rahul - 9876543210" />
           </div>
@@ -694,6 +707,13 @@
         // Auto-login using the token
         BeyondKilos.setAuth(userToken, userData);
 
+        const leadSource = document.getElementById('leadSource')?.value || '';
+        const combinedNotes = [
+          notes,
+          leadSource ? `Source: ${leadSource}` : '',
+          referral ? `Referral: ${referral}` : ''
+        ].filter(Boolean).join(' | ');
+
         // Step 2: Book Appointment (now linked to the user)
         await BeyondKilos.apiRequest('/api/appointments', {
           method: 'POST',
@@ -706,7 +726,7 @@
             goal: selectedGoal,
             preferred_date: document.querySelector('.time-slot-btn.selected')?.dataset.date || null,
             preferred_time: selectedSlotTime,
-            notes: referral ? `${notes ? notes + ' | ' : ''}Referral: ${referral}` : notes,
+            notes: combinedNotes,
             client_weight_kg: clientMetrics.weight_kg,
             client_height_cm: clientMetrics.height_cm,
             client_age: clientMetrics.age,
@@ -725,7 +745,8 @@
         if (typeof gtag === 'function') {
           gtag('event', 'generate_lead', {
             event_category: 'Consultation',
-            event_label: selectedGoal || 'General Consultation'
+            event_label: selectedGoal || 'General Consultation',
+            lead_source: leadSource || 'Direct / Unspecified'
           });
         }
 
